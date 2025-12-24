@@ -1,0 +1,171 @@
+@charset "utf-8";
+
+/* =========================================================
+   MOBILE ONLY — up to 540px
+   ========================================================= */
+@media (max-width: 540px) {
+
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  table { table-layout: auto;
+          width: 100%; }
+
+  .col-platform,
+  .col-genre,
+  .col-format,
+  .col-notes {
+    display: none;
+  }
+
+  .col-title    { width: 38%; }
+  .col-version  { width: 22%; }
+  .col-included { width: 40%; }
+
+  th, td,
+  td *,
+  th * {
+    white-space: normal;
+    word-break: normal !important;
+    overflow-wrap: normal !important;
+    hyphens: none !important;
+  }
+
+  .topbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+  }
+
+  .topbar .title {
+    font-size: 18px;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .topbar .search {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .search input[type="search"] {
+    width: min(420px, 100%);
+  }
+
+  .search select,
+  .search button {
+    width: min(240px, 100%);
+  }
+
+  .filterbar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .filtergroup {
+    align-items: center;
+  }
+
+  .chips {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  th, td {
+    padding: 8px 6px;
+    font-size: 12px;
+    text-align: left;
+  }
+
+  td ul, td ol {
+    margin: 0;
+    padding-left: 16px;
+  }
+
+  td li {
+    word-break: break-word;
+  }
+
+  .col-version ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .col-version li {
+    margin: 0;
+    padding: 0;
+  }
+
+   #toTop {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+}
+  /* =========================================================
+   TABLET — 541px to 1024px
+   Same as MOBILE column visibility, BUT keep Notes visible
+   Also removes bullets in Version column
+   ========================================================= */
+@media (min-width: 541px) and (max-width: 1024px) {
+
+  /* no horizontal scroll */
+  html, body { max-width: 100%; overflow-x: hidden; }
+
+  table { width: 100%; table-layout: auto; }
+
+  /* keep words whole */
+  th, td, td *, th * {
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: normal;
+    hyphens: none;
+  }
+
+  /* -------------------------------------------------------
+     Column visibility (tablet):
+     Hide Platform/Format/Genre, KEEP Notes
+     ------------------------------------------------------- */
+  .col-platform,
+  .col-format,
+  .col-genre {
+    display: none;
+  }
+
+  .col-title    { width: 35%; }
+  .col-version  { width: 15%; }
+  .col-included { width: 35%; }
+  .col-notes    { width: 15%;}
+
+  /* -------------------------------------------------------
+     Version column: remove bullet points (tablet only)
+     ------------------------------------------------------- */
+  .col-version ul {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+
+  .col-version li {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Lists elsewhere keep their bullets (Included/Notes etc.) */
+  td ul, td ol {
+    margin: 0;
+    padding-left: 16px;
+  }
+}

@@ -10,8 +10,11 @@
 
 <title>PlayStation Trophy Hunter&#39;s Cache</title>
 <link rel="stylesheet" href="ps_styles.css" />
+<link rel="stylesheet" href="ps_resp.css">
 </head>
+
 <body>
+  <button id="toTop" aria-label="Back to top">▲</button>
 <header>
   <div class="topbar">
     <div class="title">PlayStation Trophy Hunter&#39;s Cache</div>
@@ -61,7 +64,6 @@
 </div>
 
 <script>
-// Keep the sticky table header aligned under the page header (search + filters)
 (function syncHeaderHeight(){
   function setH(){
     const header = document.querySelector("header");
@@ -72,6 +74,36 @@
   window.addEventListener("resize", setH);
   window.addEventListener("load", setH);
   setH();
+})();
+
+(function () {
+  const btn = document.getElementById("toTop");
+  if (!btn) { console.error("toTop button not found"); return; }
+
+  const wrap = document.querySelector(".wrap");
+
+  function scrollPos() {
+    const win = window.pageYOffset || document.documentElement.scrollTop || 0;
+    const box = wrap ? wrap.scrollTop : 0;
+    return Math.max(win, box);
+  }
+
+  function showOrHide() {
+    btn.classList.toggle("show", scrollPos() > 300);
+  }
+
+  // Listen to both possible scroll containers
+  window.addEventListener("scroll", showOrHide, { passive: true });
+  if (wrap) wrap.addEventListener("scroll", showOrHide, { passive: true });
+
+  // Run once on load (important)
+  showOrHide();
+
+  btn.addEventListener("click", function () {
+    // scroll both; whichever matters will take effect
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    if (wrap) wrap.scrollTo({ top: 0, behavior: "smooth" });
+  });
 })();
 
 const DATA = [
@@ -1115,16 +1147,16 @@ function render() {
 
   const tbody = document.getElementById("tbody");
   tbody.innerHTML = rows.map(r => `
-    <tr>
-      <td class="col-title">${escapeHtml(r.title)}</td>
-      <td class="col-platform">${escapeHtml(r.platform)}</td>
-      <td class="col-genre">${listCell(asArray(r.genre))}</td>
-      <td class="col-format">${escapeHtml(r.format)}</td>
-      <td class="col-version">${listCell(asArray(r.version))}</td>
-      <td class="col-included">${listCell(r.included)}</td>
-      <td class="col-notes">${listCell(r.notes)}</td>
-    </tr>
-  `).join("");
+  <tr>
+    <td class="col-title" data-label="Title">${escapeHtml(r.title)}</td>
+    <td class="col-platform" data-label="Platform">${escapeHtml(r.platform)}</td>
+    <td class="col-genre" data-label="Genre">${listCell(asArray(r.genre))}</td>
+    <td class="col-format" data-label="Format">${escapeHtml(r.format)}</td>
+    <td class="col-version" data-label="Version">${listCell(asArray(r.version))}</td>
+    <td class="col-included" data-label="Included">${listCell(r.included)}</td>
+    <td class="col-notes" data-label="Notes">${listCell(r.notes)}</td>
+  </tr>
+`).join("");
 
   document.getElementById("stats").textContent = `${rows.length.toLocaleString()} visible of ${DATA.length.toLocaleString()} total`;
 }
