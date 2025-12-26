@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="ps_pic/ps_plat.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="ps_pic/ps_plat.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ps_pic/ps_plat.png">
+
+    <title>Notes</title>
+    <link rel="stylesheet" href="ps_styles.css" />
+    <link rel="stylesheet" href="ps_resp.css" />
+    <style>
+      .notes-wrap{ max-width: 1100px; margin: 0 auto; padding: 18px; }
+      .note-block{ margin: 18px 0; padding: 14px 16px; border: 1px solid rgba(230,234,242,.10); border-radius: 14px; background: rgba(255,255,255,.03); }
+      .note-block h2{ margin: 0 0 8px; font-size: 18px; }
+      .note-block p{ margin: 6px 0; }
+      .notes-index{ display:flex; flex-wrap:wrap; gap:10px; margin: 10px 0 18px; }
+      .notes-index a{ display:inline-block; padding:6px 10px; border:1px solid rgba(230,234,242,.10); border-radius:999px; text-decoration:none; }
+      .notes-index a:hover{ border-color: rgba(99,179,237,.35); }
+      header{position: static !important; }
+
+      .notes-sticky{
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        padding: 10px 0;
+        backdrop-filter: blur(10px);
+        background: rgba(11, 15, 23, .72);
+        border-bottom: 1px solid rgba(255,255,255,.12);
+      }
+
+      .notes-chips{
+        justify-content: center;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 0 18px;
+      }
+
+      .notes-chips a.chip{
+        text-decoration: none;
+        color: inherit;
+      }
+
+      .notes-chips a.chip:hover{
+        border-color: rgba(99,179,237,.55);
+        background: rgba(99,179,237,.10);
+      }
+
+      .app-header .wrap{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        gap: 10px;
+      }
+
+      .app-header .actions{
+        width: 100%;
+        display: flex;
+        justify-content: center;
+      }
+
+      .app-header .brand{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .note-block{
+        scroll-margin-top: 110px;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="toTop" aria-label="Back to top">▲</button>
+    <header class="app-header" id="top">
+      <div class="wrap">
+        <div class="brand">
+          <div class="title">Notes / FAQ</div>
+          <div class="subtitle">Click the buttons to jump to the desired section</div>
+        </div>
+        <div class="actions">
+          <a class="btn" href="ps_index.html">Back to catalogue</a>
+        </div>
+      </div>
+    </header>
+
+    <nav class="notes-sticky" aria-label="Notes index">
+      <div class="chips notes-chips">
+        <a class="chip" href="#online"><b>Online Only</b></a>
+        <a class="chip" href="#disc"><b>Discontinued</b></a>
+        <a class="chip" href="#3d"><b>3D Compatible</b></a>
+        <a class="chip" href="#move-comp"><b>PS Move Compatible</b></a>
+        <a class="chip" href="#move-feat"><b>PS Move Features</b></a>
+        <a class="chip" href="#move-game"><b>PS Move Game</b></a>
+        <a class="chip" href="#vr-comp"><b>PSVR Compatible</b></a>
+        <a class="chip" href="#vr-feat"><b>PSVR Features</b></a>
+        <a class="chip" href="#vr-game"><b>PSVR Game</b></a>
+        <a class="chip" href="#vr2-comp"><b>PSVR2 Compatible</b></a>
+        <a class="chip" href="#vr2-feat"><b>PSVR2 Features</b></a>
+        <a class="chip" href="#vr2-game"><b>PSVR2 Game</b></a>
+        <a class="chip" href="#udraw"><b>uDraw Game</b></a>
+        <a class="chip" href="#strict"><b>Strictly Limited</b></a>
+        <a class="chip" href="#limited"><b>Limited Run</b></a>
+      </div>
+    </nav>
+
+    <main class="notes-wrap">
+      <section id="online" class="note-block">
+        <h2>Online Only</h2>
+          <ul>
+            <li>Requires a constant connection Internet connection (also known as live-service), for both single and multiplayer content, as well as progression and achievemnts.</li>
+            <li>If a stable Internet connection is not possible, or the servers are offline, the game is technically unplayable.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="disc" class="note-block">
+        <h2>Discontinued</h2>
+          <ul>
+            <li>The official servers have been shut down by the developers / host, therefore rendering the game unplayable.</li>
+            <li>Even though the game can still be installed and booted, no progression can be made past the main menu.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="3d" class="note-block">
+        <h2>3D Compatible</h2>
+          <ul>
+            <li>Supports Stereoscopic 3D technology, which also requires a Stereoscopic 3D enabled TV / monitor.</li>
+            <li>Can also be played on regular TVs / monitors if a Stereoscopic 3D one is unavailable.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="move-comp" class="note-block">
+        <h2>PS Move Compatible</h2>
+          <ul>
+            <li>The entirety of the game can be played using either PS Move controllers and / or a regular DualShock 3 controller (or third-party compatible controllers).</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="move-feat" class="note-block">
+        <h2>PS Move Features</h2>
+          <ul>
+            <li>Only certain sections of the game support the use of PS Move controllers.</li>
+            <li>The rest must be played using a regular DualShock 3 controller (or third-party compatible controllers).</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="move-game" class="note-block">
+        <h2>PS Move Game</h2>
+          <ul>
+            <li>The entirety of the game must be played using only PS Move controllers.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="vr-comp" class="note-block">
+        <h2>PSVR Compatible</h2>
+          <ul>
+            <li>The entirety of the game can be played using either the PSVR headset alongside PS Move controllers and / or a regular DualShock 4 controller (or third-party compatible controllers).</li>
+          </ul>          
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="vr-feat" class="note-block">
+        <h2>PSVR Features</h2>
+          <ul>
+            <li>Only certain sections of the game support the use of the PSVR headset alongside PS Move controllers.</li>
+            <li>The rest must be played using a regular DualShock 4 controller (or third-party compatible controllers).</li>
+          </ul>
+        <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="vr-game" class="note-block">
+        <h2>PSVR Game</h2>
+          <ul>
+            <li>The entirety of the game must be played using only the PSVR headset alongside PS Move controllers.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="vr2-comp" class="note-block">
+        <h2>PSVR2 Compatible</h2>
+          <ul>
+            <li>The entirety of the game can be played using either the PSVR2 headset alongside its proprietary controllers and / or a regular DualSense / DualSense Edge controller (or third-party compatible controllers).</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="vr2-feat" class="note-block">
+        <h2>PSVR2 Features</h2>
+          <ul>
+            <li>Only certain sections of the game support the use of the PSVR2 headset alongside its proprietary controllers.</li>
+            <li>The rest must be played using a regular DualSsense / DualSense Edge controller (or third-party compatible controllers).</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="vr2-game" class="note-block">
+        <h2>PSVR2 Game</h2>
+          <ul>
+            <li>The entirety of the game must be played using only the PSVR2 headset alongside its proprietary controllers.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="udraw" class="note-block">
+        <h2>uDraw Game</h2>
+          <ul>
+            <li>Can only be played using THQ's third-party uDraw tablet.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="strict" class="note-block">
+        <h2>Strictly Limited</h2>
+          <ul>
+            <li>Limited physical release game, possibly a very valuable collector's item.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section><section id="limited" class="note-block">
+        <h2>Limited Run</h2>
+          <ul>
+            <li>Limited physical release game, possibly a very valuable collector's item.</li>
+          </ul>
+          <p><a href="ps_index.html">Back to catalogue</a></p>
+      </section>
+    </main>
+
+    <script>
+      (function () {
+        const btn = document.getElementById("toTop");
+        if (!btn) return;
+
+          function showOrHide() {
+              btn.classList.toggle("show", (window.pageYOffset || document.documentElement.scrollTop || 0) > 300);
+            }
+
+          window.addEventListener("scroll", showOrHide, { passive: true });
+          showOrHide();
+
+          btn.addEventListener("click", function () {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+          });
+      })();
+    </script>
+
+  </body>
+  
+  <footer class="site-footer">
+      <p>PlayStation Trophy Hunter’s Cache is a personal, non-commercial catalogue created for informational and archival purposes only.</p>
+      <p>All game titles, trademarks, and logos are the property of their respective owners. PlayStation is a registered trademark of Sony Interactive Entertainment.</p>
+      <p>This site is not affiliated with or endorsed by Sony Interactive Entertainment or any game publishers.</p>
+    </footer>
+
+</html>

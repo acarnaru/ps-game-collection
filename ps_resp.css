@@ -1,8 +1,7 @@
 @charset "utf-8";
 
-/* =========================================================
-   MOBILE ONLY — up to 540px
-   ========================================================= */
+/* MOBILE — up to 540px */
+
 @media (max-width: 540px) {
 
   html, body {
@@ -94,7 +93,7 @@
   }
 
   td li {
-    word-break: break-word;
+    word-break: normal;
   }
 
   .col-version ul {
@@ -108,25 +107,25 @@
     padding: 0;
   }
 
-   #toTop {
+  #toTop {
     width: 48px;
     height: 48px;
     font-size: 20px;
   }
+
+  a.btn.btn-notes-mobile {
+    display: inline-flex;
+  }
 }
-  /* =========================================================
-   TABLET — 541px to 1024px
-   Same as MOBILE column visibility, BUT keep Notes visible
-   Also removes bullets in Version column
-   ========================================================= */
+  
+/* TABLET — 541px to 1024px */
+
 @media (min-width: 541px) and (max-width: 1024px) {
 
-  /* no horizontal scroll */
   html, body { max-width: 100%; overflow-x: hidden; }
 
   table { width: 100%; table-layout: auto; }
 
-  /* keep words whole */
   th, td, td *, th * {
     white-space: normal;
     word-break: normal;
@@ -134,10 +133,6 @@
     hyphens: none;
   }
 
-  /* -------------------------------------------------------
-     Column visibility (tablet):
-     Hide Platform/Format/Genre, KEEP Notes
-     ------------------------------------------------------- */
   .col-platform,
   .col-format,
   .col-genre {
@@ -149,9 +144,6 @@
   .col-included { width: 35%; }
   .col-notes    { width: 15%;}
 
-  /* -------------------------------------------------------
-     Version column: remove bullet points (tablet only)
-     ------------------------------------------------------- */
   .col-version ul {
     list-style: none;
     padding-left: 0;
@@ -163,7 +155,6 @@
     padding: 0;
   }
 
-  /* Lists elsewhere keep their bullets (Included/Notes etc.) */
   td ul, td ol {
     margin: 0;
     padding-left: 16px;
