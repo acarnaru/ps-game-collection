@@ -8,7 +8,7 @@
     <link rel="icon" type="image/png" sizes="16x16" href="ps_pic/ps_plat.png">
     <link rel="apple-touch-icon" sizes="180x180" href="ps_pic/ps_plat.png">
 
-    <title>Games Catalogue</title>
+    <title>Catalogue</title>
     <link rel="stylesheet" href="ps_styles.css" />
     <link rel="stylesheet" href="ps_resp.css">
   </head>
@@ -44,6 +44,10 @@
         <div class="filtergroup" id="formatGroup">
           <div class="filterlabel">Format</div>
           <div class="chips" id="formatChips"></div>
+        </div>
+        <div class="filtergroup" id="hardwareGroup" style="display:none;">
+          <div class="filterlabel">Hardware</div>
+          <div class="chips" id="hardwareChips"></div>
         </div>
         <div class="filtermeta" id="filterMeta">
           <span id="stats"></span>
@@ -1078,10 +1082,34 @@
                     {"title": "Woah Dave!", "platform": "Vita", "format": "Digital", "genre": "Arcade", "version": "", "included": [], "notes": []}
                   ];
 
+      const DATA_HARDWARE = [
+                              /*Placeholder:
+
+                              {"device": "", "platform": "", "brand": "", "category": "", "notes": []}, */
+
+                              {"device":"PS3 Ultra Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["1TB SSD"]},
+                              {"device":"PS3 Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["Stock"]},
+                              {"device":"PS4 Pro","platform":"PS4","brand":"Sony","category":"Console","notes":["8TB SSD"]},
+                              {"device":"PS5 Pro","platform":"PS5","brand":"Sony","category":"Console","notes":["8TB SSD"]},
+                              {"device":"PS Vita","platform":"Vita","brand":"Sony","category":["Console","Handheld"],"notes":["Stock","64GB Card"]},
+                              {"device":"PS TV","platform":"Vita","brand":"Sony","category":"Console","notes":["Stock"]},
+                              {"device":"PSVR","platform":"PS4","brand":"Sony","category":["VR","Headset"],"notes":[]},
+                              {"device":"PSVR2","platform":"PS5","brand":"Sony","category":["VR","Headset"],"notes":[]},
+                              {"device":"Compact","platform":"PS4","brand":"Nacon","category":"Controller","notes":["Wired"]},
+                              {"device":"VX3","platform":"PS3","brand":"Gioteck","category":"Controller","notes":["Wireless","Pack of 2"]},
+                              {"device":"Onyx Plus","platform":"PS4","brand":"Hori","category":"Controller","notes":["Wireless"]},
+                              {"device":"T300: GT Edition","platform":["PS4","PS5"],"brand":"Thrustmaster","category":"Other","notes":["Driving Wheel"]},
+                              {"device":"uDraw","platform":"PS3","brand":"THQ","category":"Other","notes":["Game Tablet"]},
+                              {"device":"PS Move Motion","platform":"PS4","brand":"Sony","category":["Controller","VR"],"notes":["Wireless","Pack of 2"]},
+                              {"device":"DualShock 4","platform":"PS4","brand":"Sony","category":"Controller","notes":["Wireless"]}
+                            ];
+
       const state = {
         q: "",
         platforms: new Set(["PS3","PS4","PS5","Vita"]),
         formats: new Set(["Physical","Digital"]),
+        hardwareCats: new Set(["Console","VR","Controller","Headphone","Other"]),
+        brand: "All",
         sort: "title-asc"
       };
 
@@ -1107,6 +1135,19 @@
         return hay.includes(q);
       }
 
+      function includesAnyHardware(rec, q) {
+        if (!q) return true;
+        const hayParts = [
+          rec.device,
+          ...(asArray(rec.platform)),
+          rec.brand,
+          ...(asArray(rec.category)),
+          ...(rec.notes || [])
+        ];
+        const hay = hayParts.join(" ").toLowerCase();
+        return hay.includes(q);
+      }
+
       function cmp(a, b, key) {
         const av = norm(a[key]);
         const bv = norm(b[key]);
@@ -1116,14 +1157,18 @@
       }
 
       function renderChips() {
+        const isHardware = document.getElementById("modeSwitch").checked;
         const pWrap = document.getElementById("platformChips");
         const fWrap = document.getElementById("formatChips");
+        const hWrap = document.getElementById("hardwareChips");
 
         pWrap.innerHTML = "";
         fWrap.innerHTML = "";
+        if (hWrap) hWrap.innerHTML = "";
 
         const platforms = ["PS3","PS4","PS5","Vita"];
         const formats = ["Physical","Digital"];
+        const hardwareCats = ["Console","VR","Controller","Headphone","Other"];
 
         for (const p of platforms) {
           const el = document.createElement("div");
@@ -1132,12 +1177,12 @@
           el.onclick = () => {
             if (state.platforms.has(p)) state.platforms.delete(p); else state.platforms.add(p);
             el.classList.toggle("on");
-            render();
+            if (isHardware) renderHardware(); else render();
           };
           pWrap.appendChild(el);
         }
 
-        if (!document.getElementById("modeSwitch").checked) {
+        if (!isHardware) {
           for (const f of formats) {
             const el = document.createElement("div");
             el.className = "chip " + (state.formats.has(f) ? "on" : "");
@@ -1148,6 +1193,18 @@
               render();
             };
             fWrap.appendChild(el);
+          }
+        } else if (hWrap) {
+          for (const c of hardwareCats) {
+            const el = document.createElement("div");
+            el.className = "chip " + (state.hardwareCats.has(c) ? "on" : "");
+            el.innerHTML = `<b>${c}</b>`;
+            el.onclick = () => {
+              if (state.hardwareCats.has(c)) state.hardwareCats.delete(c); else state.hardwareCats.add(c);
+              el.classList.toggle("on");
+              renderHardware();
+            };
+            hWrap.appendChild(el);
           }
         }
       }
@@ -1227,8 +1284,7 @@
 
       function render() {
         const q = norm(state.q);
-        const isHardware = document.getElementById("modeSwitch").checked;
-        let rows = DATA.filter(r => state.platforms.has(r.platform) && (isHardware ? true : state.formats.has(r.format)) && includesAny(r, q) );
+        let rows = DATA.filter(r => state.platforms.has(r.platform) && state.formats.has(r.format) && includesAny(r, q));
         const [field, dir] = state.sort.split("-");
         const key = (field === "title") ? "title" : "genre";
         rows.sort((a,b) => cmp(a,b,key) * (dir === "asc" ? 1 : -1));
@@ -1248,15 +1304,60 @@
         if (!isHardware) { statsEl.textContent = `${rows.length} visible of ${DATA.length} total`; } 
         else { statsEl.textContent = ""; }
       }
+
+      function platformMatchesHardware(row) {
+        const plats = asArray(row.platform);
+        return plats.some(p => state.platforms.has(p));
+      }
+
+      function categoryMatchesHardware(row) {
+        if (state.hardwareCats.size === 0) return true;
+        const cats = asArray(row.category).map(x => String(x));
+        const joined = cats.join(" ");
+        for (const c of state.hardwareCats) {
+          if (joined.includes(c)) return true;
+        }
+        return false;
+      }
+
+      function renderHardware() {
+        const q = norm(state.q);
+        let rows = DATA_HARDWARE
+          .filter(r =>
+            platformMatchesHardware(r) &&
+            categoryMatchesHardware(r) &&
+            (state.brand === "All" ? true : norm(r.brand) === norm(state.brand)) &&
+            includesAnyHardware(r, q)
+          );
+
+        rows.sort((a,b) => cmp(a,b,"device"));
+
+        const tbody = document.getElementById("tbodyHardware");
+        tbody.innerHTML = rows.map(r => `
+          <tr>
+            <td class="col-device" data-label="Device">${escapeHtml(r.device)}</td>
+            <td class="col-platform" data-label="Platform">${listCell(asArray(r.platform))}</td>
+            <td class="col-brand" data-label="Brand">${escapeHtml(r.brand)}</td>
+            <td class="col-category" data-label="Category">${listCell(asArray(r.category))}</td>
+            <td class="col-notes" data-label="Notes">${listCell(r.notes || [])}</td>
+          </tr>
+        `).join("");
+      }
+
       document.getElementById("q").addEventListener("input", (e) => {
         state.q = e.target.value;
         if (document.getElementById("modeSwitch").checked) renderHardware();
         else render();
       });
       document.getElementById("sort").addEventListener("change", (e) => {
-        state.sort = e.target.value;
-        if (document.getElementById("modeSwitch").checked) renderHardware();
-        else render();
+        const isHardware = document.getElementById("modeSwitch").checked;
+        if (isHardware) {
+          state.brand = e.target.value;
+          renderHardware();
+        } else {
+          state.sort = e.target.value;
+          render();
+        }
       });
       document.getElementById("clear").addEventListener("click", () => {
         state.q = "";
@@ -1274,6 +1375,7 @@
       const hardware = document.getElementById("hardwareContent");
       const subTitle = document.getElementById("subTitle");
       const formatGroup = document.getElementById("formatGroup");
+      const hardwareGroup = document.getElementById("hardwareGroup");
       const sortSelect = document.getElementById("sort");
 
       const DROPDOWN_GAMES = [
@@ -1283,30 +1385,43 @@
         { value: "genre-desc", label: "Sort: Genre (Z→A)" },
       ];
 
-      const DROPDOWN_HARDWARE = [
-        { value: "brand-asc",  label: "Sort: Brand (A→Z)" },
-        { value: "brand-desc", label: "Sort: Brand (Z→A)" },
-      ];
-
-      function setDropdown(options) {
-        sortSelect.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
-        const values = new Set(options.map(o => o.value));
-        if (!values.has(state.sort)) state.sort = options[0]?.value || "title-asc";
+      function setGamesDropdown() {
+        sortSelect.innerHTML = DROPDOWN_GAMES.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+        const values = new Set(DROPDOWN_GAMES.map(o => o.value));
+        if (!values.has(state.sort)) state.sort = DROPDOWN_GAMES[0]?.value || "title-asc";
         sortSelect.value = state.sort;
+      }
+
+      function setHardwareDropdown() {
+        const brands = Array.from(new Set(DATA_HARDWARE.map(r => r.brand).filter(Boolean)))
+          .sort((a,b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+        const opts = [{ value: "All", label: "Brand: All" }, ...brands.map(b => ({ value: b, label: `Brand: ${b}` }))];
+        sortSelect.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+        const values = new Set(opts.map(o => o.value));
+        if (!values.has(state.brand)) state.brand = "All";
+        sortSelect.value = state.brand;
       }
 
       function updateModeUI() {
         const isHardware = switchEl.checked;
         const filterMeta = document.getElementById("filterMeta");
         const statsEl = document.getElementById("stats");
+
         games.style.display = isHardware ? "none" : "block";
         hardware.style.display = isHardware ? "block" : "none";
+
         filterMeta.style.display = isHardware ? "none" : "";
         if (isHardware) statsEl.textContent = "";
+
         subTitle.textContent = isHardware ? "Hardware Catalogue" : "Games Catalogue";
         document.title = subTitle.textContent;
+
         formatGroup.style.display = isHardware ? "none" : "";
-        setDropdown(isHardware ? DROPDOWN_HARDWARE : DROPDOWN_GAMES);
+        if (hardwareGroup) hardwareGroup.style.display = isHardware ? "" : "none";
+
+        if (isHardware) setHardwareDropdown();
+        else setGamesDropdown();
+
         renderChips();
         if (isHardware) renderHardware();
         else render();

@@ -4,7 +4,10 @@
 
 @media (max-width: 540px) {
 
-  table { table-layout: auto; width: 100%; }
+  table { 
+    table-layout: auto; 
+    width: 100%; 
+  }
 
   .col-genre,
   .col-format,
@@ -30,20 +33,34 @@
     hyphens: none !important;
   }
 
+  thead th {
+    padding: 6px 6px;
+    font-size: 10px;
+    letter-spacing: .3px;
+  }
+
+  thead th * {
+    line-height: 1.15;
+  }
+
   .topbar, .topbar-2 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     text-align: center;
-    padding-top: 8px;
-    padding-bottom: 10px;
+    padding-top: 6px;
+    padding-bottom: 8px;
   }
 
   .topbar .title {
     font-size: 18px;
     line-height: 1.2;
     margin: 0;
+  }
+
+  .subtitle { 
+    font-size: 14px; 
   }
 
   .topbar .search {
@@ -67,9 +84,14 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     text-align: center;
-    padding-bottom: 10px;
+    padding: 6px 10px 8px;
+  }
+
+  .filterlabel { 
+    font-size: 10px; 
+    padding: 4px 8px; 
   }
 
   .filtergroup {
@@ -79,10 +101,22 @@
   .chips {
     justify-content: center;
     flex-wrap: wrap;
-    gap: 8px;
+    gap: 6px;
   }
 
-  .mode-toggle { margin: 10px 0 6px; }
+  .chip { 
+    padding: 6px 8px; 
+    font-size: 12px; 
+  }
+
+  .mode-toggle { 
+    margin: 8px 0 4px; 
+    gap: 10px; 
+  }
+
+  .mode-label  { 
+    font-size: 0.95rem; 
+  }
 
   th, td {
     padding: 8px 6px;
@@ -118,6 +152,29 @@
 
   a.btn.btn-notes-mobile {
     display: inline-flex;
+  }
+
+  .switch { 
+    width: 56px; 
+    height: 30px; 
+  }
+
+   .slider::before { 
+    width: 22px; 
+    height: 22px; 
+    left: 4px; 
+    bottom: 4px; 
+  }
+
+   .switch input:checked + .slider::before { transform: translateX(26px); }
+
+  input[type="search"],
+  select,
+  button,
+  a.btn {
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 12px;
   }
 }
   
@@ -186,5 +243,21 @@
     -webkit-backdrop-filter: none;
     background: rgba(11, 15, 23, 0.95);
     transform: translateZ(0);
+  }
+
+   .notes-wrap {
+    padding: 14px;
+  }
+
+  .note-block {
+    padding: 12px 14px;
+  }
+
+  .note-block h2 {
+    font-size: 16px;
+  }
+
+  .notes-chips {
+    padding: 0 12px;
   }
 }
