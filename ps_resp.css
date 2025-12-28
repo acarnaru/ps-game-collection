@@ -1,27 +1,25 @@
 @charset "utf-8";
 
-/* MOBILE — up to 540px */
+/* MOBILE - up to 540px */
 
 @media (max-width: 540px) {
 
-  html, body {
-    max-width: 100%;
-    overflow-x: hidden;
-  }
+  table { table-layout: auto; width: 100%; }
 
-  table { table-layout: auto;
-          width: 100%; }
-
-  .col-platform,
   .col-genre,
   .col-format,
   .col-notes {
     display: none;
   }
 
-  .col-title    { width: 38%; }
+  .col-title    { width: 33%; }
+  .col-platform { width: 1%;}
   .col-version  { width: 22%; }
-  .col-included { width: 40%; }
+  .col-included { width: 44%; }
+
+  .col-device   { width: 37%; }
+  .col-brand    { width: 25%; }
+  .col-category { width: 25%; }
 
   th, td,
   td *,
@@ -32,12 +30,14 @@
     hyphens: none !important;
   }
 
-  .topbar {
+  .topbar, .topbar-2 {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 10px;
     text-align: center;
+    padding-top: 8px;
+    padding-bottom: 10px;
   }
 
   .topbar .title {
@@ -69,6 +69,7 @@
     align-items: center;
     gap: 12px;
     text-align: center;
+    padding-bottom: 10px;
   }
 
   .filtergroup {
@@ -81,9 +82,11 @@
     gap: 8px;
   }
 
+  .mode-toggle { margin: 10px 0 6px; }
+
   th, td {
     padding: 8px 6px;
-    font-size: 12px;
+    font-size: 10px;
     text-align: left;
   }
 
@@ -118,11 +121,9 @@
   }
 }
   
-/* TABLET — 541px to 1024px */
+/* TABLET - 541px to 1024px */
 
 @media (min-width: 541px) and (max-width: 1024px) {
-
-  html, body { max-width: 100%; overflow-x: hidden; }
 
   table { width: 100%; table-layout: auto; }
 
@@ -133,16 +134,26 @@
     hyphens: none;
   }
 
-  .col-platform,
+  th, td {
+    padding: 8px 6px;
+    font-size: 12px;
+    text-align: left;
+  }
+
   .col-format,
   .col-genre {
     display: none;
   }
 
-  .col-title    { width: 35%; }
+  .col-title    { width: 33%; }
+  .col-platform { width: 3%;}
   .col-version  { width: 15%; }
-  .col-included { width: 35%; }
+  .col-included { width: 34%; }
   .col-notes    { width: 15%;}
+
+  .col-device   { width: 42%; }
+  .col-brand    { width: 20%; }
+  .col-category { width: 20%; }
 
   .col-version ul {
     list-style: none;
@@ -158,5 +169,22 @@
   td ul, td ol {
     margin: 0;
     padding-left: 16px;
+  }
+}
+
+/* MOBILE and TABLET - up to 1024px */
+@media (max-width: 1024px) {
+  
+  html, body { max-width: 100%; }
+  
+  .sticky-header {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 9999;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(11, 15, 23, 0.95);
+    transform: translateZ(0);
   }
 }

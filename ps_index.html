@@ -15,17 +15,23 @@
 
   <body>
     <button id="toTop" aria-label="Back to top">▲</button>
-    <header>
-      <div class="topbar">
-        <div class="title">PlayStation Trophy Hunter&#39;s Cache</div>
+    <header class="site-header">
+      <div class="site-title">PlayStation Trophy Hunter&#39;s Cache</div>
+    </header>
+    <div class="sticky-header">
+      <div class="mode-toggle">
+        <span class="mode-label">Games</span>
+        <label class="switch">
+          <input type="checkbox" id="modeSwitch">
+          <span class="slider"></span>
+        </label>
+        <span class="mode-label">Hardware</span>
+      </div>
+      <div class="topbar topbar-2">
+        <div class="subtitle" id="subTitle">Games Catalogue</div>
         <div class="search">
-          <input id="q" type="search" placeholder="Search titles, notes, included games…" autocomplete="off" />
-          <select id="sort">
-            <option value="title-asc">Sort: Title (A→Z)</option>
-            <option value="title-desc">Sort: Title (Z→A)</option>
-            <option value="genre-asc">Sort: Genre (A→Z)</option>
-            <option value="genre-desc">Sort: Genre (Z→A)</option>
-          </select>
+          <input id="q" type="search" placeholder="Search..." autocomplete="off" />
+          <select id="sort"></select>
           <button id="clear">Clear</button>
           <a class="btn btn-notes-mobile" href="ps_notes.html">Notes / FAQ</a>
         </div>
@@ -35,39 +41,58 @@
           <div class="filterlabel">Platform</div>
           <div class="chips" id="platformChips"></div>
         </div>
-        <div class="filtergroup">
+        <div class="filtergroup" id="formatGroup">
           <div class="filterlabel">Format</div>
           <div class="chips" id="formatChips"></div>
         </div>
-        <div class="filtermeta">
+        <div class="filtermeta" id="filterMeta">
           <span id="stats"></span>
         </div>
       </div>
-    </header>
-
-    <div class="wrap">
-      <div class="table-card">
-        <table>
-          <thead>
-            <tr>
-              <th class="col-title">Title</th>
-              <th class="col-platform">Platform</th>
-              <th class="col-genre">Genre</th>
-              <th class="col-format">Format</th>
-              <th class="col-version">Version</th>
-              <th class="col-included">Included Games</th>
-              <th class="col-notes">Notes</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
+    </div>
+    <div id="gamesContent">
+      <div class="wrap">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-title">Title</th>
+                <th class="col-platform">Platform</th>
+                <th class="col-genre">Genre</th>
+                <th class="col-format">Format</th>
+                <th class="col-version">Version</th>
+                <th class="col-included">Included Games</th>
+                <th class="col-notes">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="hardwareContent" style="display:none;">
+      <div class="wrap">
+        <div class="table-card">
+          <table>
+            <thead>
+              <tr>
+                <th class="col-device">Device</th>
+                <th class="col-platform">Platform</th>
+                <th class="col-brand">Brand</th>
+                <th class="col-category">Category</th>
+                <th class="col-notes">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyHardware"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
     <script>
       (function syncHeaderHeight(){
         function setH(){
-          const header = document.querySelector("header");
+          const header = document.querySelector(".sticky-header");
           if (!header) return;
           const h = header.getBoundingClientRect().height;
           document.documentElement.style.setProperty("--appHeaderH", Math.ceil(h) + "px");
@@ -115,15 +140,15 @@
                     {"title": "Alice: Madness Returns", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Alien: Isolation", "platform": "PS3", "format": "Physical", "genre": "Horror", "version": "Ripley Edition", "included": [], "notes": []}, 
                     {"title": "Aliens: Colonial Marines", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "Extermination Edition", "included": [], "notes": []}, 
-                    {"title": "Aliens vs Predator", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Aliens vs Predator", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
                     {"title": "Anarchy Reigns", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Limited Edition", "included": [], "notes": []}, 
                     {"title": "Angry Birds: Star Wars", "platform": "PS3", "format": "Physical", "genre": "Puzzle", "version": "", "included": [], "notes": ["PS Move Features"]}, 
                     {"title": "Angry Birds Trilogy", "platform": "PS3", "format": "Physical", "genre": "Puzzle", "version": "", "included": [], "notes": ["PS Move Features"]}, 
                     {"title": "Ape Escape", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "Arcana Heart 3: Love Max!!!!!", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Arcania", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "The Complete Tale", "included": [], "notes": []}, 
-                    {"title": "Army of Two: 40th Day", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []},
-                    {"title": "Army of Two: The Devil's Cartel", "platform": "PS3", "format": "Physical", "genre": "", "version": "Overkill Edition", "included": [], "notes": ["x"]}, 
+                    {"title": "Army of Two: 40th Day", "platform": "PS3", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": []},
+                    {"title": "Army of Two: The Devil's Cartel", "platform": "PS3", "format": "Physical", "genre": "Shooter", "version": "Overkill Edition", "included": [], "notes": ["x"]}, 
                     {"title": "Assassin's Creed", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Double Pack", "included": ["Assassin's Creed 4: Black Flag", "Assassin's Creed: Rogue"], "notes": []}, 
                     {"title": "Assassin's Creed: Birth of a New World", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "The American Saga", "included": ["Assassin's Creed 3", "Assassin's Creed 4: Black Flag", "Assassin's Creed: Liberation HD"], "notes": []}, 
                     {"title": "Assassin's Creed: Heritage Collection", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": ["Assassin's Creed (no trophies)", "Assassin's Creed 2", "Assassin's Creed: Brotherhood", "Assassin's Creed: Revelations", "Assassin's Creed 3"], "notes": []}, 
@@ -147,9 +172,9 @@
                     {"title": "Blazblue: Continuum Shift", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "Limited Edition", "included": [], "notes": []}, 
                     {"title": "Blur", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Borderlands Triple Pack", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": ["Borderlands", "Borderlands 2", "Borderlands: The Pre-Sequel!"], "notes": []}, 
-                    {"title": "Brink", "platform": "PS3", "format": "Physical", "genre": "", "version": "Special Edition", "included": [], "notes": []}, 
+                    {"title": "Brink", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "Special Edition", "included": [], "notes": []}, 
                     {"title": "Brutal Legend", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "BulletStorm", "platform": "PS3", "format": "Physical", "genre": "", "version": "Limited Edition", "included": [], "notes": []}, 
+                    {"title": "BulletStorm", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "Limited Edition", "included": [], "notes": []}, 
                     {"title": "Burnout Paradise", "platform": "PS3", "format": "Physical", "genre": "Racing", "version": "The Ultimate Box", "included": [], "notes": []}, 
                     {"title": "Buzz!: The Ultimate Music Quiz", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Features"]}, 
                     {"title": "Call of Juarez: Bound in Blood", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
@@ -170,7 +195,7 @@
                     {"title": "Darksiders", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Darksiders 2", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Angel of Death Pack", "included": [], "notes": []}, 
                     {"title": "DC Universe Online", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": ["Online Only", "Discontinued"]}, 
-                    {"title": "Dead Island", "platform": "PS3", "format": "Physical", "genre": "", "version": "Double Pack", "included": ["Dead Island: Game of the Year Edition", "Dead Island: Riptide: Complete Edition"], "notes": []}, 
+                    {"title": "Dead Island", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Double Pack", "included": ["Dead Island: Game of the Year Edition", "Dead Island: Riptide: Complete Edition"], "notes": []}, 
                     {"title": "Dead or Alive 5", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "Ultimate", "included": [], "notes": []}, 
                     {"title": "Dead Rising 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Dead Space", "platform": "PS3", "format": "Physical", "genre": "Horror", "version": "", "included": [], "notes": []}, 
@@ -195,8 +220,8 @@
                     {"title": "Dragon Ball: Raging Blast", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "", "included": [], "notes": []}, 
                     {"title": "Dragon Ball Z: Budokai HD Collection", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "", "included": ["Dragon Ball Z: Budokai", "Dragon Ball Z: Budokai 3"], "notes": []}, 
                     {"title": "Dragon Ball Z: Ultimate Tenkaichi", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "", "included": [], "notes": []}, 
-                    {"title": "Dragon's Dogma: Dark Arisen", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Driver: San Francisco", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Dragon's Dogma: Dark Arisen", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
+                    {"title": "Driver: San Francisco", "platform": "PS3", "format": "Physical", "genre": "Racing", "version": "", "included": [], "notes": []}, 
                     {"title": "Duke Nukem Forever", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
                     {"title": "Dungeon Siege 3", "platform": "PS3", "format": "Physical", "genre": "ARPG", "version": "Limited Edition", "included": [], "notes": []}, 
                     {"title": "Dynasty Warriors 7: Xtreme Legends", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
@@ -333,9 +358,9 @@
                     {"title": "Resident Evil: Revelations", "platform": "PS3", "format": "Physical", "genre": "Horror", "version": "", "included": [], "notes": []}, 
                     {"title": "Resistance 2", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
                     {"title": "Resistance 3", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": ["PS Move Features", "3D Compatible"]}, 
-                    {"title": "Ride to Hell: Retribution", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Risen 2: Dark Waters", "platform": "PS3", "format": "Physical", "genre": "", "version": "Special Edition", "included": [], "notes": []}, 
-                    {"title": "Risen 3: Titan Lords", "platform": "PS3", "format": "Physical", "genre": "", "version": "First Edition", "included": [], "notes": ["x"]}, 
+                    {"title": "Ride to Hell: Retribution", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
+                    {"title": "Risen 2: Dark Waters", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Special Edition", "included": [], "notes": []}, 
+                    {"title": "Risen 3: Titan Lords", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "First Edition", "included": [], "notes": ["x"]}, 
                     {"title": "Rugby League Live 2", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "World Cup Edition", "included": [], "notes": []}, 
                     {"title": "RUSE: Don't Believe What You See", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Features"]}, 
                     {"title": "Sacred 2: Fallen Angel", "platform": "PS3", "format": "Physical", "genre": "ARPG", "version": "", "included": [], "notes": []}, 
@@ -343,9 +368,9 @@
                     {"title": "Saints Row the Third", "platform": "PS3", "format": "Physical", "genre": "ARPG", "version": "The Full Package", "included": [], "notes": []}, 
                     {"title": "Saw", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Scene It? Bright Lights! Big Screen!", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Sega Mega Drive Ultimate Collection", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Sega Mega Drive Ultimate Collection", "platform": "PS3", "format": "Physical", "genre": "Arcade", "version": "", "included": [], "notes": []}, 
                     {"title": "Shadows of the Damned", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Silent Hill: HD Collection", "platform": "PS3", "format": "Physical", "genre": "", "version": "Classics HD", "included": ["Silent Hill 2", "Silent Hill 3"], "notes": []}, 
+                    {"title": "Silent Hill: HD Collection", "platform": "PS3", "format": "Physical", "genre": "Horror", "version": "Classics HD", "included": ["Silent Hill 2", "Silent Hill 3"], "notes": []}, 
                     {"title": "Singularity", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Skylanders: Giants", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info"]}, 
                     {"title": "Skylanders: Imaginators", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]}, 
@@ -361,9 +386,9 @@
                     {"title": "Sonic & Sega All-Stars Racing", "platform": "PS3", "format": "Physical", "genre": "Racing", "version": "", "included": [], "notes": []}, 
                     {"title": "Sorcery", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "South Park: The Stick of Truth", "platform": "PS3", "format": "Physical", "genre": "TBS", "version": "", "included": [], "notes": []}, 
-                    {"title": "Spec Ops: The Line", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Spider-Man: Edge of Time", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Spider-Man: Shattered Dimensions", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Spec Ops: The Line", "platform": "PS3", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": []}, 
+                    {"title": "Spider-Man: Edge of Time", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
+                    {"title": "Spider-Man: Shattered Dimensions", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Sports Champions", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "Star Ocean: The Last Hope", "platform": "PS3", "format": "Physical", "genre": "JRPG", "version": "International", "included": [], "notes": []}, 
                     {"title": "Star Trek", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["3D Compatible"]}, 
@@ -371,39 +396,39 @@
                     {"title": "Star Wars: The Force Unleashed 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Street Fighter 4", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "", "included": [], "notes": []}, 
                     {"title": "Street Fighter X Tekken", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "", "included": [], "notes": []}, 
-                    {"title": "Supremacy MMA", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Supremacy MMA", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
                     {"title": "Syberia Collection", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": ["Syberia", "Syberia 2"], "notes": []}, 
                     {"title": "Syndicate", "platform": "PS3", "format": "Physical", "genre": "", "version": "Executive Package Edition", "included": [], "notes": []}, 
                     {"title": "Tales of Xillia", "platform": "PS3", "format": "Physical", "genre": "", "version": "Double Pack", "included": ["Tales of Xillia", "Tales of Xillia 2"], "notes": []}, 
                     {"title": "Teenage Mutant Ninja Turtles: Danger of the Ooze", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Tekken Hybrid", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "", "included": ["Tekken Tag Tournament HD", "Tekken Tag Tournament 2 Prologue"], "notes": ["3D Compatible"]}, 
-                    {"title": "Terminator: Salvation", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Terraria", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Terminator: Salvation", "platform": "PS3", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": []}, 
+                    {"title": "Terraria", "platform": "PS3", "format": "Physical", "genre": "Sandbox", "version": "", "included": [], "notes": []}, 
                     {"title": "The Adventures of Tintin: The Secret of the Unicorn", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Features"]}, 
-                    {"title": "The Amazing Spider-Man", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Features"]}, 
-                    {"title": "The Amazing Spider-Man 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "The Bureau: XCOM Declassified", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "The Amazing Spider-Man", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": ["PS Move Features"]}, 
+                    {"title": "The Amazing Spider-Man 2", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
+                    {"title": "The Bureau: XCOM Declassified", "platform": "PS3", "format": "Physical", "genre": "TBS", "version": "", "included": [], "notes": []}, 
                     {"title": "The Chronicles of Riddick: Assault on Dark Athena", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Cursed Crusade", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Darkness 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "Limited Edition", "included": [], "notes": []}, 
                     {"title": "The Elder Scrolls 5: Skyrim", "platform": "PS3", "format": "Physical", "genre": "", "version": "Legendary Edition", "included": [], "notes": []}, 
                     {"title": "The Evil Within", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "The Fight", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game", "3D Compatible"]}, 
+                    {"title": "The Fight", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": ["PS Move Game", "3D Compatible"]}, 
                     {"title": "The Godfather 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The House of the Dead: Overkill", "platform": "PS3", "format": "Physical", "genre": "", "version": "Extended Cut", "included": [], "notes": ["PS Move Features", "3D Compatible"]}, 
                     {"title": "The Jak and Daxter Trilogy", "platform": "PS3", "format": "Physical", "genre": "", "version": "Classics HD", "included": ["Jak and Daxter: The Precursor Legacy", "Jak 2: Renegade", "Jak 3"], "notes": ["3D Compatible"]}, 
                     {"title": "The Last of Us", "platform": "PS3", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": []}, 
-                    {"title": "The Lord of the Rings: Aragorn's Quest", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Features"]}, 
-                    {"title": "The Lord of the Rings: Conquest", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "The Lord of the Rings: War in the North", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "The Lord of the Rings: Aragorn's Quest", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["PS Move Features"]}, 
+                    {"title": "The Lord of the Rings: Conquest", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
+                    {"title": "The Lord of the Rings: War in the North", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "The Ratchet & Clank Trilogy", "platform": "PS3", "format": "Physical", "genre": "", "version": "Classics HD", "included": ["Ratchet & Clank", "Ratchet & Clank 2: Going Commando", "Ratchet & Clank 3: Up Your Arsenal"], "notes": ["3D Compatible"]}, 
                     {"title": "The Saboteur", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "The Shoot", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
+                    {"title": "The Shoot", "platform": "PS3", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "The Sims 3", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Sims 3: Pets", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Sly Trilogy", "platform": "PS3", "format": "Physical", "genre": "", "version": "Classics HD", "included": ["Sly Raccoon", "Sly 2: Band of Thieves", "Sly 3: Honour Among Thieves"], "notes": ["PS Move Features", "3D Compatible"]}, 
                     {"title": "The Tomb Raider Trilogy", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "Classics HD", "included": ["Tomb Raider: Legend", "Tomb Raider: Underworld", "Tomb Raider: Anniversary"], "notes": []}, 
-                    {"title": "The Walking Dead: A Telltale Games Series", "platform": "PS3", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": []}, 
+                    {"title": "The Walking Dead: A Telltale Games Series", "platform": "PS3", "format": "Physical", "genre": "Narrative", "version": "Game of the Year Edition", "included": [], "notes": []}, 
                     {"title": "The Walking Dead: Survival Instinct", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Wolf Among Us: A Telltale Games Series", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Thor: God of Thunder", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["3D Compatible"]}, 
@@ -418,7 +443,7 @@
                     {"title": "Transformers: Rise of the Dark Spark", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Transformers: War for Cybertron", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "TV Superstars", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
-                    {"title": "Twisted Metal", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Twisted Metal", "platform": "PS3", "format": "Physical", "genre": "Racing", "version": "", "included": [], "notes": []}, 
                     {"title": "uDraw Studio: Instant Artist", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["uDraw Game"]}, 
                     {"title": "UFC Undisputed 3", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
                     {"title": "UFC Undisputed 2009", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
@@ -434,17 +459,17 @@
                     {"title": "Venetica", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Virtua Tennis 2009", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
                     {"title": "Warhammer 40000: Space Marine", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Warhawk", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["Online Only", "Discontinued"]}, 
+                    {"title": "Warhawk", "platform": "PS3", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": ["Online Only", "Discontinued"]}, 
                     {"title": "WET", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Where the Wild Things Are: The Video Game", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "White Knight Chronicles 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": ["White Knight Chronicles: Remastered", "White Knight Chronicles 2"], "notes": []}, 
-                    {"title": "Wipeout HD: Fury", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Wipeout HD: Fury", "platform": "PS3", "format": "Physical", "genre": "Racing", "version": "", "included": [], "notes": []}, 
                     {"title": "Wolfenstein", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
                     {"title": "Wonderbook: Book of Potions", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "Wonderbook: Book of Spells", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "Wonderbook: Diggs Nightcrawler", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
                     {"title": "Wonderbook: Walking with Dinosaurs", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PS Move Game"]}, 
-                    {"title": "Worms Collection", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": ["Worms", "Worms: Ultimate Mayhem", "Worms 2: Armageddon"], "notes": []}, 
+                    {"title": "Worms Collection", "platform": "PS3", "format": "Physical", "genre": "Arcade", "version": "", "included": ["Worms", "Worms: Ultimate Mayhem", "Worms 2: Armageddon"], "notes": []}, 
                     {"title": "WRC 3", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "WWE 12", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": ["Wrestlemania Edition", "Platinum"], "included": [], "notes": []}, 
                     {"title": "WWE 13", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": ["x"]}, 
@@ -456,9 +481,9 @@
                     {"title": "Xblaze Code: Embryo", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "XCOM: Enemy Unknown", "platform": "PS3", "format": "Physical", "genre": "TBS", "version": "", "included": [], "notes": []}, 
                     {"title": "XCOM: Enemy Within", "platform": "PS3", "format": "Physical", "genre": "TBS", "version": "Commander Edition", "included": [], "notes": []}, 
-                    {"title": "X-Men: Destiny", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "X-Men Origins: Wolverine", "platform": "PS3", "format": "Physical", "genre": "", "version": "Uncaged Edition", "included": [], "notes": []}, 
-                    {"title": "Yakuza: Dead Souls", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "X-Men: Destiny", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
+                    {"title": "X-Men Origins: Wolverine", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Uncaged Edition", "included": [], "notes": []}, 
+                    {"title": "Yakuza: Dead Souls", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Zone of the Enders HD Collection", "platform": "PS3", "format": "Physical", "genre": "", "version": "Classics HD", "included": ["Zone of the Enders", "Zone of the Enders: The 2nd Runner"], "notes": []}, 
                     //PS4 Physical
                     {"title": "17 Bit Platinum Pack", "platform": "PS4", "format": "Physical", "genre": ["Roguelite", "TBS"], "version": "", "included": ["Galak-Z: The Void", "Skulls of the Shogun: Bone-A-Fide Edition"], "notes": []}, 
@@ -537,10 +562,10 @@
                     {"title": "Doom", "platform": "PS4", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
                     {"title": "Doom", "platform": "PS4", "format": "Physical", "genre": "FPS", "version": "VFR", "included": [], "notes": ["PSVR Game"]}, 
                     {"title": "Doom 3", "platform": "PS4", "format": "Physical", "genre": "FPS", "version": "VR Edition", "included": [], "notes": ["PSVR Game"]}, 
-                    {"title": "Dragon Age: Inquisition", "platform": "PS4", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": ["x"]}, 
+                    {"title": "Dragon Age: Inquisition", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Game of the Year Edition", "included": [], "notes": ["x"]}, 
                     {"title": "Dragon Ball: Xenoverse", "platform": "PS4", "format": "Physical", "genre": "Fighting", "version": "Double Pack", "included": ["Dragon Ball: Xenoverse", "Dragon Ball: Xenoverse 2"], "notes": []}, 
                     {"title": "Dragon Quest XI S: Echoes of an Elusive Age", "platform": "PS4", "format": "Physical", "genre": "", "version": "Definitive Edition", "included": [], "notes": []}, 
-                    {"title": "Dragon's Dogma: Dark Arisen", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Dragon's Dogma: Dark Arisen", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Dredge", "platform": "PS4", "format": "Physical", "genre": "", "version": "Deluxe Edition", "included": [], "notes": []}, 
                     {"title": "Dungeon of the Endless", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Dungeons 3", "platform": "PS4", "format": "Physical", "genre": "", "version": "Complete Collection", "included": [], "notes": []}, 
@@ -573,8 +598,8 @@
                     {"title": "God of War 3", "platform": "PS4", "format": "Physical", "genre": "", "version": "Remastered", "included": [], "notes": []}, 
                     {"title": "Golden Force", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Grand Ages: Medieval", "platform": "PS4", "format": "Physical", "genre": "RTS", "version": "Limited Special Edition", "included": [], "notes": []}, 
-                    {"title": "Grand Theft Auto 5", "platform": "PS4", "format": "Physical", "genre": "", "version": "Premium Edition", "included": [], "notes": []}, 
-                    {"title": "Grand Theft Auto: The Trilogy", "platform": "PS4", "format": "Physical", "genre": "", "version": "The Definitive Edition", "included": ["Grand Theft Auto 3", "Grand Theft Auto: Vice City", "Grand Theft Auto: San Andreas"], "notes": []}, 
+                    {"title": "Grand Theft Auto 5", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Premium Edition", "included": [], "notes": []}, 
+                    {"title": "Grand Theft Auto: The Trilogy", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "The Definitive Edition", "included": ["Grand Theft Auto 3", "Grand Theft Auto: Vice City", "Grand Theft Auto: San Andreas"], "notes": []}, 
                     {"title": "Guitar Hero Live", "platform": "PS4", "format": "Physical", "genre": "", "version": "Supreme Party Edition", "included": [], "notes": ["2 x Guitars"]}, 
                     {"title": "Gungrave G.O.R.E.", "platform": "PS4", "format": "Physical", "genre": "", "version": "Day One Edition", "included": [], "notes": []}, 
                     {"title": "Hades", "platform": "PS4", "format": "Physical", "genre": "Roguelite", "version": "", "included": [], "notes": []}, 
@@ -594,7 +619,7 @@
                     {"title": "Just Cause 3", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Gold Edition", "included": [], "notes": []}, 
                     {"title": "Killing Floor", "platform": "PS4", "format": "Physical", "genre": "", "version": "Double Feature", "included": ["Killing Floor 2", "Killing Floor: Incursion"], "notes": ["PSVR Game"]}, 
                     {"title": "King's Bounty 2", "platform": "PS4", "format": "Physical", "genre": "TBS", "version": "Day One Edition", "included": [], "notes": []}, 
-                    {"title": "Kingdom Come: Deliverance", "platform": "PS4", "format": "Physical", "genre": "", "version": "Royal Edition", "included": [], "notes": []}, 
+                    {"title": "Kingdom Come: Deliverance", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Royal Edition", "included": [], "notes": []}, 
                     {"title": "Kingdom Hearts: The Story So Far", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Kingdom Hearts: Final Mix", "Kingdom Hearts: Re:Chain of Memories", "Kingdom Hearts: 358/2 Days", "Kingdom Hearts 2: Final Mix", "Kingdom Hearts: Birth by Sleep - Final Mix", "Kingdom Hearts: Re:Coded", "Kingdom Hearts: Dream Drop Distance HD", "Kingdom Hearts 0.2: Birth by Sleep - A Fragmentary Passage"], "notes": []}, 
                     {"title": "Kingdom Majestic", "platform": "PS4", "format": "Physical", "genre": "", "version": "Limited Edition", "included": ["Kingdom: New Lands", "Kingdom: Two Crowns"], "notes": []}, 
                     {"title": "Kingdoms of Amalur: Re-Reckoning", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
@@ -614,14 +639,14 @@
                     {"title": "Metro: Redux", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Metro: 2033", "Metro: Last Light"], "notes": []}, 
                     {"title": "Middle-Earth: Shadow of Mordor", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Game of the Year Edition", "included": [], "notes": []}, 
                     {"title": "Middle-Earth: Shadow of War", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Definitive Edition", "included": [], "notes": []}, 
-                    {"title": "Might & Magic: Clash of Heroes", "platform": "PS4", "format": "Physical", "genre": "", "version": "Definitive Edition", "included": [], "notes": []}, 
+                    {"title": "Might & Magic: Clash of Heroes", "platform": "PS4", "format": "Physical", "genre": "Puzzle", "version": "Definitive Edition", "included": [], "notes": []}, 
                     {"title": "Minecraft", "platform": "PS4", "format": "Physical", "genre": "Sandbox", "version": "(Bedrock Edition)", "included": [], "notes": ["PSVR Compatible", "Discontinued"]}, 
                     {"title": "Minecraft", "platform": "PS4", "format": "Physical", "genre": "Sandbox", "version": "PlayStation 4 Edition", "included": [], "notes": []}, 
                     {"title": "Minecraft", "platform": "PS4", "format": "Physical", "genre": "Sandbox", "version": "(Starter Collection)", "included": [], "notes": []}, 
                     {"title": "Minecraft Dungeons", "platform": "PS4", "format": "Physical", "genre": "", "version": "Ultimate Edition", "included": [], "notes": []}, 
                     {"title": "Minecraft Legends", "platform": "PS4", "format": "Physical", "genre": "", "version": "Deluxe Edition", "included": [], "notes": []}, 
                     {"title": "Monkey King: Hero is Back", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Monster Hunter World: Iceborne", "platform": "PS4", "format": "Physical", "genre": "", "version": "Master Edition", "included": [], "notes": []}, 
+                    {"title": "Monster Hunter World: Iceborne", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Master Edition", "included": [], "notes": []}, 
                     {"title": "Mortal Kombat 10", "platform": "PS4", "format": "Physical", "genre": "Fighting", "version": "XL", "included": [], "notes": []}, 
                     {"title": "Mortal Kombat 11", "platform": "PS4", "format": "Physical", "genre": "Fighting", "version": "Ultimate", "included": [], "notes": []}, 
                     {"title": "Mortal Shell", "platform": "PS4", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": ["Steelcase"]}, 
@@ -633,10 +658,10 @@
                     {"title": "No Man's Sky: Beyond", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PSVR Compatible"]}, 
                     {"title": "Outlast Trinity", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Outlast", "Outlast: Whistleblower", "Outlast 2"], "notes": []}, 
                     {"title": "Overcooked!", "platform": "PS4", "format": "Physical", "genre": "", "version": "All You Can Eat", "included": ["Overcooked!", "Overcooked! 2"], "notes": []}, 
-                    {"title": "Pathfinder: Kingmaker", "platform": "PS4", "format": "Physical", "genre": "", "version": "Definitive Edition", "included": [], "notes": []}, 
-                    {"title": "Phoenix Point", "platform": "PS4", "format": "Physical", "genre": "", "version": "Behemoth Edition", "included": [], "notes": []}, 
-                    {"title": "Pillars of Eternity", "platform": "PS4", "format": "Physical", "genre": "", "version": "Complete Edtion", "included": [], "notes": []}, 
-                    {"title": "Pillars of Eternity 2: Deadfire", "platform": "PS4", "format": "Physical", "genre": "", "version": "Ultimate Edition", "included": [], "notes": []}, 
+                    {"title": "Pathfinder: Kingmaker", "platform": "PS4", "format": "Physical", "genre": "CRPG", "version": "Definitive Edition", "included": [], "notes": []}, 
+                    {"title": "Phoenix Point", "platform": "PS4", "format": "Physical", "genre": "TBS", "version": "Behemoth Edition", "included": [], "notes": []}, 
+                    {"title": "Pillars of Eternity", "platform": "PS4", "format": "Physical", "genre": "CRPG", "version": "Complete Edtion", "included": [], "notes": []}, 
+                    {"title": "Pillars of Eternity 2: Deadfire", "platform": "PS4", "format": "Physical", "genre": "CRPG", "version": "Ultimate Edition", "included": [], "notes": []}, 
                     {"title": "Planescape: Torment/Icewind Dale", "platform": "PS4", "format": "Physical", "genre": "CRPG", "version": "(Double Pack)", "included": ["Planescape: Torment - Enhanced Edition", "Icewind Dale: Enhanced Edition"], "notes": []}, 
                     {"title": "Red Dead Redemption", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Resident Evil 2", "platform": "PS4", "format": "Physical", "genre": "Horror", "version": "(Remake)", "included": [], "notes": []}, 
@@ -652,7 +677,7 @@
                     {"title": "Resident Evil: Revelations 2", "platform": "PS4", "format": "Physical", "genre": "Horror", "version": "Box Set", "included": [], "notes": []}, 
                     {"title": "Reverie Knights: Tactics", "platform": "PS4", "format": "Physical", "genre": "TBS", "version": "", "included": [], "notes": []}, 
                     {"title": "Rise of the Tomb Raider", "platform": "PS4", "format": "Physical", "genre": "Adventure", "version": "20 Year Celebration", "included": [], "notes": ["PSVR Features"]}, 
-                    {"title": "Risen", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Risen", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Rising Hell", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["Strictly Limited"]}, 
                     {"title": "Rocket League", "platform": "PS4", "format": "Physical", "genre": "", "version": "Collector's Edition", "included": [], "notes": []}, 
                     {"title": "Secret of Mana", "platform": "PS4", "format": "Physical", "genre": "JRPG", "version": "", "included": [], "notes": []}, 
@@ -701,8 +726,8 @@
                     {"title": "The Outer Worlds", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Quarry", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "The Quest for Excalibur: Puy du Fou", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "The Walking Dead: A Telltale Games Series", "platform": "PS4", "format": "Physical", "genre": "", "version": "The Telltale Definitive Series", "included": [], "notes": []}, 
-                    {"title": "The Witcher 3", "platform": "PS4", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": []}, 
+                    {"title": "The Walking Dead: A Telltale Games Series", "platform": "PS4", "format": "Physical", "genre": "Narrative", "version": "The Telltale Definitive Series", "included": [], "notes": []}, 
+                    {"title": "The Witcher 3", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Game of the Year Edition", "included": [], "notes": []}, 
                     {"title": "This is the Police", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "This is the Police 2", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Titan Quest", "platform": "PS4", "format": "Physical", "genre": "ARPG", "version": "", "included": [], "notes": []}, 
@@ -725,10 +750,10 @@
                     {"title": "Wasteland 2", "platform": "PS4", "format": "Physical", "genre": "", "version": "Director's Cut", "included": [], "notes": []}, 
                     {"title": "Wolfenstein: Alt History Collection", "platform": "PS4", "format": "Physical", "genre": "FPS", "version": "", "included": ["Wolfenstein: The New Order", "Wolfenstein: The Old Blood", "Wolfenstein: The New Colossus", "Wolfenstein: Youngblood"], "notes": []}, 
                     {"title": "World of Final Fantasy", "platform": "PS4", "format": "Physical", "genre": "", "version": "Day One Edition", "included": [], "notes": []}, 
-                    {"title": "Worms", "platform": "PS4", "format": "Physical", "genre": "", "version": "Double Pack", "included": ["Worms: Battlegrounds", "Worms W.M.D."], "notes": []}, 
-                    {"title": "Worms: Rumble", "platform": "PS4", "format": "Physical", "genre": "", "version": "Fully Loaded Edition", "included": [], "notes": ["Online Only"]}, 
+                    {"title": "Worms", "platform": "PS4", "format": "Physical", "genre": "Arcade", "version": "Double Pack", "included": ["Worms: Battlegrounds", "Worms W.M.D."], "notes": []}, 
+                    {"title": "Worms: Rumble", "platform": "PS4", "format": "Physical", "genre": "Arcade", "version": "Fully Loaded Edition", "included": [], "notes": ["Online Only"]}, 
                     {"title": "WWE 2k19", "platform": "PS4", "format": "Physical", "genre": "Sports", "version": "Deluxe Edition", "included": [], "notes": []}, 
-                    {"title": "Yakuza: Remastered Collection", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Yakuza 3", "Yakuza 4", "Yakuza 5"], "notes": []}, 
+                    {"title": "Yakuza: Remastered Collection", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": ["Yakuza 3", "Yakuza 4", "Yakuza 5"], "notes": []}, 
                     {"title": "You Suck at Parking", "platform": "PS4", "format": "Physical", "genre": "", "version": "Complete Edition", "included": [], "notes": []}, 
                     {"title": "Zombi", "platform": "PS4", "format": "Physical", "genre": "Horror", "version": "", "included": [], "notes": []}, 
                     {"title": "Zombie Army Trilogy", "platform": "PS4", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": ["x"]}, 
@@ -759,7 +784,7 @@
                     {"title": "Iron Harvest 1920+", "platform": "PS5", "format": "Physical", "genre": "", "version": "Complete Edition", "included": [], "notes": []}, 
                     {"title": "Football Manager 2024", "platform": "PS5", "format": "Physical", "genre": "Sports", "version": "Console", "included": [], "notes": []}, 
                     {"title": "Gamedec", "platform": "PS5", "format": "Physical", "genre": "", "version": "Definitive Edition", "included": [], "notes": []}, 
-                    {"title": "Grand Theft Auto 5", "platform": "PS5", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Grand Theft Auto 5", "platform": "PS5", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Graven", "platform": "PS5", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Greed Fall", "platform": "PS5", "format": "Physical", "genre": "", "version": "Gold Edition", "included": [], "notes": []}, 
                     {"title": "Hades", "platform": "PS5", "format": "Physical", "genre": "Roguelite", "version": "", "included": [], "notes": []}, 
@@ -836,7 +861,7 @@
                     {"title": "Tekken Revolution", "platform": "PS3", "format": "Digital", "genre": "Fighting", "version": "", "included": [], "notes": ["Online Only", "Discontinued"]}, 
                     {"title": "The Swapper", "platform": "PS3", "format": "Digital", "genre": "Puzzle", "version": "", "included": [], "notes": []}, 
                     {"title": "Thomas Was Alone", "platform": "PS3", "format": "Digital", "genre": "Narrative", "version": "", "included": [], "notes": []}, 
-                    {"title": "Yakuza 4", "platform": "PS3", "format": "Digital", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Yakuza 4", "platform": "PS3", "format": "Digital", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     //PS4 Digital
                     {"title": "A King's Tale: Final Fantasy XV", "platform": "PS4", "format": "Digital", "genre": "Arcade", "version": "", "included": [], "notes": []}, 
                     {"title": "Abyss Odyssey", "platform": "PS4", "format": "Digital", "genre": "Roguelite", "version": "Extended Dream Edition", "included": [], "notes": []}, 
@@ -1093,10 +1118,13 @@
       function renderChips() {
         const pWrap = document.getElementById("platformChips");
         const fWrap = document.getElementById("formatChips");
+
         pWrap.innerHTML = "";
         fWrap.innerHTML = "";
+
         const platforms = ["PS3","PS4","PS5","Vita"];
         const formats = ["Physical","Digital"];
+
         for (const p of platforms) {
           const el = document.createElement("div");
           el.className = "chip " + (state.platforms.has(p) ? "on" : "");
@@ -1108,16 +1136,19 @@
           };
           pWrap.appendChild(el);
         }
-        for (const f of formats) {
-          const el = document.createElement("div");
-          el.className = "chip " + (state.formats.has(f) ? "on" : "");
-          el.innerHTML = `<b>${f}</b>`;
-          el.onclick = () => {
-            if (state.formats.has(f)) state.formats.delete(f); else state.formats.add(f);
-            el.classList.toggle("on");
-            render();
-          };
-          fWrap.appendChild(el);
+
+        if (!document.getElementById("modeSwitch").checked) {
+          for (const f of formats) {
+            const el = document.createElement("div");
+            el.className = "chip " + (state.formats.has(f) ? "on" : "");
+            el.innerHTML = `<b>${f}</b>`;
+            el.onclick = () => {
+              if (state.formats.has(f)) state.formats.delete(f); else state.formats.add(f);
+              el.classList.toggle("on");
+              render();
+            };
+            fWrap.appendChild(el);
+          }
         }
       }
 
@@ -1196,7 +1227,8 @@
 
       function render() {
         const q = norm(state.q);
-        let rows = DATA.filter(r => state.platforms.has(r.platform) && state.formats.has(r.format) && includesAny(r, q));
+        const isHardware = document.getElementById("modeSwitch").checked;
+        let rows = DATA.filter(r => state.platforms.has(r.platform) && (isHardware ? true : state.formats.has(r.format)) && includesAny(r, q) );
         const [field, dir] = state.sort.split("-");
         const key = (field === "title") ? "title" : "genre";
         rows.sort((a,b) => cmp(a,b,key) * (dir === "asc" ? 1 : -1));
@@ -1212,25 +1244,76 @@
             <td class="col-notes" data-label="Notes">${notesCell(r.notes, r)}</td>
           </tr>
         `).join("");
-        document.getElementById("stats").textContent = `${rows.length.toLocaleString()} visible of ${DATA.length.toLocaleString()} total`;
+        const statsEl = document.getElementById("stats");
+        if (!isHardware) { statsEl.textContent = `${rows.length} visible of ${DATA.length} total`; } 
+        else { statsEl.textContent = ""; }
       }
-
       document.getElementById("q").addEventListener("input", (e) => {
         state.q = e.target.value;
-        render();
+        if (document.getElementById("modeSwitch").checked) renderHardware();
+        else render();
       });
       document.getElementById("sort").addEventListener("change", (e) => {
         state.sort = e.target.value;
-        render();
+        if (document.getElementById("modeSwitch").checked) renderHardware();
+        else render();
       });
       document.getElementById("clear").addEventListener("click", () => {
         state.q = "";
         document.getElementById("q").value = "";
-        render();
+        if (document.getElementById("modeSwitch").checked) renderHardware();
+        else render();
       });
-
       renderChips();
       render();
+    </script>
+
+    <script>
+      const switchEl = document.getElementById("modeSwitch");
+      const games = document.getElementById("gamesContent");
+      const hardware = document.getElementById("hardwareContent");
+      const subTitle = document.getElementById("subTitle");
+      const formatGroup = document.getElementById("formatGroup");
+      const sortSelect = document.getElementById("sort");
+
+      const DROPDOWN_GAMES = [
+        { value: "title-asc",  label: "Sort: Title (A→Z)" },
+        { value: "title-desc", label: "Sort: Title (Z→A)" },
+        { value: "genre-asc",  label: "Sort: Genre (A→Z)" },
+        { value: "genre-desc", label: "Sort: Genre (Z→A)" },
+      ];
+
+      const DROPDOWN_HARDWARE = [
+        { value: "brand-asc",  label: "Sort: Brand (A→Z)" },
+        { value: "brand-desc", label: "Sort: Brand (Z→A)" },
+      ];
+
+      function setDropdown(options) {
+        sortSelect.innerHTML = options.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+        const values = new Set(options.map(o => o.value));
+        if (!values.has(state.sort)) state.sort = options[0]?.value || "title-asc";
+        sortSelect.value = state.sort;
+      }
+
+      function updateModeUI() {
+        const isHardware = switchEl.checked;
+        const filterMeta = document.getElementById("filterMeta");
+        const statsEl = document.getElementById("stats");
+        games.style.display = isHardware ? "none" : "block";
+        hardware.style.display = isHardware ? "block" : "none";
+        filterMeta.style.display = isHardware ? "none" : "";
+        if (isHardware) statsEl.textContent = "";
+        subTitle.textContent = isHardware ? "Hardware Catalogue" : "Games Catalogue";
+        document.title = subTitle.textContent;
+        formatGroup.style.display = isHardware ? "none" : "";
+        setDropdown(isHardware ? DROPDOWN_HARDWARE : DROPDOWN_GAMES);
+        renderChips();
+        if (isHardware) renderHardware();
+        else render();
+      }
+
+      switchEl.addEventListener("change", updateModeUI);
+      updateModeUI();
     </script>
   </body>
 

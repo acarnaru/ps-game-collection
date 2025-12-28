@@ -21,7 +21,12 @@ body {
                 radial-gradient(1200px 700px at 80% 0%, rgba(129,230,217,.10), transparent 60%),
                 var(--bg);
   }
-header {
+
+.site-header {
+    border-bottom: 1px solid var(--border);
+  }
+
+.sticky-header {
     position: sticky;
     top: 0;
     z-index: 50;
@@ -30,9 +35,92 @@ header {
     border-bottom: 1px solid var(--border);
   }
 
+.site-title {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 16px 14px 6px;
+    text-align: center;
+    font-weight: 900;
+    letter-spacing: .6px;
+    font-size: 28px;
+  }
+
+.subtitle {
+    font-weight: 800;
+    letter-spacing: .4px;
+    font-size: 18px;
+    white-space: nowrap;
+  }
+
+.mode-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    margin: 16px 0 8px;
+  }
+
+.mode-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    opacity: 0.85;
+  }
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 72px;
+    height: 38px;
+  }
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #444;
+    border-radius: 999px;
+    transition: background-color 0.25s ease;
+  }
+
+.slider::before {
+    content: "";
+    position: absolute;
+    height: 30px;
+    width: 30px;
+    left: 4px;
+    bottom: 4px;
+    background-color: #fff;
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+  }
+
+.switch input:checked + .slider {
+    background-color: #0070f3;
+  }
+
+.switch input:checked + .slider::before {
+    transform: translateX(34px);
+  }
+
 .topbar {
     display:flex; gap:12px; align-items:center;
     padding: 12px 14px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+.topbar-2 {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px 12px;
     max-width: 1400px;
     margin: 0 auto;
   }
@@ -78,8 +166,6 @@ header {
     gap: 10px;
     margin-top: 4px;
   }
-
-.title { font-weight: 800; letter-spacing: .4px; white-space: nowrap; font-size: 18px; }
 
 .search { flex: 1; display:flex; gap: 10px; align-items:center; }
 
@@ -262,6 +348,10 @@ tbody tr:hover td { background: rgba(99,179,237,.06); }
 .col-version { width: 14%; }
 .col-included { width: 28%; }
 .col-notes { width: 12%; }
+
+.col-device   { width: 41%; }
+.col-brand    { width: 21%; }
+.col-category { width: 21%; }
 
 .site-footer {
     margin-top: 40px;
