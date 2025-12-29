@@ -115,17 +115,25 @@
     </div>
 
     <script>
-      (function syncHeaderHeight(){
-        function setH(){
+        (function syncHeaderHeight(){
           const header = document.querySelector(".sticky-header");
           if (!header) return;
-          const h = header.getBoundingClientRect().height;
-          document.documentElement.style.setProperty("--appHeaderH", Math.ceil(h) + "px");
-        }
-        window.addEventListener("resize", setH);
-        window.addEventListener("load", setH);
-        setH();
-      })();
+
+          function setH(){
+            const h = header.getBoundingClientRect().height;
+            document.documentElement.style.setProperty("--appHeaderH", Math.ceil(h) + "px");
+          }
+
+          window.addEventListener("resize", setH);
+          window.addEventListener("load", setH);
+          window.addEventListener("orientationchange", setH);
+          setH();
+
+          if ("ResizeObserver" in window) {
+            const ro = new ResizeObserver(() => setH());
+            ro.observe(header);
+          }
+        })();
 
       (function () {
         const btn = document.getElementById("toTop");
@@ -214,13 +222,13 @@
                     {"title": "Crimes & Punishments: Sherlock Holmes", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Crysis 2", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "Limited Edition", "included": [], "notes": ["3D Compatible"]}, 
                     {"title": "Damnation", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Dante's Inferno", "platform": "PS3", "format": "Physical", "genre": "", "version": "Death Edition", "included": [], "notes": []}, 
+                    {"title": "Dante's Inferno", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Death Edition", "included": [], "notes": []}, 
                     {"title": "Dark Souls", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Prepare to Die Edition", "included": [], "notes": []}, 
                     {"title": "Dark Void", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Darksiders", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Darksiders 2", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Angel of Death Pack", "included": [], "notes": []}, 
                     {"title": "DC Universe Online", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": ["Online Only", "Discontinued"]}, 
-                    {"title": "Dead Island", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Double Pack", "included": ["Dead Island: Game of the Year Edition", "Dead Island: Riptide: Complete Edition"], "notes": []}, 
+                    {"title": "Dead Island", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Double Pack", "included": ["Dead Island: Game of the Year Edition", "Dead Island: Riptide - Complete Edition"], "notes": []}, 
                     {"title": "Dead or Alive 5", "platform": "PS3", "format": "Physical", "genre": "Fighting", "version": "Ultimate", "included": [], "notes": []}, 
                     {"title": "Dead Rising 2", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Dead Space", "platform": "PS3", "format": "Physical", "genre": "Horror", "version": "", "included": [], "notes": []}, 
@@ -237,6 +245,9 @@
                     {"title": "Diablo 3: Reaper of Souls", "platform": "PS3", "format": "Physical", "genre": "ARPG", "version": "Ultimate Evil Edition", "included": [], "notes": []}, 
                     {"title": "Dirt: Showdown", "platform": "PS3", "format": "Physical", "genre": "Racing", "version": "Hoonigan Exclusive Edition", "included": [], "notes": []}, 
                     {"title": "Dishonored", "platform": "PS3", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": []}, 
+                    {"title": "Disney Infinity", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
+                    {"title": "Disney Infinity 2.0", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
+                    {"title": "Disney Infinity 3.0", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
                     {"title": "Doctor Who: The Eternity Clock", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Doom 3", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "BFG Edition", "included": [], "notes": ["3D Compatible"]}, 
                     {"title": "Dragon Age 2", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Bioware Signature Edition", "included": [], "notes": []}, 
@@ -558,13 +569,13 @@
                     {"title": "Crisis Core: Final Fantasy VII Reunion", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Crysis Remastered Trilogy", "platform": "PS4", "format": "Physical", "genre": "FPS", "version": "", "included": ["Crysis: Remastered", "Crysis 2: Remastered", "Crysis 3: Remastered"], "notes": []}, 
                     {"title": "Cyberpunk 2077", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
-                    {"title": "Dark Souls Trilogy", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Dark Souls: Remastered", "Dark Souls 2: Scholar of the First Sin", "Dark Souls 3: The Fire Fades"], "notes": []}, 
+                    {"title": "Dark Souls Trilogy", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": ["Dark Souls: Remastered", "Dark Souls 2: Scholar of the First Sin", "Dark Souls 3: The Fire Fades"], "notes": []}, 
                     {"title": "Darkest Dungeon", "platform": "PS4", "format": "Physical", "genre": "Roguelite", "version": "Collector's Edition", "included": [], "notes": []}, 
-                    {"title": "Darksiders", "platform": "PS4", "format": "Physical", "genre": "", "version": "Warmastered Edition", "included": [], "notes": []}, 
-                    {"title": "Darksiders 2", "platform": "PS4", "format": "Physical", "genre": "", "version": "Deathinitive Edition", "included": [], "notes": []}, 
-                    {"title": "Darksiders 3", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Darksiders", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Warmastered Edition", "included": [], "notes": []}, 
+                    {"title": "Darksiders 2", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Deathinitive Edition", "included": [], "notes": []}, 
+                    {"title": "Darksiders 3", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Dead Cells", "platform": "PS4", "format": "Physical", "genre": "", "version": "Return to Castlevania Edition", "included": [], "notes": ["x"]}, 
-                    {"title": "Dead Island", "platform": "PS4", "format": "Physical", "genre": "", "version": "Definitive Edition", "included": ["Dead Island: Definitive Edition", "Dead Island: Riptide - Definitive Edition"], "notes": []}, 
+                    {"title": "Dead Island", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Definitive Edition", "included": ["Dead Island: Definitive Edition", "Dead Island: Riptide - Definitive Edition"], "notes": []}, 
                     {"title": "Dead Rising 4: Frank's Big Package", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Deadlight", "platform": "PS4", "format": "Physical", "genre": "", "version": "Director's Cut", "included": [], "notes": []}, 
                     {"title": "Deadpool", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
@@ -578,7 +589,9 @@
                     {"title": "Disciples: Liberation", "platform": "PS4", "format": "Physical", "genre": "TBS", "version": "Deluxe Edition", "included": [], "notes": []}, 
                     {"title": "Disco Elysium", "platform": "PS4", "format": "Physical", "genre": "", "version": "The Final Cut", "included": [], "notes": []}, 
                     {"title": "Dishonored & Prey: The Arkane Collection", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Dishonored: Definitive Edition", "Dishonored 2", "Dishonored: Death of the Outsider", "Prey"], "notes": []}, 
-                    {"title": "Disney Classic Games Collection", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["The Jungle Book", "Aladdin", "The Lion King"], "notes": []}, 
+                    {"title": "Disney Classic Games Collection", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Disney Infinity 2.0", "platform": "PS4", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
+                    {"title": "Disney Infinity 3.0", "platform": "PS4", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
                     {"title": "Dissidia: Final Fantasy NT", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Divinity: Original Sin", "platform": "PS4", "format": "Physical", "genre": "CRPG", "version": "Enhanced Edition", "included": [], "notes": []}, 
                     {"title": "Divinity: Original Sin 2", "platform": "PS4", "format": "Physical", "genre": "CRPG", "version": "Definitive Edition", "included": [], "notes": []}, 
@@ -790,7 +803,7 @@
                     {"title": "Atomic Heart", "platform": "PS5", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Blood Bowl", "platform": "PS5", "format": "Physical", "genre": "", "version": "Super Brutal Deluxe Edition", "included": [], "notes": []}, 
                     {"title": "Cyberpunk 2077", "platform": "PS5", "format": "Physical", "genre": "", "version": "Ultimate Edition", "included": [], "notes": []}, 
-                    {"title": "Darksiders 2", "platform": "PS5", "format": "Physical", "genre": "", "version": "Deathinitive Edition", "included": [], "notes": []}, 
+                    {"title": "Darksiders 2", "platform": "PS5", "format": "Physical", "genre": "Action", "version": "Deathinitive Edition", "included": [], "notes": []}, 
                     {"title": "Darq", "platform": "PS5", "format": "Physical", "genre": "", "version": "Ultimate Edition", "included": [], "notes": []}, 
                     {"title": "Dead Cells", "platform": "PS5", "format": "Physical", "genre": "", "version": "Return to Castlevania Edition", "included": [], "notes": []}, 
                     {"title": "Dead Space", "platform": "PS5", "format": "Physical", "genre": "Horror", "version": "(Remake)", "included": [], "notes": []}, 
@@ -1104,6 +1117,10 @@
                   ];
 
       const DATA_HARDWARE = [
+                              /*Placeholder:
+
+                              {"device": "", "platform": "", "brand": "", "category": "", "notes": []}, */
+
                               {"device":"PS3 Ultra Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["1TB SSD"]},
                               {"device":"PS3 Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["Stock"]},
                               {"device":"PS4 Pro","platform":"PS4","brand":"Sony","category":"Console","notes":["8TB SSD"]},

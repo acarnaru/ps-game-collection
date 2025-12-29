@@ -9,19 +9,19 @@
     width: 100%; 
   }
 
-  .col-genre,
-  .col-format,
-  .col-notes {
-    display: none;
-  }
+  #gamesContent .col-notes { display: none; }
+  #gamesContent .col-genre { display: none; }
+  #gamesContent .col-format { display: none; }
+
+  #hardwareContent .col-brand { display: none; }
 
   .col-title    { width: 33%; }
   .col-platform { width: 1%;}
   .col-version  { width: 22%; }
   .col-included { width: 44%; }
 
-  .col-device   { width: 37%; }
-  .col-brand    { width: 25%; }
+  .col-device   { width: 39%; }
+  .col-notes    { width: 22%; }
   .col-category { width: 25%; }
 
   th, td,
@@ -177,7 +177,85 @@
     font-size: 12px;
   }
 }
+
+/* MOBILE screen rotate - max-width 932px - max height 430px */
+@media (max-width: 932px) and (max-height: 430px) and (orientation: landscape) {
+
+  .sticky-header {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(11, 15, 23, 0.95);
+  }
+
+  .mode-toggle {
+    margin: 6px 0 4px;
+    gap: 10px;
+  }
+  .mode-label {
+    font-size: 0.92rem;
+  }
+
+  .switch {
+    width: 54px;
+    height: 28px;
+  }
+  .slider::before {
+    width: 20px;
+    height: 20px;
+    left: 4px;
+    bottom: 4px;
+  }
+  .switch input:checked + .slider::before {
+    transform: translateX(24px);
+  }
+
+  .topbar-2 {
+    padding: 6px 10px 6px;
+    gap: 8px;
+  }
+  .subtitle {
+    font-size: 13px;
+    letter-spacing: .2px;
+  }
+
+  input[type="search"],
+  select,
+  button,
+  a.btn {
+    padding: 7px 9px;
+    border-radius: 8px;
+    font-size: 11px;
+  }
+
+  .filterbar {
+    padding: 6px 10px 7px;
+    gap: 8px;
+  }
+  .filterlabel {
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+
+  .chips {
+    gap: 6px;
+  }
+  .chip {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .filtermeta {
+    margin-top: 2px;
+    font-size: 10px;
+  }
+
+  .notes-sticky { padding: 6px 0; }
+
+  .notes-chips { padding: 0 10px; }
   
+  .notes-chips .chip { padding: 6px 8px; font-size: 11px; }
+}
+
 /* TABLET - 541px to 1024px */
 
 @media (min-width: 541px) and (max-width: 1024px) {
