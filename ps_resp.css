@@ -4,6 +4,14 @@
 
 @media (max-width: 540px) {
 
+  html {
+    scroll-padding-top: calc(112px + env(safe-area-inset-top));
+  }
+
+  .note-block {
+    scroll-margin-top: calc(112px + env(safe-area-inset-top));
+  }
+  
   table { 
     table-layout: auto; 
     width: 100%; 
@@ -254,12 +262,28 @@
   .notes-chips { padding: 0 10px; }
   
   .notes-chips .chip { padding: 6px 8px; font-size: 11px; }
+
+  .note-block {
+    scroll-margin-top: calc(clamp(64px, 14vh, 96px) + env(safe-area-inset-top)) !important;
+  }
+
+   html {
+    scroll-padding-top: calc(clamp(64px, 14vh, 96px) + env(safe-area-inset-top)) !important; 
+  }
 }
 
 /* TABLET - 541px to 1024px */
 
 @media (min-width: 541px) and (max-width: 1024px) {
 
+   html {
+    scroll-padding-top: 76px;
+  }
+
+  .note-block {
+    scroll-margin-top: 76px;
+  }
+  
   table { width: 100%; table-layout: auto; }
 
   th, td, td *, th * {
