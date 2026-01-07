@@ -11,28 +11,7 @@
     <title>Games Catalogue</title>
     <link rel="stylesheet" href="ps_styles.css" />
     <link rel="stylesheet" href="ps_resp.css">
-  
-    <style>
-      th .sort-arrow{
-        margin-left: 6px;
-        padding: 0 4px;
-        border: 0;
-        background: transparent;
-        color: rgba(230,234,242,.86);
-        font-size: 12px;
-        line-height: 1;
-        cursor: pointer;
-        opacity: 0.85;
-      }
-      th .sort-arrow:hover,
-      th .sort-arrow:focus-visible{
-        opacity: 1;
-        text-decoration: none;
-        outline: none;
-      }
-    </style>
-
-  </head>
+</head>
 
   <body>
     <button id="toTop" aria-label="Back to top">▲</button>
@@ -247,7 +226,7 @@
                     {"title": "Dishonored", "platform": "PS3", "format": "Physical", "genre": "", "version": "Game of the Year Edition", "included": [], "notes": []}, 
                     {"title": "Disney Infinity", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
                     {"title": "Disney Infinity 2.0", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
-                    {"title": "Disney Infinity 3.0", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]},
+                    {"title": "Disney Infinity 3.0", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info"]},
                     {"title": "Doctor Who: The Eternity Clock", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Doom 3", "platform": "PS3", "format": "Physical", "genre": "FPS", "version": "BFG Edition", "included": [], "notes": ["3D Compatible"]}, 
                     {"title": "Dragon Age 2", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "Bioware Signature Edition", "included": [], "notes": []}, 
@@ -411,7 +390,7 @@
                     {"title": "Skylanders: Giants", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info"]}, 
                     {"title": "Skylanders: Imaginators", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]}, 
                     {"title": "Skylanders: Spyro's Adventure", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info"]}, 
-                    {"title": "Skylanders: SuperChargers", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]}, 
+                    {"title": "Skylanders: SuperChargers", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info"]}, 
                     {"title": "Skylanders: Swap Force", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info"]}, 
                     {"title": "Skylanders: Trap Team", "platform": "PS3", "format": "Physical", "genre": "Adventure", "version": "", "included": [], "notes": ["More Info", "x"]}, 
                     {"title": "Sleeping Dogs", "platform": "PS3", "format": "Physical", "genre": "", "version": "Limited Edition", "included": [], "notes": []}, 
@@ -1344,7 +1323,7 @@
 
         const statsEl = document.getElementById("stats");
         const isHardware = document.getElementById("modeSwitch").checked;
-        if (!isHardware) { statsEl.textContent = `${rows.length} visible of ${DATA.length} total`; }
+        if (!isHardware) { statsEl.textContent = `${rows.length} visible out of ${DATA.length} total`; }
         else { statsEl.textContent = ""; }
       }
 
@@ -1385,6 +1364,9 @@
             <td class="col-notes" data-label="Notes">${listCell(r.notes || [])}</td>
           </tr>
         `).join("");
+
+        const statsEl = document.getElementById("stats");
+        statsEl.textContent = `${rows.length} visible out of ${DATA_HARDWARE.length} total`;
       }
 
       document.getElementById("q").addEventListener("input", (e) => {
@@ -1402,9 +1384,32 @@
           render();}
       });
       document.getElementById("clear").addEventListener("click", () => {
+        const isHardware = document.getElementById("modeSwitch").checked;
+
+        // Clear search
         state.q = "";
         document.getElementById("q").value = "";
-        if (document.getElementById("modeSwitch").checked) renderHardware();
+
+        // Reset chips to default (ALL pressed)
+        state.platforms.clear();
+        ["PS3","PS4","PS5","Vita"].forEach(p => state.platforms.add(p));
+
+        state.formats.clear();
+        ["Physical","Digital"].forEach(f => state.formats.add(f));
+
+        state.hardwareCats.clear();
+        ["Console","VR","Controller","Headphone","Other"].forEach(c => state.hardwareCats.add(c));
+
+        // Reset dropdowns/sorts to default
+        state.genre = "All";
+        state.brand = "All";
+        state.titleDir = "asc";
+
+        if (isHardware) setHardwareDropdown();
+        else setGamesDropdown();
+
+        renderChips();
+        if (isHardware) renderHardware();
         else render();
       });
       renderChips();
@@ -1464,8 +1469,8 @@
         games.style.display = isHardware ? "none" : "block";
         hardware.style.display = isHardware ? "block" : "none";
 
-        filterMeta.style.display = isHardware ? "none" : "";
-        if (isHardware) statsEl.textContent = "";
+        // Keep stats visible in BOTH Games and Hardware.
+        filterMeta.style.display = "";
 
         subTitle.textContent = isHardware ? "Hardware Catalogue" : "Games Catalogue";
         document.title = subTitle.textContent;

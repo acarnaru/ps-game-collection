@@ -23,6 +23,12 @@
 
   #hardwareContent .col-brand { display: none; }
 
+
+  /* ps_sky mobile column hides (match ps_index style) */
+  #skylandersContent .col-hat { display: none; }
+  #crystalsContent   .col-hat { display: none; }
+  #vehiclesContent   .col-driver { display: none; }
+
   .col-title    { width: 33%; }
   .col-platform { width: 1%;}
   .col-version  { width: 22%; }
@@ -42,53 +48,84 @@
   }
 
   thead th {
-    padding: 6px 6px;
-    font-size: 10px;
-    letter-spacing: .3px;
+    padding: 5px 6px;
+    font-size: 8.25px;
+    letter-spacing: .25px;
   }
 
   thead th * {
     line-height: 1.15;
   }
 
-  .topbar, .topbar-2 {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    text-align: center;
+    .topbar, .topbar-2 {
+    /* keep existing mobile spacing but allow a 2-row control layout in .topbar-2 */
     padding-top: 6px;
     padding-bottom: 8px;
   }
 
-  .topbar .title {
-    font-size: 18px;
-    line-height: 1.2;
-    margin: 0;
+  /* MOBILE: 2 rows
+     Row 1: subtitle + search input
+     Row 2: select + clear + notes/back */
+  .topbar-2 {
+    display: grid;
+    grid-template-columns: max-content 1fr max-content;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 8px;
+    row-gap: 8px;
+    text-align: left;
   }
 
-  .subtitle { 
-    font-size: 14px; 
+  .subtitle {
+    font-size: 13px;
+    white-space: nowrap;
   }
 
-  .topbar .search {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 8px;
+  /* Let the children participate in the grid without changing HTML */
+  .topbar-2 .search {
+    display: contents;
+  }
+
+  .topbar-2 .search input[type="search"] {
+    grid-column: 2 / 4;
+    grid-row: 1;
     width: 100%;
+    min-width: 0;
   }
 
-  .search input[type="search"] {
-    width: min(420px, 100%);
+  .topbar-2 .search select {
+    grid-column: 1;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
   }
 
-  .search select,
-  .search button {
-    width: min(240px, 100%);
+  .topbar-2 .search button {
+    grid-column: 2;
+    grid-row: 2;
+    width: 100%;
+    min-width: 0;
   }
 
-  .filterbar {
+  .topbar-2 .search a.btn {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
+    width: auto;
+    white-space: nowrap;
+  }
+
+  /* Compact controls for mobile */
+  .topbar-2 input[type="search"],
+  .topbar-2 select,
+  .topbar-2 button,
+  .topbar-2 a.btn {
+    padding: 8px 10px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+
+.filterbar {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -167,22 +204,22 @@
     height: 30px; 
   }
 
-   .slider::before { 
+  .slider::before { 
     width: 22px; 
     height: 22px; 
     left: 4px; 
     bottom: 4px; 
   }
 
-   .switch input:checked + .slider::before { transform: translateX(26px); }
+  .switch input:checked + .slider::before { transform: translateX(26px); }
 
   input[type="search"],
   select,
   button,
   a.btn {
-    padding: 8px 10px;
-    border-radius: 9px;
-    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    font-size: 11px;
   }
 }
 
@@ -226,6 +263,17 @@
     letter-spacing: .2px;
   }
 
+  /* Smaller table head in landscape */
+  thead th {
+    padding: 5px 6px;
+    font-size: 10px;
+    letter-spacing: .25px;
+  }
+
+  thead th * {
+    line-height: 1.15;
+  }
+
   input[type="search"],
   select,
   button,
@@ -264,11 +312,11 @@
   .notes-chips .chip { padding: 6px 8px; font-size: 11px; }
 
   .note-block {
-    scroll-margin-top: calc(clamp(64px, 14vh, 96px) + env(safe-area-inset-top)) !important;
+    scroll-margin-top: calc(clamp(56px, 12vh, 84px) + env(safe-area-inset-top)) !important;
   }
 
    html {
-    scroll-padding-top: calc(clamp(64px, 14vh, 96px) + env(safe-area-inset-top)) !important; 
+    scroll-padding-top: calc(clamp(56px, 12vh, 84px) + env(safe-area-inset-top)) !important; 
   }
 }
 
@@ -297,6 +345,12 @@
     padding: 8px 6px;
     font-size: 12px;
     text-align: left;
+  }
+
+  thead th {
+    padding: 6px 6px;
+    font-size: 11px;
+    letter-spacing: .3px;
   }
 
   .col-format,
@@ -334,7 +388,9 @@
 /* MOBILE and TABLET - up to 1024px */
 @media (max-width: 1024px) {
   
-  html, body { max-width: 100%; }
+  html, body { 
+    max-width: 100%;
+  }
   
   .sticky-header {
     position: -webkit-sticky;
@@ -361,5 +417,16 @@
 
   .notes-chips {
     padding: 0 12px;
+  }
+
+  .wrap { 
+    padding-left: 0; 
+    padding-right: 0;
+  }
+
+  .table-card {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
   }
 }

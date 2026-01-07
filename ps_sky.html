@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="ps_pic/ps_plat.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="ps_pic/ps_plat.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="ps_pic/ps_plat.png">
+
+    <title>Skylanders Catalogue</title>
+    <link rel="stylesheet" href="ps_styles.css" />
+    <link rel="stylesheet" href="ps_resp.css">
+</head>
+
+  <body>
+    <button id="toTop" aria-label="Back to top">▲</button>
+    <header class="site-header">
+      <div class="site-title">PlayStation Trophy Hunter&#39;s Cache</div>
+    </header>
+
+    <div class="sticky-header">
+      <div class="mode-toggle tab-toggle" id="tabToggle" role="tablist" aria-label="Skylanders catalogue tabs"></div>
+
+      <div class="topbar topbar-2">
+        <div class="subtitle" id="subTitle">Skylanders Catalogue</div>
+        <div class="search">
+          <input id="q" type="search" placeholder="Search..." autocomplete="off" />
+          <select id="variantSel" aria-label="Variant filter">
+            <option value="all">Variant: All</option>
+            <option value="regular">Regular</option>
+            <option value="special">Special</option>
+          </select>
+          <button id="clear">Clear</button>
+          <a class="btn" href="ps_index.html">Back to Games</a>
+        </div>
+      </div>
+
+      <div class="filterbar">
+        <div class="filtergroup" id="gameGroup">
+          <div class="filterlabel">Game</div>
+          <div class="chips" id="gameChips"></div>
+        </div>
+
+        <div class="filtergroup" id="elementGroup">
+          <div class="filterlabel">Element</div>
+          <div class="chips" id="elementChips"></div>
+        </div>
+
+        <div class="filtergroup" id="terrainGroup" style="display:none;">
+          <div class="filterlabel">Terrain</div>
+          <div class="chips" id="terrainChips"></div>
+        </div>
+
+        <div class="filtergroup" id="battleGroup" style="display:none;">
+          <div class="filterlabel">Battle Class</div>
+          <div class="chips" id="battleChips"></div>
+        </div>
+
+        <div class="filtermeta" id="filterMeta">
+          <span id="stats"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="skylandersContent" class="wrap">
+      <div class="table-card">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script>
+
+      (function syncHeaderHeight(){
+        const header = document.querySelector(".sticky-header");
+        if (!header) return;
+
+        function setH(){
+          const h = header.getBoundingClientRect().height;
+          document.documentElement.style.setProperty("--appHeaderH", Math.ceil(h) + "px");
+        }
+
+        window.addEventListener("resize", setH);
+        window.addEventListener("load", setH);
+        window.addEventListener("orientationchange", setH);
+        setH();
+
+        if ("ResizeObserver" in window) {
+          const ro = new ResizeObserver(() => setH());
+          ro.observe(header);
+        }
+      })();
+
+      (function () {
+        const btn = document.getElementById("toTop");
+        if (!btn) return;
+        const wrap = document.querySelector(".wrap");
+        function scrollPos() {
+          const win = window.pageYOffset || document.documentElement.scrollTop || 0;
+          const box = wrap ? wrap.scrollTop : 0;
+          return Math.max(win, box);
+        }
+        function showOrHide() {
+          btn.classList.toggle("show", scrollPos() > 300);
+        }
+        window.addEventListener("scroll", showOrHide, { passive: true });
+        if (wrap) wrap.addEventListener("scroll", showOrHide, { passive: true });
+        showOrHide();
+        btn.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          if (wrap) wrap.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      })();
+
+        const DATA = {"skylanders": [{"name": "Air Strike", "element": "Air", "game": "Imaginators", "variant": "Skylander Sensei", "build": null, "hat": null}, 
+                                     {"name": "Air Strike", "element": "Air", "game": "Imaginators", "variant": "Egg Bomber", "build": null, "hat": null}, 
+                                     {"name": "Ambush", "element": "Life", "game": "Imaginators", "variant": "Skylander Sensei", "build": null, "hat": null}, 
+                                     {"name": "Astroblast", "element": "Light", "game": "SuperChargers", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Astroblast", "element": "Light", "game": "SuperChargers", "variant": "Legendary", "build": null, "hat": null}, 
+                                     {"name": "Aurora", "element": "Light", "game": "Imaginators", "variant": "Skylander Sensei", "build": null, "hat": null}, 
+                                     {"name": "Aurora", "element": "Light", "game": "Imaginators", "variant": "Solar Flare", "build": null, "hat": null}, 
+                                     {"name": "Bad Juju", "element": "Air", "game": "Imaginators", "variant": "Villain Sensei", "build": null, "hat": null}, 
+                                     {"name": "Bad Juju", "element": "Air", "game": "Imaginators", "variant": "Mystical", "build": null, "hat": null}, 
+                                     {"name": "Barbella", "element": "Earth", "game": "Imaginators", "variant": "Skylander Sensei", "build": null, "hat": null}, 
+                                     {"name": "Barkley", "element": "Life", "game": "Giants", "variant": "Sidekick", "build": null, "hat": null}, 
+                                     {"name": "Barkley", "element": "Life", "game": "Trap Team", "variant": "Mini", "build": null, "hat": null}, 
+                                     {"name": "Barkley", "element": "Life", "game": "Trap Team", "variant": "Gnarly", "build": null, "hat": null}, 
+                                     {"name": "Bash", "element": "Earth", "game": "Spyro's Adventure", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Bash", "element": "Earth", "game": "Spyro's Adventure", "variant": "Legendary", "build": null, "hat": null}, 
+                                     {"name": "Bash", "element": "Earth", "game": "Giants", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Bat Spin", "element": "Undead", "game": "Trap Team", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Blackout", "element": "Dark", "game": "Trap Team", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Blades", "element": "Air", "game": "Trap Team", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Blades", "element": "Air", "game": "Trap Team", "variant": "Legendary", "build": null, "hat": null}, 
+                                     {"name": "Blast Zone", "element": "Fire", "game": "Swap Force", "variant": "Swapper", "build": null, "hat": null}, 
+                                     {"name": "Blast Zone", "element": "Fire", "game": "Swap Force", "variant": "Dark", "build": null, "hat": null}, 
+                                     {"name": "Blastermind", "element": "Magic", "game": "Trap Team", "variant": "Trap Master", "build": null, "hat": null}, 
+                                     {"name": "Boom Jet", "element": "Air", "game": "Swap Force", "variant": "Swapper", "build": null, "hat": null}, 
+                                     {"name": "Boomer", "element": "Tech", "game": "Spyro's Adventure", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Boomer", "element": "Tech", "game": "SuperChargers", "variant": "Eon's Elite", "build": null, "hat": null}, 
+                                     {"name": "Bop", "element": "Earth", "game": "Trap Team", "variant": "Mini", "build": null, "hat": null}, 
+                                     {"name": "Bouncer", "element": "Tech", "game": "Giants", "variant": "Giant", "build": null, "hat": null}, 
+                                     {"name": "Bouncer", "element": "Tech", "game": "Giants", "variant": "Legendary", "build": null, "hat": null}, 
+                                     {"name": "Breeze", "element": "Air", "game": "Trap Team", "variant": "Mini", "build": null, "hat": null}, 
+                                     {"name": "Bumble Blast", "element": "Life", "game": "Swap Force", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Bumble Blast", "element": "Life", "game": "Swap Force", "variant": "LightCore", "build": null, "hat": null}, 
+                                     {"name": "Bumble Blast", "element": "Life", "game": "Swap Force", "variant": "Jolly", "build": null, "hat": null}, 
+                                     {"name": "Bushwhack", "element": "Life", "game": "Trap Team", "variant": "Trap Master", "build": null, "hat": null}, 
+                                     {"name": "Bushwhack", "element": "Life", "game": "Trap Team", "variant": "Legendary", "build": null, "hat": null}, 
+                                     {"name": "Camo", "element": "Life", "game": "Spyro's Adventure", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Camo", "element": "Life", "game": "Swap Force", "variant": "Thorn Horn", "build": null, "hat": null}, 
+                                     {"name": "Chill", "element": "Water", "game": "Giants", "variant": "Core", "build": null, "hat": null}, 
+                                     {"name": "Chill", "element": "Water", "game": "Giants", "variant": "LightCore", "build": null, "hat": null}, 
+                                     {"name": "Chill", "element": "Water", "game": "Giants", "variant": "Legendary LightCore", "build": null, "hat": null},
+                                      {"name": "Chill", "element": "Water", "game": "Swap Force", "variant": "Blizzard", "build": null, "hat": null}, 
+                                      {"name": "Chop Chop", "element": "Undead", "game": "Spyro's Adventure", "variant": "Core", "build": "Undead Defender", "hat": null}, 
+                                      {"name": "Chop Chop", "element": "Undead", "game": "Spyro's Adventure", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Chop Chop", "element": "Undead", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Chop Chop", "element": "Undead", "game": "Swap Force", "variant": "Twin Blade", "build": "", "hat": null}, 
+                                      {"name": "Chop Chop", "element": "Undead", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Chopper", "element": "Tech", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Cobra Cadabra", "element": "Magic", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Cobra Cadabra", "element": "Magic", "game": "Trap Team", "variant": "King", "build": "", "hat": null}, 
+                                      {"name": "Countdown", "element": "Tech", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Countdown", "element": "Tech", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Countdown", "element": "Tech", "game": "Swap Force", "variant": "Kickoff", "build": "", "hat": null}, 
+                                      {"name": "Crusher", "element": "Earth", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Crusher", "element": "Earth", "game": "Giants", "variant": "Granite", "build": "", "hat": null}, 
+                                      {"name": "Cynder", "element": "Undead", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Cynder", "element": "Undead", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Cynder", "element": "Undead", "game": "Swap Force", "variant": "Phantom", "build": "", "hat": null}, 
+                                      {"name": "Deja Vu", "element": "Magic", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Deja Vu", "element": "Magic", "game": "Trap Team", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Dino-Rang", "element": "Earth", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Dino-Rang", "element": "Earth", "game": "SuperChargers", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Dive-Clops", "element": "Water", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Dive-Clops", "element": "Water", "game": "SuperChargers", "variant": "Missile-Tow", "build": "", "hat": null}, 
+                                      {"name": "Doom Stone", "element": "Earth", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Double Trouble", "element": "Magic", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Double Trouble", "element": "Magic", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Double Trouble", "element": "Magic", "game": "Giants", "variant": "Royal", "build": "", "hat": null}, 
+                                      {"name": "Drill Sergeant", "element": "Tech", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Drill Sergeant", "element": "Tech", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Drobit", "element": "Tech", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Drobot", "element": "Tech", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Drobot", "element": "Tech", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Drobot", "element": "Tech", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Dune Bug", "element": "Magic", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Echo", "element": "Water", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Enigma", "element": "Magic", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "Swap Force", "variant": "Lava Barf", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "Swap Force", "variant": "Volcanic", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Eruptor", "element": "Fire", "game": "SuperChargers", "variant": "Lava Lance", "build": "", "hat": null}, 
+                                      {"name": "Eye-Brawl", "element": "Undead", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Eye Small", "element": "Undead", "game": "Giants", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Eye Small", "element": "Undead", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Fiesta", "element": "Undead", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Fiesta", "element": "Undead", "game": "SuperChargers", "variant": "Frightful", "build": "", "hat": null}, 
+                                      {"name": "Fire Kraken", "element": "Fire", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Fire Kraken", "element": "Fire", "game": "Swap Force", "variant": "Jade", "build": "", "hat": null}, 
+                                      {"name": "Fist Bump", "element": "Earth", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Flameslinger", "element": "Fire", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Flameslinger", "element": "Fire", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Flashwing", "element": "Earth", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Flashwing", "element": "Earth", "game": "Giants", "variant": "Jade", "build": "", "hat": null}, 
+                                      {"name": "Flashwing", "element": "Earth", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Fling Kong", "element": "Air", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Flip Wreck", "element": "Water", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Food Fight", "element": "Life", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Food Fight", "element": "Life", "game": "Trap Team", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Free Ranger", "element": "Air", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Free Ranger", "element": "Air", "game": "Swap Force", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Freeze Blade", "element": "Water", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Freeze Blade", "element": "Water", "game": "Swap Force", "variant": "Nitro", "build": "", "hat": null}, 
+                                      {"name": "Fright Rider", "element": "Undead", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Fryno", "element": "Fire", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Fryno", "element": "Fire", "game": "Trap Team", "variant": "Hog Wild", "build": "", "hat": null}, 
+                                      {"name": "Funny Bone", "element": "Undead", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Gearshift", "element": "Tech", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Ghost Roaster", "element": "Undead", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Ghost Roaster", "element": "Undead", "game": "SuperChargers", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Gill Grunt", "element": "Water", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Gill Grunt", "element": "Water", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Gill Grunt", "element": "Water", "game": "Swap Force", "variant": "Anchors Away", "build": "", "hat": null}, 
+                                      {"name": "Gill Grunt", "element": "Water", "game": "Trap Team", "variant": "Tidal Wave", "build": "", "hat": null}, 
+                                      {"name": "Gill Grunt", "element": "Water", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Gill Grunt", "element": "Water", "game": "SuperChargers", "variant": "Deep Dive", "build": "", "hat": null}, 
+                                      {"name": "Gill Runt", "element": "Water", "game": "Spyro's Adventure", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Gill Runt", "element": "Water", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Grilla Drilla", "element": "Life", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Grim Creeper", "element": "Undead", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Grim Creeper", "element": "Undead", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Grim Creeper", "element": "Undead", "game": "Swap Force", "variant": "Legendary LightCore", "build": "", "hat": null}, 
+                                      {"name": "Gusto", "element": "Air", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Head Rush", "element": "Earth", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Head Rush", "element": "Earth", "game": "Trap Team", "variant": "Nitro", "build": "", "hat": null}, 
+                                      {"name": "Hex", "element": "Undead", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Hex", "element": "Undead", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Hex", "element": "Undead", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "High Five", "element": "Life", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "High Volt", "element": "Tech", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Hijinx", "element": "Undead", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Hoot Loop", "element": "Magic", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Hoot Loop", "element": "Magic", "game": "Swap Force", "variant": "Enchanted", "build": "", "hat": null}, 
+                                      {"name": "Hot Dog", "element": "Fire", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Hot Dog", "element": "Fire", "game": "Giants", "variant": "Molten", "build": "", "hat": null}, 
+                                      {"name": "Hot Dog", "element": "Fire", "game": "Swap Force", "variant": "Fire Bone", "build": "", "hat": null}, 
+                                      {"name": "Hot Head", "element": "Fire", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Ignitor", "element": "Fire", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Ignitor", "element": "Fire", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Ignitor", "element": "Fire", "game": "Giants", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Jawbreaker", "element": "Tech", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Jawbreaker", "element": "Tech", "game": "Trap Team", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "Giants", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "Swap Force", "variant": "Turbo", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "Trap Team", "variant": "Full Blast", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "SuperChargers", "variant": "Hurricane", "build": "", "hat": null}, 
+                                      {"name": "Jet-Vac", "element": "Air", "game": "SuperChargers", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Ka-Boom", "element": "Fire", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Knight Light", "element": "Light", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Knight Mare", "element": "Dark", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Krypt King", "element": "Undead", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Krypt King", "element": "Undead", "game": "Trap Team", "variant": "Nitro", "build": "", "hat": null}, 
+                                      {"name": "Lightning Rod", "element": "Air", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Lightning Rod", "element": "Air", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Lob-Star", "element": "Water", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Lob-Star", "element": "Water", "game": "Trap Team", "variant": "Winterfest", "build": "", "hat": null}, 
+                                      {"name": "Magna Charge", "element": "Tech", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Magna Charge", "element": "Tech", "game": "Swap Force", "variant": "Nitro", "build": "", "hat": null}, 
+                                      {"name": "Mini Jini", "element": "Magic", "game": "Giants", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Mini Jini", "element": "Magic", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Night Shift", "element": "Undead", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Night Shift", "element": "Undead", "game": "Swap Force", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Nighfall", "element": "Dark", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Ninjini", "element": "Magic", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Ninjini", "element": "Magic", "game": "Giants", "variant": "Scarlet", "build": "", "hat": null}, 
+                                      {"name": "Pet Vac", "element": "Air", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Pet Vac", "element": "Air", "game": "Trap Team", "variant": "Power Punch", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "Giants", "variant": "Punch", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "Swap Force", "variant": "Super Gulp", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "Trap Team", "variant": "Fizzy Frenzy", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "Trap Team", "variant": "Love Potion", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "SuperChargers", "variant": "Big Bubble", "build": "", "hat": null}, 
+                                      {"name": "Pop Fizz", "element": "Magic", "game": "SuperChargers", "variant": "Birthday Bash", "build": "", "hat": null}, 
+                                      {"name": "Pop Thorn", "element": "Air", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Prism Break", "element": "Earth", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Prism Break", "element": "Earth", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Prism Break", "element": "Earth", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Prism Break", "element": "Earth", "game": "Swap Force", "variant": "Hyper Beam", "build": "", "hat": null}, 
+                                      {"name": "Punk Shock", "element": "Water", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Rattle Shake", "element": "Undead", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Rattle Shake", "element": "Undead", "game": "Swap Force", "variant": "Quick Draw", "build": "", "hat": null}, 
+                                      {"name": "Rip Tide", "element": "Water", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Rocky Roll", "element": "Earth", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Roller Brawl", "element": "Undead", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Roller Brawl", "element": "Undead", "game": "SuperChargers", "variant": "Bone Bash", "build": "", "hat": null}, 
+                                      {"name": "Roller Brawl", "element": "Undead", "game": "SuperChargers", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Rubble Rouser", "element": "Earth", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Scorp", "element": "Earth", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Scratch", "element": "Air", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Short Cut", "element": "Undead", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Shroomboom", "element": "Life", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Shroomboom", "element": "Life", "game": "Giants", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Shroomboom", "element": "Life", "game": "Trap Team", "variant": "Sure Shot", "build": "", "hat": null}, 
+                                      {"name": "Slam Bam", "element": "Water", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Slam Bam", "element": "Water", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Slam Bam", "element": "Water", "game": "Giants", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Slam Bam", "element": "Water", "game": "SuperChargers", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Slobber Tooth", "element": "Earth", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Slobber Tooth", "element": "Earth", "game": "Swap Force", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Small Fry", "element": "Fire", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Smash Hit", "element": "Earth", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Smash Hit", "element": "Earth", "game": "SuperChargers", "variant": "Steel Plated", "build": "", "hat": null}, 
+                                      {"name": "Smolderdash", "element": "Fire", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Smolderdash", "element": "Fire", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Snap Shot", "element": "Water", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Snap Shot", "element": "Water", "game": "Trap Team", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Sonic Boom", "element": "Air", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Sonic Boom", "element": "Air", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Spitfire", "element": "Fire", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Spitfire", "element": "Fire", "game": "SuperChargers", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Splat", "element": "Magic", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Splat", "element": "Magic", "game": "SuperChargers", "variant": "Power Blue", "build": "", "hat": null}, 
+                                      {"name": "Spotlight", "element": "Light", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Sprocket", "element": "Tech", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Sprocket", "element": "Tech", "game": "Swap Force", "variant": "Heavy Duty", "build": "", "hat": null}, 
+                                      {"name": "Spry", "element": "Magic", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Spy Rise", "element": "Tech", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Spyro's Adventure", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Spyro's Adventure", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Swap Force", "variant": "Mega Ram", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Swap Force", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Spyro", "element": "Magic", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Star Strike", "element": "Magic", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Star Strike", "element": "Magic", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Star Strike", "element": "Magic", "game": "Swap Force", "variant": "Enchanted LightCore", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "Giants", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "Swap Force", "variant": "Ninja", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "Swap Force", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "SuperChargers", "variant": "Super Shot", "build": "", "hat": null}, 
+                                      {"name": "Stealth Elf", "element": "Life", "game": "SuperChargers", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Stink Bomb", "element": "Life", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Stormblade", "element": "Air", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Stump Smash", "element": "Life", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Stump Smash", "element": "Life", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Sunburn", "element": "Fire", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Swarm", "element": "Air", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Terrabite", "element": "Earth", "game": "Spyro's Adventure", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Terrabite", "element": "Earth", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Terrafin", "element": "Earth", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Terrafin", "element": "Earth", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Terrafin", "element": "Earth", "game": "Swap Force", "variant": "Knockout", "build": "", "hat": null}, 
+                                      {"name": "Terrafin", "element": "Earth", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Terrafin", "element": "Earth", "game": "SuperChargers", "variant": "Shark Shooter", "build": "", "hat": null}, 
+                                      {"name": "Thrillipede", "element": "Life", "game": "SuperChargers", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Thrillipede", "element": "Life", "game": "SuperChargers", "variant": "Eggcited", "build": "", "hat": null}, 
+                                      {"name": "Thumpback", "element": "Water", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Thumpling", "element": "Water", "game": "Giants", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Thumpling", "element": "Water", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Thunderbolt", "element": "Air", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Torch", "element": "Fire", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Trail Blazer", "element": "Fire", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Trap Shadow", "element": "Magic", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Tread Head", "element": "Tech", "game": "Trap Team", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Tree Rex", "element": "Life", "game": "Giants", "variant": "Giant", "build": "", "hat": null}, 
+                                      {"name": "Tree Rex", "element": "Life", "game": "Giants", "variant": "Gnarly", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "Spyro's Adventure", "variant": "Core", "build": "Golden Money Bags", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "Spyro's Adventure", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "Swap Force", "variant": "Big Bang", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "Swap Force", "variant": "Springtime", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "SuperChargers", "variant": "Double Dare", "build": "", "hat": null}, 
+                                      {"name": "Trigger Happy", "element": "Tech", "game": "SuperChargers", "variant": "Power Blue", "build": "", "hat": null}, 
+                                      {"name": "Trigger Snappy", "element": "Tech", "game": "Spyro's Adventure", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Trigger Snappy", "element": "Tech", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Tuff Luck", "element": "Life", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Voodood", "element": "Magic", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Voodood", "element": "Magic", "game": "SuperChargers", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Wallop", "element": "Earth", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Warnado", "element": "Air", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Warnado", "element": "Air", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Wash Buckler", "element": "Water", "game": "Swap Force", "variant": "Swapper", "build": "", "hat": null}, 
+                                      {"name": "Wash Buckler", "element": "Water", "game": "Swap Force", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Weeruptor", "element": "Fire", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Weeruptor", "element": "Fire", "game": "Trap Team", "variant": "Eggsellent", "build": "", "hat": null}, 
+                                      {"name": "Wham-Shell", "element": "Water", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Wham-Shell", "element": "Water", "game": "Swap Force", "variant": "LightCore", "build": "", "hat": null}, 
+                                      {"name": "Whirlwind", "element": "Air", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Whirlwind", "element": "Air", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Whirlwind", "element": "Air", "game": "Giants", "variant": "Polar", "build": "", "hat": null}, 
+                                      {"name": "Whirlwind", "element": "Air", "game": "Swap Force", "variant": "Horn Blast", "build": "", "hat": null}, 
+                                      {"name": "Whirlwind", "element": "Air", "game": "Trap Team", "variant": "Eon's Elite", "build": "", "hat": null}, 
+                                      {"name": "Whisper Elf", "element": "Life", "game": "Spyro's Adventure", "variant": "Sidekick", "build": "", "hat": null}, 
+                                      {"name": "Whisper Elf", "element": "Life", "game": "Trap Team", "variant": "Mini", "build": "", "hat": null}, 
+                                      {"name": "Wildfire", "element": "Fire", "game": "Trap Team", "variant": "Trap Master", "build": "", "hat": null}, 
+                                      {"name": "Wildfire", "element": "Fire", "game": "Trap Team", "variant": "Dark", "build": "", "hat": null}, 
+                                      {"name": "Wind Up", "element": "Tech", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Wrecking Ball", "element": "Magic", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Wrecking Ball", "element": "Magic", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Zap", "element": "Water", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Zap", "element": "Water", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Zoo Lou", "element": "Life", "game": "Swap Force", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Zoo Lou", "element": "Life", "game": "Swap Force", "variant": "Legendary", "build": "", "hat": null}, 
+                                      {"name": "Zook", "element": "Life", "game": "Spyro's Adventure", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Zook", "element": "Life", "game": "Giants", "variant": "Core", "build": "", "hat": null}, 
+                                      {"name": "Zook", "element": "Life", "game": "SuperChargers", "variant": "Eon's Elite", "build": "", "hat": null}], 
+
+                      "magic": [{"name": "Anvil Rain", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Arkeyan Crossbow", "variant": "Core", "game": "Swap Force"}, 
+                                {"name": "Battle Hammer", "variant": "Core", "game": "Swap Force"}, 
+                                {"name": "Dragonfire Cannon", "variant": "Core", "game": "Giants"}, 
+                                {"name": "Dragonfire Cannon", "variant": "Golden", "game": "Giants"}, 
+                                {"name": "Fiery Forge", "variant": "Core", "game": "Swap Force"}, 
+                                {"name": "Ghost Swords", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Groove Machine", "variant": "Core", "game": "Swap Force"}, 
+                                {"name": "Hand of Fate", "variant": "Core", "game": "Trap Team"}, 
+                                {"name": "Hand of Fate", "variant": "Legendary", "game": "Trap Team"}, 
+                                {"name": "Healing Elixir", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Hidden Treasure", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Hidden Treasure", "variant": "Platinum", "game": "Giants"}, 
+                                {"name": "Piggy Bank", "variant": "Core", "game": "Trap Team"}, 
+                                {"name": "Platinum Sheep", "variant": "Core", "game": "Swap Force"}, 
+                                {"name": "Scorpion Striker Catapult", "variant": "Core", "game": "Giants"}, 
+                                {"name": "Sky Diamond", "variant": "Core", "game": "Swap Force"}, 
+                                {"name": "Sky-Iron Shield", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Sky Trophy", "variant": "Core", "game": "SuperChargers"}, 
+                                {"name": "Sparx Dragonfly", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Time Twister", "variant": "Core", "game": "Spyro's Adventure"}, 
+                                {"name": "Winged Boots", "variant": "Core", "game": "Spyro's Adventure"}], 
+
+                      "locations": [{"name": "Darklight Crypt", "game": "Spyro's Adventure"}, 
+                                    {"name": "Dragon's Peak", "game": "Spyro's Adventure"}, 
+                                    {"name": "Empire of Ice", "game": "Spyro's Adventure"}, 
+                                    {"name": "Midnight Museum", "game": "Trap Team"}, 
+                                    {"name": "Nightmare Express", "game": "Trap Team"}, 
+                                    {"name": "Pirate Seas", "game": "Spyro's Adventure"}, 
+                                    {"name": "Sheep Wreck Island", "game": "Swap Force"}, 
+                                    {"name": "Tower of Time", "game": "Swap Force"}, 
+                                    {"name": "Volcanic Vault", "game": "Spyro's Adventure"}], 
+                                    
+                      "traps": [{"name": "Arcane Hourglass", "element": "Magic", "variant": "Core", "villain": null}, 
+                                {"name": "Kaos Trap", "element": "Chaos", "variant": "Core", "villain": null}, 
+                                {"name": "Kaos Trap", "element": "Chaos", "variant": "Ultimate", "villain": null}, 
+                                {"name": "Storm Warning", "element": "Air", "variant": "Core", "villain": null}, 
+                                {"name": "Tidal Tiki", "element": "Water", "variant": "Core", "villain": null}, 
+                                {"name": "Weed Whacker", "element": "Life", "variant": "Core", "villain": null}, 
+                                {"name": "Wet Walter", "element": "Water", "variant": "Core", "villain": null}], 
+                                
+                      "vehicles": [{"name": "Buzz Wing", "element": "Air", "terrain": "Sky", "driver": ["Thrillipede", "Eggcited Thrillipede"], "variant": "Core", "build": null}, 
+                                   {"name": "Dive Bomber", "element": "Water", "terrain": "Sea", "driver": ["Dive-Clops", "Missile-Tow Dive-Clops"], "variant": "Core", "build": null}, 
+                                   {"name": "Dive Bomber", "element": "Water", "terrain": "Sea", "driver": ["Dive-Clops", "Missile-Tow Dive-Clops"], "variant": "Spring Ahead", "build": null}, 
+                                   {"name": "Hot Streak", "element": "Fire", "terrain": "Land", "driver": ["Spitfire", "Dark Spitfire"], "variant": "Core", "build": null}, 
+                                   {"name": "Hot Streak", "element": "Fire", "terrain": "Land", "driver": ["Spitfire", "Dark Spitfire"], "variant": "Mobile", "build": null}, 
+                                   {"name": "Hot Streak", "element": "Fire", "terrain": "Land", "driver": ["Spitfire", "Dark Spitfire"], "variant": "Dark", "build": null}, 
+                                   {"name": "Hot Streak", "element": "Fire", "terrain": "Land", "driver": ["Spitfire", "Dark Spitfire"], "variant": "E3", "build": null}, 
+                                   {"name": "Hot Streak", "element": "Fire", "terrain": "Land", "driver": ["Spitfire", "Dark Spitfire"], "variant": "Golden", "build": null}, 
+                                   {"name": "Jet Stream", "element": "Air", "terrain": "Sky", "driver": ["Hurricane Jet-Vac", "Legendary Jet-Vac"], "variant": "Core", "build": null}, 
+                                   {"name": "Reef Ripper", "element": "Water", "terrain": "Sea", "driver": ["Deep Dive Gill Grunt"], "variant": "Core", "build": null}, 
+                                   {"name": "Sea Shadow", "element": "Dark", "terrain": "Sea", "driver": ["Nightfall"], "variant": "Core", "build": null}, 
+                                   {"name": "Sea Shadow", "element": "Dark", "terrain": "Sea", "driver": ["Nightfall"], "variant": "Dark", "build": null}, 
+                                   {"name": "Shark Tank", "element": "Earth", "terrain": "Land", "driver": ["Shark Shooter Terrafin"], "variant": "Core", "build": null}, 
+                                   {"name": "Sky Slicer", "element": "Air", "terrain": "Sky", "driver": ["Stormblade"], "variant": "Core", "build": null}, 
+                                   {"name": "Soda Skimmer", "element": "Magic", "terrain": "Sea", "driver": ["Big Bubble Pop Fizz", "Birthday Bash Pop Fizz"], "variant": "Core", "build": null}, 
+                                   {"name": "Soda Skimmer", "element": "Magic", "terrain": "Sea", "driver": ["Big Bubble Pop Fizz", "Birthday Bash Pop Fizz"], "variant": "Nitro", "build": null}, 
+                                   {"name": "Splatter Splasher", "element": "Magic", "terrain": "Sea", "driver": ["Splat", "Power Blue Splat"], "variant": "Core", "build": null}, 
+                                   {"name": "Splatter Splasher", "element": "Magic", "terrain": "Sea", "driver": ["Splat", "Power Blue Splat"], "variant": "Power Blue", "build": null}, 
+                                   {"name": "Stealth Stinger", "element": "Life", "terrain": "Sky", "driver": ["Super Shot Stealth Elf", "Dark Stealth Elf"], "variant": "Core", "build": null}, 
+                                   {"name": "Stealth Stinger", "element": "Life", "terrain": "Sky", "driver": ["Super Shot Stealth Elf", "Dark Stealth Elf"], "variant": "Nitro", "build": null}, 
+                                   {"name": "Sunrunner", "element": "Light", "terrain": "Sky", "driver": ["Astroblast", "Legendary Astroblast"], "variant": "Core", "build": null}, 
+                                   {"name": "Sunrunner", "element": "Light", "terrain": "Sky", "driver": ["Astroblast", "Legendary Astroblast"], "variant": "Legendary", "build": null}, 
+                                   {"name": "Thump Truck", "element": "Earth", "terrain": "Land", "driver": ["Smash Hit", "Steel Plated Smash Hit"], "variant": "Core", "build": null}, 
+                                   {"name": "Tomb Buggy", "element": "Undead", "terrain": "Land", "driver": ["Bone Bash Roller Brawl", "Legendary Roller Brawl"], "variant": "Core", "build": null}], 
+                                   
+                      "crystals": []};
+
+        const REGULAR_TAGS = new Set(["Core", "Giant", "Mini", "Skylander Sensei", "Swapper", "Trap Master", "Villain Sensei"]);
+              const TABS = [
+                { id:"skylanders", label:"Skylanders", subtitle:"Skylanders Catalogue", showVariant:true, chipGroups:["game","element"], extraGroups:[] },
+                { id:"magic", label:"Magic Items", subtitle:"Magic Catalogue", showVariant:true, chipGroups:["game"], extraGroups:[] },
+                { id:"locations", label:"Locations", subtitle:"Locations Catalogue", showVariant:false, chipGroups:["game"], extraGroups:[] },
+                { id:"traps", label:"Traps", subtitle:"Traps Catalogue", showVariant:true, chipGroups:["element"], extraGroups:[] },
+                { id:"vehicles", label:"Vehicles", subtitle:"Vehicles Catalogue", showVariant:true, chipGroups:["element","terrain"], extraGroups:["terrain"] },
+                { id:"crystals", label:"Creation Crystals", subtitle:"Crystals Catalogue", showVariant:true, chipGroups:["element","battleClass"], extraGroups:["battleClass"] },
+              ];
+
+        const COLS = {
+          skylanders: [
+            { key:"name", label:"Skylander" },
+            { key:"element", label:"Element" },
+            { key:"game", label:"Game" },
+            { key:"variant", label:"Variant" },
+            { key:"build", label:"Build" },
+            { key:"hat", label:"Hat" },
+          ],
+          magic: [
+            { key:"name", label:"Item" },
+            { key:"variant", label:"Variant" },
+            { key:"game", label:"Game" },
+          ],
+          locations: [
+            { key:"name", label:"Location" },
+            { key:"game", label:"Game" },
+          ],
+          traps: [
+            { key:"name", label:"Trap" },
+            { key:"element", label:"Element" },
+            { key:"variant", label:"Variant" },
+            { key:"villain", label:"Villain" },
+          ],
+          vehicles: [
+            { key:"name", label:"Vehicle" },
+            { key:"element", label:"Element" },
+            { key:"terrain", label:"Terrain" },
+            { key:"driver", label:"Driver" },
+            { key:"variant", label:"Variant" },
+            { key:"build", label:"Build" },
+          ],
+          crystals: [
+            { key:"name", label:"Crystal" },
+            { key:"element", label:"Element" },
+            { key:"variant", label:"Variant" },
+            { key:"battleClass", label:"Battle Class" },
+            { key:"build", label:"Build" },
+            { key:"hat", label:"Hat" },
+          ],
+        };
+
+        const GAME_VALUES = ["Spyro's Adventure","Giants","Swap Force","Trap Team","SuperChargers","Imaginators"];
+        const ELEMENT_VALUES_BASE = ["Air","Water","Fire","Earth","Life","Undead","Magic","Tech","Light","Dark"];
+        const ELEMENT_VALUES_WITH_CHAOS = [...ELEMENT_VALUES_BASE, "Chaos"];
+        const TERRAIN_VALUES = ["Sky","Sea","Land"];
+        const BATTLE_VALUES = ["Brawler","Sorcerer","Smasher","Bowslinger","Knight","Quickshot","Sentinel","Ninja","Bazooker","Swashbuckler","Kaos"];
+
+        let activeTab = "skylanders";
+        let sortAsc = true;
+
+        const els = {
+          tabToggle: document.getElementById("tabToggle"),
+          subTitle: document.getElementById("subTitle"),
+          q: document.getElementById("q"),
+          variantSel: document.getElementById("variantSel"),
+          clear: document.getElementById("clear"),
+          thead: document.getElementById("thead"),
+          tbody: document.getElementById("tbody"),
+          stats: document.getElementById("stats"),
+          gameGroup: document.getElementById("gameGroup"),
+          elementGroup: document.getElementById("elementGroup"),
+          terrainGroup: document.getElementById("terrainGroup"),
+          battleGroup: document.getElementById("battleGroup"),
+          gameChips: document.getElementById("gameChips"),
+          elementChips: document.getElementById("elementChips"),
+          terrainChips: document.getElementById("terrainChips"),
+          battleChips: document.getElementById("battleChips"),
+        };
+
+        const contentWrap = document.querySelector('.wrap');
+
+
+        const state = {
+          q: "",
+          variant: "all",
+          game: new Set(),
+          element: new Set(),
+          terrain: new Set(),
+          battleClass: new Set(),
+        };
+
+      function fillSet(set, values) {
+        set.clear();
+        values.forEach(v => set.add(v));
+      }
+
+      function resetFiltersToDefault() {
+        // Default behaviour (like ps_index): ALL chips are pressed.
+        // If a user deselects every chip in a visible category, results must be 0.
+
+        // Always reset variant to All (except tabs where it's hidden)
+        state.variant = "all";
+        els.variantSel.value = "all";
+
+        // Clear all sets first
+        state.game.clear();
+        state.element.clear();
+        state.terrain.clear();
+        state.battleClass.clear();
+
+        // Fill only the chip groups that exist for the active tab
+        if (activeTab === "skylanders") {
+          fillSet(state.game, GAME_VALUES);
+          fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
+        } else if (activeTab === "magic" || activeTab === "locations") {
+          fillSet(state.game, GAME_VALUES);
+        } else if (activeTab === "traps") {
+          fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
+        } else if (activeTab === "vehicles") {
+          fillSet(state.element, ELEMENT_VALUES_BASE);
+          fillSet(state.terrain, TERRAIN_VALUES);
+        } else if (activeTab === "crystals") {
+          fillSet(state.element, ELEMENT_VALUES_BASE);
+          fillSet(state.battleClass, BATTLE_VALUES);
+        }
+      }
+
+      function makeChip(label, groupKey) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip";
+        btn.innerHTML = "<b>" + label + "</b>";
+        btn.addEventListener("click", () => {
+          const set = state[groupKey];
+          if (set.has(label)) set.delete(label); else set.add(label);
+          render();
+        });
+        return btn;
+      }
+
+      function buildTabs() {
+        els.tabToggle.innerHTML = "";
+        TABS.forEach(t => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip" + (t.id === activeTab ? " on" : "");
+          btn.setAttribute("role","tab");
+          btn.setAttribute("aria-selected", t.id === activeTab ? "true" : "false");
+          btn.innerHTML = "<b>" + t.label + "</b>";
+          btn.addEventListener("click", () => {
+            activeTab = t.id;
+            resetFiltersToDefault();
+            sortAsc = true;
+            render();
+            buildTabs();
+          });
+          els.tabToggle.appendChild(btn);
+        });
+      }
+
+      function buildChips() {
+        // Games (not present in Traps tab)
+        els.gameChips.innerHTML = "";
+        GAME_VALUES.forEach(v => els.gameChips.appendChild(makeChip(v, "game")));
+
+        // Elements (Chaos only in Skylanders + Traps)
+        els.elementChips.innerHTML = "";
+        const elementVals = (activeTab === "skylanders" || activeTab === "traps") ? ELEMENT_VALUES_WITH_CHAOS : ELEMENT_VALUES_BASE;
+        elementVals.forEach(v => els.elementChips.appendChild(makeChip(v, "element")));
+
+        // Terrain (Vehicles only)
+        els.terrainChips.innerHTML = "";
+        TERRAIN_VALUES.forEach(v => els.terrainChips.appendChild(makeChip(v, "terrain")));
+
+        // Battle class (Crystals only)
+        els.battleChips.innerHTML = "";
+        BATTLE_VALUES.forEach(v => els.battleChips.appendChild(makeChip(v, "battleClass")));
+      }
+
+      function chipOnOff() {
+        // show/hide chip groups per tab spec
+        const tab = TABS.find(t => t.id === activeTab);
+        const showGame = tab.chipGroups.includes("game");
+        const showElement = tab.chipGroups.includes("element");
+        const showTerrain = tab.chipGroups.includes("terrain");
+        const showBattle = tab.chipGroups.includes("battleClass");
+
+        els.gameGroup.style.display = showGame ? "" : "none";
+        els.elementGroup.style.display = showElement ? "" : "none";
+        els.terrainGroup.style.display = showTerrain ? "" : "none";
+        els.battleGroup.style.display = showBattle ? "" : "none";
+      }
+
+      function syncChipUI() {
+        // set .on class based on state sets
+        function sync(container, set) {
+          [...container.querySelectorAll(".chip")].forEach(ch => {
+            const label = ch.textContent.trim();
+            ch.classList.toggle("on", set.has(label));
+          });
+        }
+        sync(els.gameChips, state.game);
+        sync(els.elementChips, state.element);
+        sync(els.terrainChips, state.terrain);
+        sync(els.battleChips, state.battleClass);
+      }
+
+      function buildHeader() {
+        const cols = COLS[activeTab] || [];
+        const first = cols[0];
+        const arrow = sortAsc ? "▼" : "▲";
+        let th = "<tr>";
+        cols.forEach((c, idx) => {
+          if (idx === 0) {
+            th += `<th class="col-title col-${c.key}">${c.label} <button id="nameSort" class="sort-arrow" aria-label="Toggle alphabetical sort" type="button">${arrow}</button></th>`;
+          } else {
+            th += `<th class="col-${c.key}">${c.label}</th>`;
+          }
+        });
+        th += "</tr>";
+        els.thead.innerHTML = th;
+
+        const btn = document.getElementById("nameSort");
+        if (btn) {
+          btn.addEventListener("click", () => {
+            sortAsc = !sortAsc;
+            render();
+          });
+        }
+      }
+
+      function matchText(item, q) {
+        if (!q) return true;
+        const hay = JSON.stringify(item).toLowerCase();
+        return hay.includes(q.toLowerCase());
+      }
+
+      function matchVariant(item) {
+        if (activeTab === "locations") return true;
+        const v = (item.variant || "").toString();
+        if (state.variant === "all") return true;
+        const isRegular = REGULAR_TAGS.has(v);
+        return state.variant === "regular" ? isRegular : !isRegular;
+      }
+
+      function matchSet(itemVal, set) {
+        // If the user deselects every chip in a category, nothing should match.
+        if (!set || set.size === 0) return false;
+        return set.has((itemVal || "").toString());
+      }
+
+      function matchAnyInArray(arr, set) {
+        // Keep behaviour consistent with matchSet: empty selection => 0 matches.
+        if (!set || set.size === 0) return false;
+        if (!Array.isArray(arr)) return false;
+        return arr.some(v => set.has((v||"").toString()));
+      }
+
+      function getFiltered() {
+        const src = DATA[activeTab] || [];
+        const q = state.q.trim();
+        return src.filter(it => {
+          if (!matchText(it, q)) return false;
+          if (!matchVariant(it)) return false;
+
+          // per-group filters
+          if (activeTab === "skylanders") {
+            if (!matchSet(it.game, state.game)) return false;
+            if (!matchSet(it.element, state.element)) return false;
+          } else if (activeTab === "magic" || activeTab === "locations") {
+            if (!matchSet(it.game, state.game)) return false;
+          } else if (activeTab === "traps") {
+            if (!matchSet(it.element, state.element)) return false;
+          } else if (activeTab === "vehicles") {
+            if (!matchSet(it.element, state.element)) return false;
+            if (!matchSet(it.terrain, state.terrain)) return false;
+          } else if (activeTab === "crystals") {
+            if (!matchSet(it.element, state.element)) return false;
+            if (!matchSet(it.battleClass, state.battleClass)) return false;
+          }
+          return true;
+        });
+      }
+
+      function renderRows(items) {
+        const cols = COLS[activeTab] || [];
+        items = [...items].sort((a,b) => {
+          const av = (a.name || "").toString().toLowerCase();
+          const bv = (b.name || "").toString().toLowerCase();
+          if (av < bv) return sortAsc ? -1 : 1;
+          if (av > bv) return sortAsc ? 1 : -1;
+          const av2 = (a.variant || "").toString().toLowerCase();
+          const bv2 = (b.variant || "").toString().toLowerCase();
+          if (av2 < bv2) return -1;
+          if (av2 > bv2) return 1;
+          return 0;
+        });
+
+        function esc(s){
+          return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+        }
+
+        const rowsHtml = items.map(it => {
+          const tds = cols.map(c => {
+            let v = it[c.key];
+            if (Array.isArray(v)) {
+              const lis = v.filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("");
+              return `<td class="col-${c.key}"><ul class="stack">${lis}</ul></td>`;
+            }
+            return `<td class="col-${c.key}">${esc(v)}</td>`;
+          }).join("");
+          return `<tr>${tds}</tr>`;
+        }).join("");
+        els.tbody.innerHTML = rowsHtml;
+        const total = (DATA[activeTab] || []).length;
+        els.stats.textContent = `${items.length} visible out of ${total} total`;
+      }
+
+      function render() {
+        const tab = TABS.find(t => t.id === activeTab);
+        if (contentWrap) contentWrap.id = activeTab + 'Content';
+        els.subTitle.textContent = tab ? tab.subtitle : "";
+        // show/hide Variant dropdown (no Locations)
+        els.variantSel.style.display = (tab && tab.showVariant) ? "" : "none";
+
+        chipOnOff();
+        buildChips();
+        syncChipUI();
+        buildHeader();
+
+        const items = getFiltered();
+        renderRows(items);
+        buildTabs();
+      }
+
+      // events
+      els.q.addEventListener("input", (e) => {
+        state.q = e.target.value || "";
+        render();
+      });
+      els.variantSel.addEventListener("change", (e) => {
+        state.variant = e.target.value || "all";
+        render();
+      });
+      els.clear.addEventListener("click", () => {
+        state.q = "";
+        els.q.value = "";
+        resetFiltersToDefault();
+        sortAsc = true;
+        render();
+      });
+
+      // initial
+      state.q = "";
+      resetFiltersToDefault();
+      buildTabs();
+      render();
+    </script>
+  </body>
+</html>
