@@ -167,7 +167,11 @@ body {
     margin-top: 4px;
   }
 
-.search { flex: 1; display:flex; gap: 10px; align-items:center; }
+.search { 
+    flex: 1; display:flex; 
+    gap: 10px; 
+    align-items:center; 
+  }
 
 input[type="search"] {
     width: 100%;
@@ -179,7 +183,9 @@ input[type="search"] {
     outline: none;
   }
 
-input[type="search"]::placeholder { color: rgba(230,234,242,.55); }
+input[type="search"]::placeholder { 
+    color: rgba(230,234,242,.55); 
+  }
 
 select, button {
     border-radius: 10px;
@@ -201,8 +207,8 @@ a.btn {
     text-decoration: none;
   }
 
-a.btn.btn-notes-mobile {
-    display: none;
+a.action-btn.btn-notes-mobile { 
+    display: none; 
   }
 
 a.btn:hover,
@@ -211,7 +217,55 @@ a.btn:focus-visible {
     border-color: rgba(99,179,237,.55);
   }
 
-button { cursor:pointer; }
+button { 
+    cursor:pointer; 
+  }
+
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 10px 12px;
+    border-radius: 999px;
+
+    border: 1px solid var(--border);
+    background: var(--chip);
+
+    color: var(--text);
+    font-weight: 600;
+    letter-spacing: .2px;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition:
+      background-color 0.15s ease,
+      border-color 0.15s ease,
+      transform 0.05s ease;
+  }
+
+.action-btn:hover {
+    border-color: rgba(99,179,237,.45);
+    color: rgb(99,179,237);
+  }
+
+.action-btn:active {
+    background: var(--chipOn);
+    border-color: rgba(99,179,237,.55);
+    transform: translateY(1px);
+    color: rgb(99,179,237);
+  }
+
+.action-btn:hover,
+.action-btn:focus-visible {
+    text-decoration: none;
+  }
+
+.action-btn:focus-visible {
+    outline: 2px solid rgba(99,179,237,.6);
+    outline-offset: 2px;
+  }
 
 .wrap {
     max-width: 1600px;
@@ -220,25 +274,27 @@ button { cursor:pointer; }
     display: block;
  }
 
-a, a:visited {
-    color: var(--text);
-    text-decoration: none;
-  }
+a:not(.btn):not(.action-btn),
+a:not(.btn):not(.action-btn):visited {
+  color: rgb(153, 246, 228);
+  text-decoration: none;
+}
 
-a:hover, a:focus-visible {
-    color: rgb(99,179,237);
-  }
+a:not(.btn):not(.action-btn):hover,
+a:not(.btn):not(.action-btn):focus-visible {
+  color: rgb(94, 203, 190);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:not(.btn):not(.action-btn) {
+  transition: color 0.15s ease;
+}
 
 a {
     font-weight: 600;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     letter-spacing: .2px;
-  }
-
-a:hover,
-a:focus-visible {
-    text-decoration: underline;
-    text-underline-offset: 2px;
   }
 
 .section-title {
@@ -325,10 +381,10 @@ thead th, tbody td {
 
 tbody tr:hover td { background: rgba(99,179,237,.06); }
 
-.col-title { width: 27%; }
+.col-title { width: 25%; }
 .col-platform { width: 5%; }
 .col-genre { width: 9%; }
-.col-format { width: 5%; }
+.col-format { width: 7%; }
 .col-version { width: 14%; }
 .col-included { width: 28%; }
 .col-notes { width: 12%; }
@@ -397,10 +453,6 @@ tbody tr:hover td { background: rgba(99,179,237,.06); }
 #toTop:hover {
     opacity: 1;
   }
-
-/* =========================
-   NOTES / FAQ PAGE
-   ========================= */
 
 html {
   scroll-padding-top: 66px;
@@ -476,17 +528,6 @@ html {
   padding: 0 18px;
 }
 
-.notes-chips a.chip {
-  text-decoration: none;
-  color: inherit;
-}
-
-.notes-chips a.chip:hover {
-  border-color: rgba(99,179,237,.55);
-  background: rgba(99,179,237,.10);
-}
-
-/* Header override for Notes page */
 .app-header {
   position: static !important;
 }
@@ -511,7 +552,6 @@ html {
   align-items: center;
 }
 
-/* Sort arrow button (moved from inline <style> blocks) */
 th .sort-arrow{
   margin-left: 6px;
   padding: 0 4px;

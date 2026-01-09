@@ -32,8 +32,8 @@
         <div class="search">
           <input id="q" type="search" placeholder="Search..." autocomplete="off" />
           <select id="sort"></select>
-          <button id="clear">Clear</button>
-          <a class="btn btn-notes-mobile" href="ps_notes.html">Notes / FAQ</a>
+          <button id="clear" class="action-btn">Clear</button>
+          <a class="action-btn btn-notes-mobile" href="ps_notes.html">Notes / FAQ</a>
         </div>
       </div>
       <div class="filterbar">
@@ -48,6 +48,9 @@
         <div class="filtergroup" id="hardwareGroup" style="display:none;">
           <div class="filterlabel">Hardware</div>
           <div class="chips" id="hardwareChips"></div>
+        </div>
+        <div class="filtergroup" id="alphaGroup">
+          <div class="chips" id="alphaChips"></div>
         </div>
         <div class="filtermeta" id="filterMeta">
           <span id="stats"></span>
@@ -623,6 +626,7 @@
                     {"title": "Hell Warders", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Helldivers", "platform": "PS4", "format": "Physical", "genre": "Shooter", "version": "Super-Earth Ultimate Edition", "included": [], "notes": []}, 
                     {"title": "Hidden Agenda", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Hitman 2", "platform": "PS4", "format": "Physical", "genre": "Stealth", "version": "Gold Edition", "included": [], "notes": ["Steelcase"]},
                     {"title": "Horizon: Zero Dawn", "platform": "PS4", "format": "Physical", "genre": "Action", "version": "Complete Edition", "included": [], "notes": []}, 
                     {"title": "Hotel Transylvania 3: Monsters Overboard", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Hotline Miami Collection", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": ["Hotline Miami", "Hotline Miami 2: Wrong Number"], "notes": []}, 
@@ -749,6 +753,7 @@
                     {"title": "This is the Police 2", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Titan Quest", "platform": "PS4", "format": "Physical", "genre": "ARPG", "version": "", "included": [], "notes": []}, 
                     {"title": "Titanfall 2", "platform": "PS4", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
+                    {"title": "Tom Clancy's Ghost Recon: Wildlands", "platform": "PS4", "format": "Physical", "genre": "Shooter", "version": "Gold Edition", "included": [], "notes": []},
                     {"title": "Tomb Raider", "platform": "PS4", "format": "Physical", "genre": "Adventure", "version": "Definitive Edition", "included": [], "notes": []}, 
                     {"title": "Tomb Raider I-II-III", "platform": "PS4", "format": "Physical", "genre": "Adventure", "version": "Remastered", "included": ["Tomb Raider I", "Tomb Raider II", "Tomb Raider III"], "notes": []}, 
                     {"title": "Tomb Raider IV-V-VI", "platform": "PS4", "format": "Physical", "genre": "Adventure", "version": "Remastered", "included": ["Tomb Raider: The Last Revelation", "Tomb Raider: Chronicles", "Tomb Raider: The Angel of Darkness"], "notes": []}, 
@@ -1101,11 +1106,11 @@
                               {"device": "", "platform": "", "brand": "", "category": "", "notes": []}, */
 
                               {"device":"PS3 Ultra Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["1TB SSD"]},
-                              {"device":"PS3 Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["Stock"]},
+                              {"device":"PS3 Slim","platform":"PS3","brand":"Sony","category":"Console","notes":["Stock", "320GB HDD"]},
                               {"device":"PS4 Pro","platform":"PS4","brand":"Sony","category":"Console","notes":["8TB SSD"]},
                               {"device":"PS5 Pro","platform":"PS5","brand":"Sony","category":"Console","notes":["8TB SSD"]},
-                              {"device":"PS Vita","platform":"Vita","brand":"Sony","category":["Console","Handheld"],"notes":["Stock","64GB Card"]},
-                              {"device":"PS TV","platform":"Vita","brand":"Sony","category":"Console","notes":["Stock"]},
+                              {"device":"PS Vita PCH-1104","platform":"Vita","brand":"Sony","category":["Console","Handheld"],"notes":["Stock","64GB Memory Card"]},
+                              {"device":"PSTV","platform":"Vita","brand":"Sony","category":"Console","notes":["Stock"]},
                               {"device":"PSVR","platform":"PS4","brand":"Sony","category":["VR","Headset"],"notes":[]},
                               {"device":"PSVR2","platform":"PS5","brand":"Sony","category":["VR","Headset"],"notes":[]},
                               {"device":"Compact","platform":"PS4","brand":"Nacon","category":"Controller","notes":["Wired"]},
@@ -1113,6 +1118,8 @@
                               {"device":"Onyx Plus","platform":"PS4","brand":"Hori","category":"Controller","notes":["Wireless"]},
                               {"device":"T300: GT Edition","platform":["PS4","PS5"],"brand":"Thrustmaster","category":"Other","notes":["Driving Wheel"]},
                               {"device":"uDraw","platform":"PS3","brand":"THQ","category":"Other","notes":["Game Tablet"]},
+                              {"device":"PS Move Motion","platform":"PS3","brand":"Sony","category":["Controller","PS Move"],"notes":["Wireless","Pack of 2"]},
+                              {"device":"PS Move Navigation","platform":"PS3","brand":"Sony","category":["Controller","PS Move"],"notes":["Wireless"]},
                               {"device":"PS Move Motion","platform":"PS4","brand":"Sony","category":["Controller","VR"],"notes":["Wireless","Pack of 2"]},
                               {"device":"DualShock 4","platform":"PS4","brand":"Sony","category":"Controller","notes":["Wireless"]}
                             ];
@@ -1122,6 +1129,7 @@
         platforms: new Set(["PS3","PS4","PS5","Vita"]),
         formats: new Set(["Physical","Digital"]),
         hardwareCats: new Set(["Console","VR","Controller","Headphone","Other"]),
+        letters: new Set(),
         brand: "All",
         genre: "All",
         titleDir: "asc"
@@ -1162,6 +1170,21 @@
         return hay.includes(q);
       }
 
+      function firstAlphaKey(title) {
+        const t = (title || "").toString().trim();
+        if (!t) return "";
+        const c = t[0].toUpperCase();
+        if (c >= "A" && c <= "Z") return c;
+        if (c >= "0" && c <= "9") return "#";
+        return "";
+      }
+
+      function alphaMatches(title) {
+        if (state.letters.size === 0) return true;
+        const k = firstAlphaKey(title);
+        return state.letters.has(k);
+      }
+
       function cmp(a, b, key) {
         const av = norm(a[key]);
         const bv = norm(b[key]);
@@ -1175,6 +1198,8 @@
         const pWrap = document.getElementById("platformChips");
         const fWrap = document.getElementById("formatChips");
         const hWrap = document.getElementById("hardwareChips");
+        const aWrap = document.getElementById("alphaChips");
+        const aGroup = document.getElementById("alphaGroup");
 
         pWrap.innerHTML = "";
         fWrap.innerHTML = "";
@@ -1220,6 +1245,31 @@
             };
             hWrap.appendChild(el);
           }
+        }
+
+        // Alpha chips (Games-only)
+        if (!isHardware) {
+          if (aGroup) aGroup.style.display = "";
+          if (aWrap) {
+            aWrap.innerHTML = "";
+
+            const letters = ["#", ..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("")];
+            for (const ch of letters) {
+              const el = document.createElement("div");
+              el.className = "chip " + (state.letters.has(ch) ? "on" : "");
+              el.innerHTML = `<b>${ch}</b>`;
+              el.onclick = () => {
+                if (state.letters.has(ch)) state.letters.delete(ch);
+                else state.letters.add(ch);
+                el.classList.toggle("on");
+                render();
+              };
+              aWrap.appendChild(el);
+            }
+          }
+        } else {
+          // Hide the whole Alpha group in Hardware mode
+          if (aGroup) aGroup.style.display = "none";
         }
       }
 
@@ -1303,6 +1353,7 @@
           state.platforms.has(r.platform) &&
           state.formats.has(r.format) &&
           includesAny(r, q) &&
+          alphaMatches(r.title) &&
           (gSel === "All" || asArray(r.genre).map(x=>String(x).trim()).filter(Boolean).includes(gSel))
         );
 
@@ -1400,6 +1451,8 @@
         state.hardwareCats.clear();
         ["Console","VR","Controller","Headphone","Other"].forEach(c => state.hardwareCats.add(c));
 
+        state.letters.clear();
+
         // Reset dropdowns/sorts to default
         state.genre = "All";
         state.brand = "All";
@@ -1464,6 +1517,7 @@
       function updateModeUI() {
         const isHardware = switchEl.checked;
         const filterMeta = document.getElementById("filterMeta");
+        const alphaGroup = document.getElementById("alphaGroup");
         const statsEl = document.getElementById("stats");
 
         games.style.display = isHardware ? "none" : "block";
@@ -1477,6 +1531,7 @@
 
         formatGroup.style.display = isHardware ? "none" : "";
         if (hardwareGroup) hardwareGroup.style.display = isHardware ? "" : "none";
+        if (alphaGroup) alphaGroup.style.display = isHardware ? "none" : "";
 
         if (isHardware) setHardwareDropdown();
         else setGamesDropdown();
@@ -1492,9 +1547,9 @@
   </body>
 
   <footer class="site-footer">
-    <p>PlayStation Trophy Hunter’s Cache is a personal, non-commercial catalogue created for informational and archival purposes only.</p>
-    <p>All game titles, trademarks, and logos are the property of their respective owners. PlayStation is a registered trademark of Sony Interactive Entertainment.</p>
-    <p>This site is not affiliated with or endorsed by Sony Interactive Entertainment or any game publishers.</p>
+    <p><a href="ps_index.html">PlayStation Trophy Hunter's Cache</a> is a personal, non-commercial catalogue created for informational and archival purposes only.</p>
+    <p>All game titles, trademarks, and logos are the property of their respective owners. <a href="https://www.playstation.com" target="_blank" rel="noopener">PlayStation</a> is a registered trademark of <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a>.</p>
+    <p>This site is not affiliated with or endorsed by <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a> or any game publishers.</p>
   </footer>
   
 </html>
