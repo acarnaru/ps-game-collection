@@ -496,7 +496,7 @@
                     {"title": "WWE: Legends of Wrestlemania", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
                     {"title": "WWE Smackdown vs Raw 2010", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
                     {"title": "WWE Smackdown vs Raw 2011", "platform": "PS3", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
-                    {"title": "Xblaze Code: Embryo", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Xblaze: Code - Embryo", "platform": "PS3", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "XCOM: Enemy Unknown", "platform": "PS3", "format": "Physical", "genre": "TBS", "version": "", "included": [], "notes": []}, 
                     {"title": "XCOM: Enemy Within", "platform": "PS3", "format": "Physical", "genre": "TBS", "version": "Commander Edition", "included": [], "notes": []}, 
                     {"title": "X-Men: Destiny", "platform": "PS3", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
@@ -779,7 +779,7 @@
                     {"title": "You Suck at Parking", "platform": "PS4", "format": "Physical", "genre": "", "version": "Complete Edition", "included": [], "notes": []}, 
                     {"title": "Zombi", "platform": "PS4", "format": "Physical", "genre": "Horror", "version": "", "included": [], "notes": []}, 
                     {"title": "Zombie Army Trilogy", "platform": "PS4", "format": "Physical", "genre": "Shooter", "version": "", "included": [], "notes": ["x"]}, 
-                    {"title": "Zone of the Enders: The 2nd Runner: Mars", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PSVR Compatible"]}, 
+                    {"title": "Zone of the Enders: The 2nd Runner - Mars", "platform": "PS4", "format": "Physical", "genre": "", "version": "", "included": [], "notes": ["PSVR Compatible"]}, 
                     //PS5 Physical
                     {"title": "Aliens: Fireteam Elite", "platform": "PS5", "format": "Physical", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Among Us", "platform": "PS5", "format": "Physical", "genre": "", "version": "Crewmate Edition", "included": [], "notes": []}, 
@@ -848,7 +848,7 @@
                     {"title": "Assassin's Creed Chronicles", "platform": "Vita", "format": "Physical", "genre": "Action", "version": "", "included": [], "notes": []}, 
                     {"title": "Dungeon Hunter: Alliance", "platform": "Vita", "format": "Physical", "genre": "ARPG", "version": "", "included": [], "notes": []}, 
                     {"title": "FIFA 14", "platform": "Vita", "format": "Physical", "genre": "Sports", "version": "Legacy Edition", "included": [], "notes": []}, 
-                    {"title": "Final Fantasy X/X-2", "platform": "Vita", "format": "Physical", "genre": "JRPG", "version": "HD Remaster", "included": ["Final Fantasy X", "Final Fantasy X-2 (download code)"], "notes": []}, 
+                    {"title": "Final Fantasy X/X-2", "platform": "Vita", "format": "Physical", "genre": "JRPG", "version": "HD Remaster", "included": ["Final Fantasy X", "Final Fantasy X-2 (digital)"], "notes": []}, 
                     {"title": "Football Manager Classic 2014", "platform": "Vita", "format": "Physical", "genre": "Sports", "version": "", "included": [], "notes": []}, 
                     {"title": "Killzone: Mercenary", "platform": "Vita", "format": "Physical", "genre": "FPS", "version": "", "included": [], "notes": []}, 
                     {"title": "Minecraft", "platform": "Vita", "format": "Physical", "genre": "Sandbox", "version": "PlayStation Vita Edition", "included": [], "notes": ["x"]}, 
@@ -1064,7 +1064,7 @@
                     {"title": "Actual Sunlight", "platform": "Vita", "format": "Digital", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Bastion", "platform": "Vita", "format": "Digital", "genre": "Narrative", "version": "", "included": [], "notes": []}, 
                     {"title": "Burly Men at Sea", "platform": "Vita", "format": "Digital", "genre": "Narrative", "version": "", "included": [], "notes": []}, 
-                    {"title": "Code: Realize: Guardian of Rebirth", "platform": "Vita", "format": "Digital", "genre": "", "version": "", "included": [], "notes": []}, 
+                    {"title": "Code: Realize - Guardian of Rebirth", "platform": "Vita", "format": "Digital", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Day of the Tentacle", "platform": "Vita", "format": "Digital", "genre": "Adventure", "version": "Remastered", "included": [], "notes": []}, 
                     {"title": "Dead Nation: Road of Devastation", "platform": "Vita", "format": "Digital", "genre": "", "version": "", "included": [], "notes": []}, 
                     {"title": "Defender's Quest: Valley of the Forgotten DX", "platform": "Vita", "format": "Digital", "genre": "Tower Defense", "version": "", "included": [], "notes": []}, 
@@ -1275,7 +1275,7 @@
 
       function listCell(items) {
         if (!items || items.length === 0) return `<span class="empty">—</span>`;
-        const lis = items.map(x => `<li>${escapeHtml(x)}</li>`).join("");
+        const lis = items.map(x => `<li>${linkNoTrophies(escapeHtml(x))}</li>`).join("");
         return `<ul class="stack">${lis}</ul>`;
       }
 
@@ -1285,7 +1285,13 @@
           const label = String(x).trim();
           const href = noteHrefForRow(label, row);
           if (!href) return `<li>${escapeHtml(label)}</li>`;
-          return `<li><a class="note-link" href="${href}">${escapeHtml(label)}</a></li>`;
+
+          const classes = ["note-link"];
+            if (label.toLowerCase() === "discontinued") classes.push("status-link", "status-discontinued");
+            if (label.toLowerCase() === "active" || label.toLowerCase() === "working") classes.push("status-link", "status-active");
+            if (label.toLowerCase() === "servers offline") classes.push("status-link", "status-offline");
+            return `<li><a class="${classes.join(" ")}" href="${href}">${escapeHtml(label)}</a></li>`;
+
         }).join("");
         return `<ul class="stack">${lis}</ul>`;
       }
@@ -1297,6 +1303,15 @@
           .replaceAll(">","&gt;")
           .replaceAll('"',"&quot;")
           .replaceAll("'","&#039;");
+      }
+
+      function linkNoTrophies(text){
+        if (typeof text !== "string") return text;
+
+        return text.replace(
+          /\(no trophies\)/gi,
+          '( <a class="no-trophies-link" href="ps_notes.html#trophy">no trophies</a> )'
+        );
       }
 
       const NOTE_NO_LINK = new Set(["2 x Guitars", "Steelcase", "x"]);
@@ -1362,7 +1377,7 @@
         const tbody = document.getElementById("tbody");
         tbody.innerHTML = rows.map(r => `
           <tr>
-            <td class="col-title" data-label="Title">${escapeHtml(r.title)}</td>
+            <td class="col-title" data-label="Title"><a class="game-link" href="ps_game.html#${encodeURIComponent([r.title, r.platform, (r.format||""), (r.version||"")].join("||"))}">${escapeHtml(r.title)}</a></td>
             <td class="col-platform" data-label="Platform">${escapeHtml(r.platform)}</td>
             <td class="col-genre" data-label="Genre">${listCell(asArray(r.genre))}</td>
             <td class="col-format" data-label="Format">${escapeHtml(r.format)}</td>
@@ -1371,6 +1386,7 @@
             <td class="col-notes" data-label="Notes">${notesCell(r.notes, r)}</td>
           </tr>
         `).join("");
+
 
         const statsEl = document.getElementById("stats");
         const isHardware = document.getElementById("modeSwitch").checked;
@@ -1474,6 +1490,17 @@
       const games = document.getElementById("gamesContent");
       const hardware = document.getElementById("hardwareContent");
       const subTitle = document.getElementById("subTitle");
+
+      // Allow deep-linking back to a specific catalogue mode (e.g., ps_index.html?mode=games)
+      (function applyModeFromUrl(){
+        try{
+          const params = new URLSearchParams(location.search);
+          const mode = (params.get("mode") || "").toLowerCase();
+          if (mode === "games") switchEl.checked = false;
+          if (mode === "hardware") switchEl.checked = true;
+        }catch(e){}
+      })();
+
       const formatGroup = document.getElementById("formatGroup");
       const hardwareGroup = document.getElementById("hardwareGroup");
       const sortSelect = document.getElementById("sort");
@@ -1551,5 +1578,4 @@
     <p>All game titles, trademarks, and logos are the property of their respective owners. <a href="https://www.playstation.com" target="_blank" rel="noopener">PlayStation</a> is a registered trademark of <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a>.</p>
     <p>This site is not affiliated with or endorsed by <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a> or any game publishers.</p>
   </footer>
-  
 </html>
