@@ -352,49 +352,6 @@
     padding: 6px 8px; 
     font-size: 11px; 
   }
-
-  /* ps_game: landscape should behave like mobile (scroll + stacked layout) */
-  body.ps-game-page {
-    height: auto !important;
-    min-height: 100vh;
-    overflow-y: auto !important;
-    overflow-x: hidden;
-  }
-
-  body.ps-game-page .game-page-main {
-    display: block !important;
-  }
-
-  body.ps-game-page .game-layout {
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
-  }
-
-  body.ps-game-page .game-top {
-    grid-template-columns: 1fr !important;
-  }
-
-  body.ps-game-page .tri-cards {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* landscape: smaller picture so you don't waste vertical space */
-  body.ps-game-page .game-picture {
-    min-height: 170px;
-  }
-
-  /* ps_game mini-cards: true 4x2 grid in landscape */
-  body.ps-game-page #miniGrid.mini-grid {
-    display: grid !important;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-    height: auto !important;
-  }
-
-  body.ps-game-page #miniGrid .mini-row {
-    display: contents;
-  }
 }
 
 /* TABLET - 541px to 1024px */
@@ -569,6 +526,29 @@
   body.ps-game-page .mini-grid {
     height: auto !important;
   }
+
+  /* ps_game: on <=1024px the minis must GROW (no desktop fixed-frame behaviour) */
+body.ps-game-page #detailsCard {
+  overflow: visible;
+}
+
+body.ps-game-page #miniGrid.mini-grid {
+  height: auto;
+}
+
+body.ps-game-page #miniGrid .mini-row {
+  flex: 0 0 auto;
+}
+
+body.ps-game-page #miniGrid .mini {
+  height: auto;
+  overflow: visible;
+}
+
+body.ps-game-page #miniGrid .mini-body {
+  overflow: visible;
+  display: block;
+}
 
   /* Additional Info centered on mobile/tablet/landscape */
   body.ps-game-page #additionalInfoCard {

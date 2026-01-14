@@ -24,9 +24,7 @@ body {
     margin: 0;
     font: 14px/1.35 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     color: var(--text);
-    background: radial-gradient(1200px 700px at 20% 10%, rgba(99,179,237,.18), transparent 55%),
-                radial-gradient(1200px 700px at 80% 0%, rgba(129,230,217,.10), transparent 60%),
-                var(--bg);
+    background: var(--bg);
   }
 
 .site-header {
@@ -485,12 +483,6 @@ tbody tr:hover td {
     color: rgba(230,234,242,.35); 
   }
 
-@media (max-width: 980px) { 
-    .wrap { 
-      grid-template-columns: 1fr; 
-    } 
-  }
-
 #toTop {
     position: fixed;
     bottom: 20px;
@@ -672,6 +664,63 @@ body.ps-game-page .tri-cards {
 
 .tri-card {
     min-width:0;
+  }
+
+body.ps-game-page .tri-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+body.ps-game-page #includedGames,
+body.ps-game-page #additionalInfo,
+body.ps-game-page #seeAlso {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+body.ps-game-page #includedGames,
+body.ps-game-page #additionalInfo,
+body.ps-game-page #seeAlso {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99,179,237,.55) rgba(255,255,255,.05);
+  }
+
+body.ps-game-page #includedGames::-webkit-scrollbar,
+body.ps-game-page #additionalInfo::-webkit-scrollbar,
+body.ps-game-page #seeAlso::-webkit-scrollbar {
+    width: 8px;
+  }
+
+body.ps-game-page #includedGames::-webkit-scrollbar-track,
+body.ps-game-page #additionalInfo::-webkit-scrollbar-track,
+body.ps-game-page #seeAlso::-webkit-scrollbar-track {
+    background: rgba(255,255,255,.05);
+    border-radius: 10px;
+  }
+
+body.ps-game-page #includedGames::-webkit-scrollbar-thumb,
+body.ps-game-page #additionalInfo::-webkit-scrollbar-thumb,
+body.ps-game-page #seeAlso::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgba(99,179,237,.65),
+      rgba(99,179,237,.35)
+    );
+    border-radius: 10px;
+    border: 2px solid rgba(11,15,23,.6);
+  }
+
+body.ps-game-page #includedGames::-webkit-scrollbar-thumb:hover,
+body.ps-game-page #additionalInfo::-webkit-scrollbar-thumb:hover,
+body.ps-game-page #seeAlso::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(99,179,237,.9),
+      rgba(99,179,237,.6)
+    );
   }
 
 .card-title {
@@ -887,6 +936,11 @@ body.ps-game-page .mini-grid {
     min-height: 0;
   }
 
+body.ps-game-page .mini,
+body.ps-game-page .mini-body {
+    overflow: visible;
+  }
+
 .mini-title {
     margin: 0 0 8px;
     font-size: var(--card-title-size, 16px);
@@ -937,6 +991,91 @@ body.ps-game-page .mini-grid {
 .mini.span3 {
   grid-column: 1 / -1;
 }
+
+/* Details card acts like a fixed frame */
+  body.ps-game-page #detailsCard {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  /* miniGrid fills Details card height */
+  body.ps-game-page #miniGrid.mini-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+  }
+
+  /* Each row shares the available height equally */
+  body.ps-game-page #miniGrid .mini-row {
+    flex: 1 1 0;
+    min-height: 0;
+    align-items: stretch; /* you already had this, keep it */
+  }
+
+  /* Each mini becomes a fixed-height flex column */
+  body.ps-game-page #miniGrid .mini {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    text-align: center;
+  }
+
+  /* Title stays fixed */
+  body.ps-game-page #miniGrid .mini-title,
+  body.ps-game-page #miniGrid .mini h4 {
+    flex: 0 0 auto;
+  }
+
+  /* Body is the scroll container */
+  body.ps-game-page #miniGrid .mini-body {
+    flex: 1 1 auto;
+    min-height: 0;
+    width: 100%;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* stop vertical centering fighting the scroll */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  /* Match scrollbar styling to your bottom 3 cards */
+  body.ps-game-page #miniGrid .mini-body {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(99,179,237,.55) rgba(255,255,255,.05);
+  }
+
+  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar { width: 8px; }
+  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar-track {
+    background: rgba(255,255,255,.05);
+    border-radius: 10px;
+  }
+  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar-thumb {
+    background: linear-gradient(
+      180deg,
+      rgba(99,179,237,.65),
+      rgba(99,179,237,.35)
+    );
+    border-radius: 10px;
+    border: 2px solid rgba(11,15,23,.6);
+  }
+  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(99,179,237,.9),
+      rgba(99,179,237,.6)
+    );
+  }
 
 .additional-info h3 {
     margin: 0 0 8px;
@@ -1008,4 +1147,46 @@ button.action-btn {
     -webkit-appearance:none;
     cursor:pointer;
     font:inherit;
+  }
+
+/* Genre abbreviation tooltip */
+.genre-abbr{
+    display: inline-block;
+    position: relative;
+    padding-bottom: 1px;
+
+    border-bottom: 1px dotted rgba(255,255,255,.35);
+    cursor: help;
+    line-height: 1.1;
+  }
+
+.genre-abbr::after{
+    content: attr(data-tip);
+    position: absolute;
+
+    left: 50%;
+    bottom: calc(100% + 8px);
+    transform: translateX(-50%) translateY(6px);
+
+    background: var(--panel);
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+
+    padding: 5px 8px;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: nowrap;
+
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .12s ease, transform .12s ease;
+    z-index: 9999;
+  }
+
+/* Show tooltip on hover or keyboard focus */
+.genre-abbr:hover::after,
+.genre-abbr:focus-visible::after{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
