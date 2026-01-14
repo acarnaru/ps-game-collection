@@ -959,13 +959,6 @@ body.ps-game-page .mini-body {
     opacity: 1;
   }
 
-.mini ul {
-    margin:6px 0 0;
-    padding:0;
-    list-style-position:inside;
-    text-align:center;
-  }
-
 .mini h4 {
     margin:0 0 8px;
     font-size: var(--mini-head, 12px);

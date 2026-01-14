@@ -352,6 +352,12 @@
     padding: 6px 8px; 
     font-size: 11px; 
   }
+
+  #gamesContent td.col-notes ul.stack {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+  }
 }
 
 /* TABLET - 541px to 1024px */
@@ -413,9 +419,15 @@
     padding-left: 16px;
   }
 
+  #gamesContent td.col-notes ul.stack {
+    list-style: none;
+    padding-left: 0;
+    margin-left: 0;
+  }
+
   /* ps_game: keep mini-cards readable on tablets */
   body.ps-game-page .game-top {
-    grid-template-columns: 1fr !important; /* stack picture + details */
+    grid-template-columns: 1fr !important;
   }
 
   /* ps_game mini-cards: true 4x2 grid on tablets */
@@ -566,10 +578,6 @@ body.ps-game-page #miniGrid .mini-body {
     width: 100%;
   }
 
-  /* =========================
-   ps_game header: title row + buttons row (Prev | Back | Next)
-   ========================= */
-
   header.game-sticky {
     position: sticky;
     top: 0;
@@ -623,7 +631,6 @@ body.ps-game-page #miniGrid .mini-body {
 
   /* Auto-shrink button text without extra media queries */
   body.ps-game-page .action-btn {
-    /* scales smoothly with screen width */
     font-size: clamp(10px, 2.4vw, 13px);
     padding: clamp(7px, 1.6vw, 10px) clamp(10px, 2.2vw, 16px);
 
