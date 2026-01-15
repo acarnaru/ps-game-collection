@@ -1004,7 +1004,7 @@ body.ps-game-page .mini-body {
   body.ps-game-page #miniGrid .mini-row {
     flex: 1 1 0;
     min-height: 0;
-    align-items: stretch; /* you already had this, keep it */
+    align-items: stretch;
   }
 
   /* Each mini becomes a fixed-height flex column */
@@ -1020,40 +1020,41 @@ body.ps-game-page .mini-body {
     text-align: center;
   }
 
-  /* Title stays fixed */
   body.ps-game-page #miniGrid .mini-title,
   body.ps-game-page #miniGrid .mini h4 {
     flex: 0 0 auto;
   }
 
-  /* Body is the scroll container */
   body.ps-game-page #miniGrid .mini-body {
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
-
-    overflow-y: auto;
-    overflow-x: hidden;
-
-    /* stop vertical centering fighting the scroll */
+    overflow: visible;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
     align-items: center;
   }
 
-  /* Match scrollbar styling to your bottom 3 cards */
-  body.ps-game-page #miniGrid .mini-body {
+  body.ps-game-page #miniGrid .mini-body .mini-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: rgba(99,179,237,.55) rgba(255,255,255,.05);
   }
 
-  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar { width: 8px; }
-  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar-track {
+  body.ps-game-page #miniGrid .mini-body .mini-list::-webkit-scrollbar { 
+    width: 8px; 
+  }
+
+  body.ps-game-page #miniGrid .mini-body .mini-list::-webkit-scrollbar-track {
     background: rgba(255,255,255,.05);
     border-radius: 10px;
   }
-  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar-thumb {
+
+  body.ps-game-page #miniGrid .mini-body .mini-list::-webkit-scrollbar-thumb {
     background: linear-gradient(
       180deg,
       rgba(99,179,237,.65),
@@ -1062,7 +1063,8 @@ body.ps-game-page .mini-body {
     border-radius: 10px;
     border: 2px solid rgba(11,15,23,.6);
   }
-  body.ps-game-page #miniGrid .mini-body::-webkit-scrollbar-thumb:hover {
+
+  body.ps-game-page #miniGrid .mini-body .mini-list::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(
       180deg,
       rgba(99,179,237,.9),
