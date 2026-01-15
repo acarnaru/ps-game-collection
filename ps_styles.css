@@ -1150,41 +1150,32 @@ button.action-btn {
 /* Genre abbreviation tooltip */
 .genre-abbr{
     display: inline-block;
-    position: relative;
     padding-bottom: 1px;
-
     border-bottom: 1px dotted rgba(255,255,255,.35);
     cursor: help;
     line-height: 1.1;
   }
 
-.genre-abbr::after{
-    content: attr(data-tip);
-    position: absolute;
-
-    left: 50%;
-    bottom: calc(100% + 8px);
-    transform: translateX(-50%) translateY(6px);
-
+.genre-tooltip {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -100%);
     background: var(--panel);
     color: var(--muted);
     border: 1px solid var(--border);
     border-radius: 10px;
-
     padding: 5px 8px;
     font-size: 11px;
     line-height: 1.2;
     white-space: nowrap;
-
     opacity: 0;
     pointer-events: none;
     transition: opacity .12s ease, transform .12s ease;
-    z-index: 9999;
+    z-index: 10050;
   }
 
-/* Show tooltip on hover or keyboard focus */
-.genre-abbr:hover::after,
-.genre-abbr:focus-visible::after{
+.genre-tooltip.show {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translate(-50%, calc(-100% - 6px));
   }

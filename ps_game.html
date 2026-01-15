@@ -434,6 +434,82 @@
         return genreItemHtml(label);
       }
 
+      let genreTooltipEl = null;
+      let genreTooltipTarget = null;
+      let genreTooltipHandlersBound = false;
+
+      function ensureGenreTooltip(){
+        if (genreTooltipEl) return genreTooltipEl;
+        const tooltip = document.createElement("div");
+        tooltip.className = "genre-tooltip";
+        tooltip.setAttribute("role", "tooltip");
+        document.body.appendChild(tooltip);
+        genreTooltipEl = tooltip;
+        return tooltip;
+      }
+
+      function positionGenreTooltip(){
+        if (!genreTooltipTarget) return;
+        const tooltip = ensureGenreTooltip();
+        const rect = genreTooltipTarget.getBoundingClientRect();
+        const left = rect.left + rect.width / 2;
+        const top = rect.top;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+      }
+
+      function showGenreTooltip(target){
+        const tip = target.getAttribute("data-tip");
+        if (!tip) return;
+        const tooltip = ensureGenreTooltip();
+        genreTooltipTarget = target;
+        tooltip.textContent = tip;
+        tooltip.classList.add("show");
+        positionGenreTooltip();
+      }
+
+      function hideGenreTooltip(){
+        if (!genreTooltipEl) return;
+        genreTooltipEl.classList.remove("show");
+        genreTooltipTarget = null;
+      }
+
+      function bindGenreTooltipHandlers(){
+        if (genreTooltipHandlersBound) return;
+        genreTooltipHandlersBound = true;
+
+        window.addEventListener("scroll", hideGenreTooltip, true);
+        window.addEventListener("resize", () => {
+          if (genreTooltipTarget) positionGenreTooltip();
+        });
+
+        document.addEventListener("mouseover", (event) => {
+          const target = event.target.closest(".genre-abbr");
+          if (!target) return;
+          showGenreTooltip(target);
+        });
+
+        document.addEventListener("mouseout", (event) => {
+          if (!genreTooltipTarget) return;
+          const leaving = event.target.closest(".genre-abbr");
+          if (!leaving || leaving !== genreTooltipTarget) return;
+          hideGenreTooltip();
+        });
+
+        document.addEventListener("focusin", (event) => {
+          const target = event.target.closest(".genre-abbr");
+          if (!target) return;
+          showGenreTooltip(target);
+        });
+
+        document.addEventListener("focusout", (event) => {
+          if (!genreTooltipTarget) return;
+          const leaving = event.target.closest(".genre-abbr");
+          if (!leaving || leaving !== genreTooltipTarget) return;
+          hideGenreTooltip();
+        });
+      }
+
       async function renderGame(key){
         let game = byKey.get(key);
         if (!game) {
@@ -539,6 +615,7 @@
         }
 
         grid.innerHTML = rows.join("");
+        bindGenreTooltipHandlers();
 
         const includedList = document.getElementById("includedGames");
         includedList.innerHTML = (included && included.length)
