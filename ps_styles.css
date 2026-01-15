@@ -1022,6 +1022,8 @@ body.ps-game-page .mini-body {
   body.ps-game-page #miniGrid .mini-title,
   body.ps-game-page #miniGrid .mini h4 {
     flex: 0 0 auto;
+    position: relative;
+    z-index: 1;
   }
 
   body.ps-game-page #miniGrid .mini-body {
@@ -1029,6 +1031,8 @@ body.ps-game-page .mini-body {
     min-height: 0;
     width: 100%;
     overflow: visible;
+    position: relative;
+    z-index: 2;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
