@@ -165,18 +165,52 @@
         return Array.isArray(x) ? x : [x];
       }
 
+      const PUBLISHER_ALIAS_REVERSE = (() => {
+        const rev = Object.create(null);
+        const a = (PSDB && PSDB.publisherAliases) ? PSDB.publisherAliases : null;
+        if (!a) return rev;
+
+        for (const alias in a) {
+          const canon = a[alias];
+          if (!canon) continue;
+          (rev[canon] || (rev[canon] = [])).push(alias);
+        }
+        return rev;
+      })();
+
       function includesAny(rec, q) {
         if (!q) return true;
+
+        const pubs = (rec.publisher || []);
+        const pubsExpanded = [];
+
+        for (const pRaw of pubs) {
+          const p = String(pRaw || "").trim();
+          if (!p) continue;
+
+          const canon = (PSDB.publisherAliases && PSDB.publisherAliases[p]) || p;
+
+          pubsExpanded.push(p);
+          if (canon && canon !== p) pubsExpanded.push(canon);
+
+          const revForCanon = PUBLISHER_ALIAS_REVERSE[canon];
+          if (revForCanon && revForCanon.length) pubsExpanded.push(...revForCanon);
+
+          const revForRaw = PUBLISHER_ALIAS_REVERSE[p];
+          if (revForRaw && revForRaw.length) pubsExpanded.push(...revForRaw);
+        }
+
         const hayParts = [
           rec.title,
           rec.platform,
           rec.format,
           ...asArray(rec.genre),
           ...asArray(rec.version),
-          ...(rec.publisher || []),
+          ...pubsExpanded,
           ...(rec.included || []),
           ...(rec.notes || [])
         ];
+
         const hay = hayParts.join(" ").toLowerCase();
         return hay.includes(q);
       }

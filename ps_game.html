@@ -275,10 +275,12 @@
           const label = String(name || "").trim();
           if (!label) return null;
 
-          const url = (PSDB.publisherLinks && PSDB.publisherLinks[label]) || "";
+          const canonical = (PSDB.publisherAliases && PSDB.publisherAliases[label]) || label;
+          const url = (PSDB.publisherLinks && PSDB.publisherLinks[canonical]) || "";
+
           if (!url) return label;
 
-          return { label, href: url };
+          return { label: canonical, href: url };
         }).filter(Boolean);
       }
 
@@ -595,7 +597,7 @@
         const miniFormat    = makeMini("Format", format, "mini-small");
         const miniVersion   = makeMini("Version", version);
         const miniGenre     = makeMini("Genre", genre);
-        const miniPublisher = makeMini("Publisher", publisherItems);
+        const miniPublisher = makeMini("Publisher/Developer", publisherItems);
         const miniYear      = makeMini("Year", year ? [year] : []);
         const miniStatus    = makeStatusMini("Status", status);
 
