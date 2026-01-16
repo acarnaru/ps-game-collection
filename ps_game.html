@@ -556,7 +556,6 @@
 
         if (!publisherNames.length || !year) {
           try {
-            const meta = await ensureMetaForTitle(game.title);
 
             if (!publisherNames.length) {
               const metaPub = (meta.publisher || "").toString().trim();

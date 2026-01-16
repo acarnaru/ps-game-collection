@@ -230,6 +230,7 @@ button {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    text-align: center;
     padding: 10px 12px;
     border-radius: 999px;
     border: 1px solid var(--border);
@@ -239,6 +240,7 @@ button {
     letter-spacing: .2px;
     text-decoration: none;
     cursor: pointer;
+    line-height: 1;
     transition:
       background-color 0.15s ease,
       border-color 0.15s ease,
@@ -419,8 +421,6 @@ thead th {
     z-index: 30;
     background: rgba(15, 23, 42,.98);
     border-bottom: 1px solid var(--border);
-    padding: 10px 10px;
-    text-align: left;
     font-size: 12px;
     letter-spacing: .4px;
     text-transform: uppercase;
@@ -428,7 +428,6 @@ thead th {
   }
 
 tbody td {
-    padding: 10px 10px;
     vertical-align: top;
     border-bottom: 1px solid rgba(255,255,255,.06);
     color: rgba(230,234,242,.92);
@@ -440,6 +439,7 @@ tbody td {
 thead th, tbody td {
     text-align: center;
     vertical-align: middle;
+    padding: 10px 10px;
   }
 
 tbody tr:hover td { 
@@ -985,7 +985,6 @@ body.ps-game-page .mini-body {
   grid-column: 1 / -1;
 }
 
-/* Details card acts like a fixed frame */
   body.ps-game-page #detailsCard {
     display: flex;
     flex-direction: column;
@@ -993,21 +992,18 @@ body.ps-game-page .mini-body {
     overflow: hidden;
   }
 
-  /* miniGrid fills Details card height */
   body.ps-game-page #miniGrid.mini-grid {
     flex: 1 1 auto;
     min-height: 0;
     height: 100%;
   }
 
-  /* Each row shares the available height equally */
   body.ps-game-page #miniGrid .mini-row {
     flex: 1 1 0;
     min-height: 0;
     align-items: stretch;
   }
 
-  /* Each mini becomes a fixed-height flex column */
   body.ps-game-page #miniGrid .mini {
     height: 100%;
     min-height: 0;
@@ -1147,7 +1143,6 @@ button.action-btn {
     font:inherit;
   }
 
-/* Genre abbreviation tooltip */
 .genre-abbr{
     display: inline-block;
     padding-bottom: 1px;

@@ -128,6 +128,7 @@
                 { id:"traps", label:"Traps", subtitle:"Traps Catalogue", showVariant:true, chipGroups:["element"], extraGroups:[] },
                 { id:"vehicles", label:"Vehicles", subtitle:"Vehicles Catalogue", showVariant:true, chipGroups:["element","terrain"], extraGroups:["terrain"] },
                 { id:"crystals", label:"Creation Crystals", subtitle:"Crystals Catalogue", showVariant:true, chipGroups:["element","battleClass"], extraGroups:["battleClass"] },
+                { id:"extra", label:"Extras", subtitle:"Extras Catalogue", showVariant:false, chipGroups:["game"], extraGroups:[] }
               ];
 
         const COLS = {
@@ -170,6 +171,10 @@
             { key:"build", label:"Build" },
             { key:"hat", label:"Hat" },
           ],
+          extra: [
+            { key:"name", label:"Item" },
+            { key:"game", label:"Game" },
+          ],
         };
 
         const GAME_VALUES = ["Spyro's Adventure","Giants","Swap Force","Trap Team","SuperChargers","Imaginators"];
@@ -202,7 +207,6 @@
 
         const contentWrap = document.querySelector('.wrap');
 
-
         const state = {
           q: "",
           variant: "all",
@@ -229,7 +233,7 @@
         if (activeTab === "skylanders") {
           fillSet(state.game, GAME_VALUES);
           fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
-        } else if (activeTab === "magic" || activeTab === "locations") {
+        } else if (activeTab === "magic" || activeTab === "locations" || activeTab === "extra") {
           fillSet(state.game, GAME_VALUES);
         } else if (activeTab === "traps") {
           fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
@@ -347,7 +351,7 @@
       }
 
       function matchVariant(item) {
-        if (activeTab === "locations") return true;
+        if (activeTab === "locations" || activeTab === "extra") return true;
         const v = (item.variant || "").toString();
         if (state.variant === "all") return true;
         const isRegular = REGULAR_TAGS.has(v);
@@ -375,7 +379,7 @@
           if (activeTab === "skylanders") {
             if (!matchSet(it.game, state.game)) return false;
             if (!matchSet(it.element, state.element)) return false;
-          } else if (activeTab === "magic" || activeTab === "locations") {
+          } else if (activeTab === "magic" || activeTab === "locations" || activeTab === "extra") {
             if (!matchSet(it.game, state.game)) return false;
           } else if (activeTab === "traps") {
             if (!matchSet(it.element, state.element)) return false;

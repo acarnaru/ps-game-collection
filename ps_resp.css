@@ -9,18 +9,18 @@
     width: 100%; 
   }
 
-  #gamesContent .col-notes { display: none; }
-  #gamesContent .col-genre { display: none; }
+  #gamesContent .col-notes  { display: none; }
+  #gamesContent .col-genre  { display: none; }
   #gamesContent .col-format { display: none; }
 
   #hardwareContent .col-brand { display: none; }
 
-  #skylandersContent .col-hat { display: none; }
-  #crystalsContent   .col-hat { display: none; }
+  #skylandersContent .col-hat    { display: none; }
+  #crystalsContent   .col-hat    { display: none; }
   #vehiclesContent   .col-driver { display: none; }
 
   .col-title    { width: 33%; }
-  .col-platform { width: 1%;}
+  .col-platform { width: 1%; }
   .col-version  { width: 22%; }
   .col-included { width: 44%; }
 
@@ -241,7 +241,7 @@
   }
 }
 
-/* MOBILE screen rotate - max-width 932px - max height 430px */
+/* MOBILE screen rotate - max-width 932px - max-height 430px */
 @media (max-width: 932px) and (max-height: 430px) and (orientation: landscape) {
   
   .sticky-header {
@@ -425,12 +425,10 @@
     margin-left: 0;
   }
 
-  /* ps_game: keep mini-cards readable on tablets */
   body.ps-game-page .game-top {
     grid-template-columns: 1fr !important;
   }
 
-  /* ps_game mini-cards: true 4x2 grid on tablets */
   body.ps-game-page #miniGrid.mini-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -505,12 +503,10 @@
     overflow-x: hidden;
   }
 
-  /* stop treating main like a fixed-height app panel */
   body.ps-game-page .game-page-main {
     display: block !important;
   }
 
-  /* ditch the 60/40 fixed-height grid on small screens */
   body.ps-game-page .game-layout {
     display: flex !important;
     flex-direction: column !important;
@@ -518,51 +514,45 @@
     min-height: 0 !important;
   }
 
-  /* stack Picture then Details (order already correct in HTML) */
   body.ps-game-page .game-top {
     grid-template-columns: 1fr !important;
     min-height: 0 !important;
   }
 
-  /* make sure the picture card has a sensible height on narrow screens */
   body.ps-game-page .game-picture {
     min-height: 220px;
   }
 
-  /* bottom cards: single column */
   body.ps-game-page .tri-cards {
     grid-template-columns: 1fr !important;
   }
 
-  /* allow content to expand normally */
   body.ps-game-page .mini-grid {
     height: auto !important;
   }
 
-  /* ps_game: on <=1024px the minis must GROW (no desktop fixed-frame behaviour) */
-body.ps-game-page #detailsCard {
-  overflow: visible;
-}
+  body.ps-game-page #detailsCard {
+    overflow: visible;
+  }
 
-body.ps-game-page #miniGrid.mini-grid {
-  height: auto;
-}
+  body.ps-game-page #miniGrid.mini-grid {
+    height: auto;
+  }
 
-body.ps-game-page #miniGrid .mini-row {
-  flex: 0 0 auto;
-}
+  body.ps-game-page #miniGrid .mini-row {
+    flex: 0 0 auto;
+  }
 
-body.ps-game-page #miniGrid .mini {
-  height: auto;
-  overflow: visible;
-}
+  body.ps-game-page #miniGrid .mini {
+    height: auto;
+    overflow: visible;
+  }
 
-body.ps-game-page #miniGrid .mini-body {
-  overflow: visible;
-  display: block;
-}
+  body.ps-game-page #miniGrid .mini-body {
+    overflow: visible;
+    display: block;
+  }
 
-  /* Additional Info centered on mobile/tablet/landscape */
   body.ps-game-page #additionalInfoCard {
     display: flex;
     flex-direction: column;
@@ -584,10 +574,9 @@ body.ps-game-page #miniGrid .mini-body {
     z-index: 10000;
     background: rgba(11, 15, 23, 0.95);
     border-bottom: 1px solid rgba(255,255,255,.12);
-    overflow-x: hidden; /* hard stop for side-scroll caused by buttons */
+    overflow-x: hidden;
   }
 
-  /* 2 rows: title full width, then 3 equal button columns */
   body.ps-game-page .game-header {
     display: grid !important;
     grid-template-columns: 1fr 1fr 1fr;
@@ -597,7 +586,6 @@ body.ps-game-page #miniGrid .mini-body {
     align-items: center;
   }
 
-  /* Title: keep centered + wrapped like you want */
   body.ps-game-page .game-title {
     grid-column: 1 / -1;
     grid-row: 1;
@@ -613,36 +601,40 @@ body.ps-game-page #miniGrid .mini-body {
     overflow: hidden;
   }
 
-  /* Place each button in its own column on row 2 */
-  body.ps-game-page .nav-left { grid-column: 1; grid-row: 2; }
-  body.ps-game-page #backBtn  { grid-column: 2; grid-row: 2; justify-self: center; }
-  body.ps-game-page #nextBtn  { grid-column: 3; grid-row: 2; justify-self: end; }
+  body.ps-game-page .nav-left { 
+    grid-column: 1; 
+    grid-row: 2; 
+  }
 
-  /* The left container should align its button to the left */
+  body.ps-game-page #backBtn  { 
+    grid-column: 2; 
+    grid-row: 2; 
+    justify-self: center; 
+  }
+
+  body.ps-game-page #nextBtn  { 
+    grid-column: 3; 
+    grid-row: 2; 
+    justify-self: end; 
+  }
+
   body.ps-game-page .nav-left {
     display: flex;
     justify-content: flex-start;
   }
 
-  /* The right container should NOT act like a flex row anymore on small screens */
   body.ps-game-page .nav-right {
-    display: contents; /* lets backBtn + nextBtn become grid items */
+    display: contents;
   }
 
-  /* Auto-shrink button text without extra media queries */
   body.ps-game-page .action-btn {
     font-size: clamp(10px, 2.4vw, 13px);
     padding: clamp(7px, 1.6vw, 10px) clamp(10px, 2.2vw, 16px);
-
     max-width: 100%;
     min-width: 0;
-
-    /* keep one line and avoid overflow/side-scroll */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-
-    /* optional: makes long labels fit a bit better */
     letter-spacing: -0.1px;
   }
 }

@@ -60,7 +60,7 @@
       <section id="online" class="note-block">
         <h2>Online Only</h2>
           <ul>
-            <li>Requires a constant Internet connection (also known as live-service), for both single and multiplayer content, including progression and achievemnts.</li>
+            <li>Requires a constant Internet connection (also known as live-service), for both single and multiplayer content, including progression and achievements.</li>
             <li>If a stable Internet connection is not possible, or the servers are offline, the game is technically unplayable.</li>
           </ul>
           <p><a href="ps_index.html">Back to Catalogue</a></p>
@@ -143,7 +143,7 @@
         <h2>PSVR2 Features</h2>
           <ul>
             <li>Only certain sections of the game support the use of the PSVR2 headset alongside its proprietary controllers.</li>
-            <li>The remainder of the game must be played using a regular DualSsense / DualSense Edge controller (or third-party compatible controllers).</li>
+            <li>The remainder of the game must be played using a regular DualSense / DualSense Edge controller (or third-party compatible controllers).</li>
           </ul>
           <p><a href="ps_index.html">Back to Catalogue</a></p>
       </section>
@@ -197,11 +197,7 @@
 
         function setH() {
           const h = Math.ceil(nav.getBoundingClientRect().height);
-
-          // Store real sticky height (optional, but keep it if you use it elsewhere)
           document.documentElement.style.setProperty("--notesStickyH", h + "px");
-
-          // IMPORTANT: Notes-only anchor offset (do NOT touch --anchorOffset)
           document.documentElement.style.setProperty("--notesAnchor", (h + 8) + "px");
         }
 
