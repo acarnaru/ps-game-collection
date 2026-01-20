@@ -194,13 +194,16 @@
         location.hash = encodeURIComponent(key);
       }
 
-      function resolveSeeAlsoToKey(entry){
+      const QUALIFIED_TARGET_KEYS = new Set();
+      
+      function resolveSeeAlsoToKey(entry, _opts){
+        // Object form stays supported as-is
         if (entry && typeof entry === "object") {
           const spec = {
             title: entry.title || "",
             platform: entry.platform || "",
-            format: entry.format || "",
-            version: entry.version || ""
+            version: entry.version || "",
+            format: entry.format || ""
           };
           const key = makeKey(spec);
           return byKey.has(key) ? key : null;
@@ -209,6 +212,7 @@
         const raw = String(entry || "").trim();
         if (!raw) return null;
 
+        // Parse: Title (qualifiers...)  [you said you'll only ever use ONE (...) block]
         let baseTitle = raw;
         let qualifier = "";
         const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
@@ -217,13 +221,48 @@
           qualifier = m[2].trim();
         }
 
-        const platformAliases = new Set([
-          "PS3","PS4","PS5","Vita","PS Vita"
-        ]);
+        const platformAliases = new Set(["PS3","PS4","PS5","Vita"]);
 
-        const wantsPlatform = platformAliases.has(qualifier);
-        const desiredPlatform = wantsPlatform ? (qualifier === "PS Vita" ? "Vita" : qualifier) : "";
-        const desiredVersion  = (!wantsPlatform && qualifier) ? qualifier : "";
+        // Split qualifier on commas into ordered parts.
+        // Example: "PS4 Remake, Gold Edition" -> ["PS4 Remake", "Gold Edition"]
+        const chunks = qualifier
+          ? qualifier.split(",").map(s => s.trim()).filter(Boolean)
+          : [];
+
+        // Extract a platform from anywhere, and keep remaining chunks as version parts in order
+        let desiredPlatform = "";
+        const desiredVersionParts = [];
+
+        function extractPlatformFromText(text){
+          let out = String(text || "").trim();
+
+          for (const p of platformAliases) {
+            const re = new RegExp(`(?:^|\\s)${p}(?:\\s|$)`, "i");
+
+            if (re.test(out)) {
+              if (!desiredPlatform) desiredPlatform = p;
+              out = out.replace(re, "").replace(/\s+/g, " ").trim();
+            }
+          }
+
+          return out;
+        }
+
+        function normVerToken(s){
+          // Makes "(Remastered)" and "Remastered" match, same for any label.
+          return String(s ?? "")
+            .trim()
+            .replace(/^\((.*)\)$/, "$1")   // strip ONE outer pair of parentheses
+            .replace(/\s+/g, " ")          // collapse whitespace
+            .toLowerCase();               // case-insensitive matching
+        }
+
+        for (const c of chunks) {
+          const rest = extractPlatformFromText(c);
+          if (!rest) continue;
+
+          desiredVersionParts.push(normVerToken(rest));
+        }
 
         const collectMatches = (t) => keysSorted
           .map(k => ({ key: k, game: byKey.get(k) }))
@@ -233,16 +272,88 @@
         if (!matches.length && baseTitle !== raw) matches = collectMatches(raw);
         if (!matches.length) return null;
 
+        // If the See Also entry has NO qualifiers (no "(...)"),
+        // do not allow it to resolve to an edition that is already linkable via qualified See Also strings.
+        // (Unless this filter would eliminate all candidates.)
+        if (!_opts?.building && !qualifier && matches.length > 1 && QUALIFIED_TARGET_KEYS.size) {
+          const filtered = matches.filter(x => !QUALIFIED_TARGET_KEYS.has(x.key));
+          if (filtered.length) matches = filtered;
+        }
+
+        // Filter by platform if explicitly provided in (...)
         if (desiredPlatform) {
           const filtered = matches.filter(x => String(x.game.platform).trim() === desiredPlatform);
           if (filtered.length) matches = filtered;
         }
 
-        if (desiredVersion) {
-          const filtered = matches.filter(x => String(x.game.version || "").trim() === desiredVersion);
-          if (filtered.length) matches = filtered;
+        function gameVersionParts(v){
+          if (Array.isArray(v)) return v.map(normVerToken).filter(Boolean);
+          const s = String(v ?? "").trim();
+          return s ? [normVerToken(s)] : [];
         }
 
+          // If the user gave NO qualifiers (no platform + no version tokens),
+          // prefer the "base" entry (empty version) before any platform tie-breaker.
+          if (!desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+            const baseOnly = matches.filter(x => gameVersionParts(x.game.version).length === 0);
+            if (baseOnly.length) matches = baseOnly;
+          }
+
+          // If the user gave a platform but NO version tokens, still prefer empty version on that platform.
+          if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+            const baseOnPlatform = matches.filter(x => gameVersionParts(x.game.version).length === 0);
+            if (baseOnPlatform.length) matches = baseOnPlatform;
+          }
+
+          // If platform is specified but NO version tokens were given, and we still have multiple matches,
+          // prefer "case-art" style versions (non-parenthesized) over tags like "(Bedrock Edition)".
+          if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+            const firstVerRaw = (v) => {
+              if (Array.isArray(v)) return String(v[0] ?? "").trim();
+              return String(v ?? "").trim();
+            };
+
+            const nonParen = matches.filter(x => {
+              const v0 = firstVerRaw(x.game.version);
+              return v0 && !/^\(/.test(v0);
+            });
+
+            if (nonParen.length) matches = nonParen;
+          }
+
+        function prefixMatch(need, have){
+          if (need.length === 0) return true;
+          if (have.length < need.length) return false;
+          for (let i = 0; i < need.length; i++){
+            if (String(have[i]).trim() !== String(need[i]).trim()) return false;
+          }
+          return true;
+        }
+
+        if (desiredVersionParts.length) {
+          const versionMatched = matches
+            .map(x => ({ ...x, vparts: gameVersionParts(x.game.version) }))
+            .filter(x => prefixMatch(desiredVersionParts, x.vparts));
+
+          if (versionMatched.length) {
+            // Tie-break rules:
+            // 1) If user specified only 1 version token (e.g. "(Remake)"),
+            //    prefer the entry whose version is a single string "(Remake)" over arrays starting the same.
+            // 2) Otherwise, prefer the shortest version list (most exact match).
+            const wantSingle = desiredVersionParts.length === 1;
+
+            versionMatched.sort((a,b) => {
+              const aArr = Array.isArray(a.game.version);
+              const bArr = Array.isArray(b.game.version);
+              if (wantSingle && aArr !== bArr) return aArr ? 1 : -1; // non-array first
+              return a.vparts.length - b.vparts.length;
+            });
+
+            matches = versionMatched;
+          }
+        }
+
+        // Existing tie-breaker: prefer same platform as current page if still ambiguous
         const current = byKey.get(getHashKey());
         if (current && matches.length > 1) {
           const samePlatform = matches.find(x => x.game.platform === current.platform);
@@ -267,6 +378,30 @@
       }).map(makeKey);
 
       const byKey = new Map(DATA.map(g => [makeKey(g), g]));
+
+      // Build a set of keys that are explicitly reachable via qualified See Also entries.
+      // Qualified = anything with "(...)" (string form) or object form with platform/format/version.
+      (function buildQualifiedTargets(){
+        for (const g of DATA) {
+          const sa = g && g.seeAlso;
+          if (!Array.isArray(sa)) continue;
+
+          for (const entry of sa) {
+            if (typeof entry === "string") {
+              const s = entry.trim();
+              if (!s) continue;
+              if (!/\(.+\)/.test(s)) continue; // only qualified strings
+              const key = resolveSeeAlsoToKey(entry, { building: true });
+              if (key) QUALIFIED_TARGET_KEYS.add(key);
+            } else if (entry && typeof entry === "object") {
+              const isQualifiedObj = !!(entry.platform || entry.format || entry.version);
+              if (!isQualifiedObj) continue;
+              const key = resolveSeeAlsoToKey(entry, { building: true });
+              if (key) QUALIFIED_TARGET_KEYS.add(key);
+            }
+          }
+        }
+      })();
 
       function mapPublishersToLinks(publishers){
         if (!Array.isArray(publishers)) return [];
@@ -398,6 +533,7 @@
         "ARPG": "Action Role-Playing Game",
         "RTS":  "Real-Time Strategy",
         "TBS":  "Turn-Based Strategy",
+        "TBT": "Turn-Based Tactics",
         "FPS":  "First-Person Shooter"
       };
 
@@ -631,7 +767,7 @@
         const seeAlsoList = document.getElementById("seeAlso");
           if (seeAlso && seeAlso.length && seeAlso[0] !== "—") {
             seeAlsoList.innerHTML = seeAlso.map(entry => {
-              const label = (entry && typeof entry === "object") ? entry.title : String(entry || "");
+              const label = (entry && typeof entry === "object") ? (entry.label || entry.title) : String(entry || "");
               const key = resolveSeeAlsoToKey(entry);
 
               if (!key) return `<li>${escapeHtml(label)}</li>`;
