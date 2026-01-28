@@ -47,6 +47,11 @@
           <div class="chips" id="elementChips"></div>
         </div>
 
+        <div class="filtergroup" id="typeGroup" style="display:none;">
+          <div class="filterlabel">Type</div>
+          <div class="chips" id="typeChips"></div>
+        </div>
+
         <div class="filtergroup" id="terrainGroup" style="display:none;">
           <div class="filterlabel">Terrain</div>
           <div class="chips" id="terrainChips"></div>
@@ -120,11 +125,11 @@
         });
       })();
 
-        const REGULAR_TAGS = new Set(["Core", "Giant", "Mini", "Skylander Sensei", "Swapper", "Trap Master", "Villain Sensei"]);
+        const REGULAR_TAGS = new Set(["Anchors Away", "Big Bang", "Big Bubble", "Blizzard", "Bone Bash", "Core", "Deep Dive", "Double Dare", "Fire Bone", "Fizzy Frenzy", "Full Blast", "Giant", "Heavy Duty", "Hog Wild", "Horn Blast", "Hurricane", "Hyper Beam", "Knockout", "Lava Barf", "Lava Lance", "Mega Ram", "Mini", "Ninja", "Phantom", "Shark Shooter", "Skylander Sensei", "Super Gulp", "Super Shot", "Sure Shot", "Swapper", "Thorn Horn", "Tidal Wave", "Trap Master", "Turbo", "Twin Blade", "Villain Sensei"]);
               const TABS = [
                 { id:"skylanders", label:"Skylanders", subtitle:"Skylanders Catalogue", showVariant:true, chipGroups:["game","element"], extraGroups:[] },
-                { id:"magic", label:"Magic Items", subtitle:"Magic Catalogue", showVariant:true, chipGroups:["game"], extraGroups:[] },
-                { id:"locations", label:"Locations", subtitle:"Locations Catalogue", showVariant:false, chipGroups:["game"], extraGroups:[] },
+                { id:"magic", label:"Magic Items", subtitle:"Magic Catalogue", showVariant:true, chipGroups:["game", "type"], extraGroups:["type"] },
+                { id:"stages", label:"Stages", subtitle:"Stages Catalogue", showVariant:true, chipGroups:["game","type"], extraGroups:["type"] },
                 { id:"traps", label:"Traps", subtitle:"Traps Catalogue", showVariant:true, chipGroups:["element"], extraGroups:[] },
                 { id:"vehicles", label:"Vehicles", subtitle:"Vehicles Catalogue", showVariant:true, chipGroups:["element","terrain"], extraGroups:["terrain"] },
                 { id:"crystals", label:"Creation Crystals", subtitle:"Crystals Catalogue", showVariant:true, chipGroups:["element","battleClass"], extraGroups:["battleClass"] },
@@ -142,11 +147,14 @@
           ],
           magic: [
             { key:"name", label:"Item" },
+            { key:"type", label:"Type" },
             { key:"variant", label:"Variant" },
             { key:"game", label:"Game" },
           ],
-          locations: [
-            { key:"name", label:"Location" },
+          stages: [
+            { key:"name", label:"Stage" },
+            { key:"type", label:"Type" },
+            { key:"variant", label:"Variant" },
             { key:"game", label:"Game" },
           ],
           traps: [
@@ -180,8 +188,10 @@
         const GAME_VALUES = ["Spyro's Adventure","Giants","Swap Force","Trap Team","SuperChargers","Imaginators"];
         const ELEMENT_VALUES_BASE = ["Air","Water","Fire","Earth","Life","Undead","Magic","Tech","Light","Dark"];
         const ELEMENT_VALUES_WITH_CHAOS = [...ELEMENT_VALUES_BASE, "Chaos"];
+        const TYPE_VALUES_MAGIC = ["Buff","DPS","Utility"];
+        const TYPE_VALUES_STAGE = ["Adventure","Battle Arena","Race Track","Vehicle"];
         const TERRAIN_VALUES = ["Sky","Sea","Land"];
-        const BATTLE_VALUES = ["Brawler","Sorcerer","Smasher","Bowslinger","Knight","Quickshot","Sentinel","Ninja","Bazooker","Swashbuckler","Kaos"];
+        const BATTLE_VALUES = ["Brawler","Sorcerer","Smasher","Bowslinger","Knight","Quickshot","Sentinel","Ninja","Bazooker","Swashbuckler"];
 
         let activeTab = "skylanders";
         let sortAsc = true;
@@ -197,10 +207,12 @@
           stats: document.getElementById("stats"),
           gameGroup: document.getElementById("gameGroup"),
           elementGroup: document.getElementById("elementGroup"),
+          typeGroup: document.getElementById("typeGroup"),
           terrainGroup: document.getElementById("terrainGroup"),
           battleGroup: document.getElementById("battleGroup"),
           gameChips: document.getElementById("gameChips"),
           elementChips: document.getElementById("elementChips"),
+          typeChips: document.getElementById("typeChips"),
           terrainChips: document.getElementById("terrainChips"),
           battleChips: document.getElementById("battleChips"),
         };
@@ -212,6 +224,7 @@
           variant: "all",
           game: new Set(),
           element: new Set(),
+          type: new Set(),
           terrain: new Set(),
           battleClass: new Set(),
         };
@@ -227,14 +240,19 @@
 
         state.game.clear();
         state.element.clear();
+        state.type.clear();
         state.terrain.clear();
         state.battleClass.clear();
 
         if (activeTab === "skylanders") {
           fillSet(state.game, GAME_VALUES);
           fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
-        } else if (activeTab === "magic" || activeTab === "locations" || activeTab === "extra") {
+        } else if (activeTab === "magic") {
           fillSet(state.game, GAME_VALUES);
+          fillSet(state.type, TYPE_VALUES_MAGIC);
+        } else if (activeTab === "stages") {
+          fillSet(state.game, GAME_VALUES);
+          fillSet(state.type, TYPE_VALUES_STAGE);
         } else if (activeTab === "traps") {
           fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
         } else if (activeTab === "vehicles") {
@@ -243,6 +261,8 @@
         } else if (activeTab === "crystals") {
           fillSet(state.element, ELEMENT_VALUES_BASE);
           fillSet(state.battleClass, BATTLE_VALUES);
+        } else if (activeTab === "extra") {
+          fillSet(state.game, GAME_VALUES);
         }
       }
 
@@ -284,8 +304,19 @@
         GAME_VALUES.forEach(v => els.gameChips.appendChild(makeChip(v, "game")));
 
         els.elementChips.innerHTML = "";
-        const elementVals = (activeTab === "skylanders" || activeTab === "traps") ? ELEMENT_VALUES_WITH_CHAOS : ELEMENT_VALUES_BASE;
+        const elementVals =
+          (activeTab === "skylanders" || activeTab === "traps")
+            ? ELEMENT_VALUES_WITH_CHAOS
+            : ELEMENT_VALUES_BASE;
+
         elementVals.forEach(v => els.elementChips.appendChild(makeChip(v, "element")));
+
+        els.typeChips.innerHTML = "";
+        let typeVals = [];
+        if (activeTab === "magic") typeVals = TYPE_VALUES_MAGIC;
+        else if (activeTab === "stages") typeVals = TYPE_VALUES_STAGE;
+
+        typeVals.forEach(v => els.typeChips.appendChild(makeChip(v, "type")));
 
         els.terrainChips.innerHTML = "";
         TERRAIN_VALUES.forEach(v => els.terrainChips.appendChild(makeChip(v, "terrain")));
@@ -294,15 +325,18 @@
         BATTLE_VALUES.forEach(v => els.battleChips.appendChild(makeChip(v, "battleClass")));
       }
 
+
       function chipOnOff() {
         const tab = TABS.find(t => t.id === activeTab);
         const showGame = tab.chipGroups.includes("game");
         const showElement = tab.chipGroups.includes("element");
+        const showType = tab.chipGroups.includes("type");
         const showTerrain = tab.chipGroups.includes("terrain");
         const showBattle = tab.chipGroups.includes("battleClass");
 
         els.gameGroup.style.display = showGame ? "" : "none";
         els.elementGroup.style.display = showElement ? "" : "none";
+        els.typeGroup.style.display = showType ? "" : "none";
         els.terrainGroup.style.display = showTerrain ? "" : "none";
         els.battleGroup.style.display = showBattle ? "" : "none";
       }
@@ -316,6 +350,7 @@
         }
         sync(els.gameChips, state.game);
         sync(els.elementChips, state.element);
+        sync(els.typeChips, state.type);
         sync(els.terrainChips, state.terrain);
         sync(els.battleChips, state.battleClass);
       }
@@ -351,7 +386,7 @@
       }
 
       function matchVariant(item) {
-        if (activeTab === "locations" || activeTab === "extra") return true;
+        if (activeTab === "extra") return true;
         const v = (item.variant || "").toString();
         if (state.variant === "all") return true;
         const isRegular = REGULAR_TAGS.has(v);
@@ -369,8 +404,39 @@
         return arr.some(v => set.has((v||"").toString()));
       }
 
+      function getTabSource(tabId) {
+        const base = DATA[tabId] || [];
+        const hybrid = DATA.hybrid || [];
+
+        if (tabId === "magic") {
+          const projected = hybrid
+            .filter(h => h.magicType) // only hybrids that have magic data
+            .map(h => ({
+              name: h.name,
+              variant: h.variant || "",
+              game: h.game || "",
+              type: h.magicType,      // Magic tab expects "type"
+            }));
+          return base.concat(projected);
+        }
+
+        if (tabId === "stages") {
+          const projected = hybrid
+            .filter(h => h.stageType) // only hybrids that have stage data
+            .map(h => ({
+              name: h.name,
+              variant: h.variant || "",
+              game: h.game || "",
+              type: h.stageType,      // Stages tab expects "type" (string OR array)
+            }));
+          return base.concat(projected);
+        }
+
+        return base;
+      }
+
       function getFiltered() {
-        const src = DATA[activeTab] || [];
+        const src = getTabSource(activeTab);
         const q = state.q.trim();
         return src.filter(it => {
           if (!matchText(it, q)) return false;
@@ -379,8 +445,12 @@
           if (activeTab === "skylanders") {
             if (!matchSet(it.game, state.game)) return false;
             if (!matchSet(it.element, state.element)) return false;
-          } else if (activeTab === "magic" || activeTab === "locations" || activeTab === "extra") {
+          } else if (activeTab === "magic" || activeTab === "stages") {
             if (!matchSet(it.game, state.game)) return false;
+            const okType = Array.isArray(it.type)
+              ? matchAnyInArray(it.type, state.type)
+              : matchSet(it.type, state.type);
+            if (!okType) return false;
           } else if (activeTab === "traps") {
             if (!matchSet(it.element, state.element)) return false;
           } else if (activeTab === "vehicles") {
@@ -389,6 +459,8 @@
           } else if (activeTab === "crystals") {
             if (!matchSet(it.element, state.element)) return false;
             if (!matchSet(it.battleClass, state.battleClass)) return false;
+          } else if (activeTab === "extra") {
+            if (!matchSet(it.game, state.game)) return false;
           }
           return true;
         });
@@ -424,7 +496,7 @@
           return `<tr>${tds}</tr>`;
         }).join("");
         els.tbody.innerHTML = rowsHtml;
-        const total = (DATA[activeTab] || []).length;
+        const total = getTabSource(activeTab).length;
         els.stats.textContent = `${items.length} visible out of ${total} total`;
       }
 

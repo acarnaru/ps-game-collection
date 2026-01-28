@@ -34,6 +34,9 @@
         getGameData() {
         return { DATA: window.PSDB.games };
         },
+        getHardData() {
+        return { DATA: window.PSDB.hardware };
+        },
         getSkyData() {
         return { DATA: window.PSDB.sky };
         }

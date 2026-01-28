@@ -212,10 +212,6 @@ a.btn {
     text-decoration: none;
   }
 
-a.action-btn.btn-notes-mobile { 
-    display: none; 
-  }
-
 a.btn:hover,
 a.btn:focus-visible {
     color: rgb(99,179,237);
@@ -470,7 +466,7 @@ tbody tr:hover td {
 .stack { 
     margin: 0;
     padding-left: 0;
-    list-style-position: inside;
+    list-style: none;
     text-align: center;
   }
 
@@ -660,6 +656,10 @@ body.ps-game-page .tri-cards {
     gap: 12px;
     align-items: stretch;
     min-width:0;
+  }
+
+body.ps-hard-page .tri-cards{
+    grid-template-columns: repeat(2, 1fr);
   }
 
 .tri-card {

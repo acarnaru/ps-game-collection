@@ -33,7 +33,7 @@
           <input id="q" type="search" placeholder="Search..." autocomplete="off" />
           <select id="sort"></select>
           <button id="clear" class="action-btn">Clear</button>
-          <a class="action-btn btn-notes-mobile" href="ps_notes.html">Notes / FAQ</a>
+          <a class="action-btn" href="ps_notes.html#general">Notes/FAQ</a>
         </div>
       </div>
       <div class="filterbar">
@@ -337,6 +337,7 @@
         "ARPG": "Action Role-Playing Game",
         "RTS":  "Real-Time Strategy",
         "TBS":  "Turn-Based Strategy",
+        "TBT": "Turn-Based Tactics",
         "FPS":  "First-Person Shooter"
       };
 
@@ -441,6 +442,41 @@
         return `<ul class="stack">${lis}</ul>`;
       }
 
+      const HARDWARE_CATEGORY_NOTE_MAP = {
+        "3D Compatible": "3d",
+        "3D": "3d",
+        "PS Move": "move-game",
+        "PSVR2": "vr2-game",
+        "PSVR": "vr-game",
+        "uDraw": "udraw"
+      };
+
+      function linkHardwareCategoryKeywords(label) {
+        let s = escapeHtml(label);
+
+        const entries = Object.entries(HARDWARE_CATEGORY_NOTE_MAP)
+          .sort((a, b) => b[0].length - a[0].length);
+
+        for (const [term, id] of entries) {
+          const safeTerm = escapeHtml(term);
+          s = s.split(safeTerm).join(`<a class="note-link" href="ps_notes.html#${id}">${safeTerm}</a>`);
+        }
+
+        return s;
+      }
+
+      function categoryNotesCell(items) {
+        if (!items || items.length === 0) return `<span class="empty">—</span>`;
+
+        const lis = items.map(x => {
+          const label = String(x ?? "").trim();
+          if (!label) return "";
+          return `<li>${linkHardwareCategoryKeywords(label)}</li>`;
+        }).filter(Boolean).join("");
+
+        return lis ? `<ul class="stack">${lis}</ul>` : `<span class="empty">—</span>`;
+      }
+
       function notesCell(items, row) {
         if (!items || items.length === 0) return `<span class="empty">—</span>`;
         const lis = items.map(x => {
@@ -476,7 +512,7 @@
         );
       }
 
-      const NOTE_NO_LINK = new Set(["2 x Guitars", "Steelcase", "x"]);
+      const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Controller Adapter", "Cooler", "Driving Wheel", "Flight Stick", "Game Tablet", "Gaming Chair", "Horizontal Stand", "Pack of 2", "USB Adapter", "Vertical Stand", "Wired", "Wireless", "x"]);
 
       const MORE_INFO_SKY_TITLES = new Set([
         "Skylanders: Giants",
@@ -488,6 +524,7 @@
       ]);
 
       const NOTE_ID_MAP = {
+        "Stock": "stock",
         "Online Only": "online",
         "Discontinued": "disc",
         "3D Compatible": "3d",
@@ -585,11 +622,11 @@
         const tbody = document.getElementById("tbodyHardware");
         tbody.innerHTML = rows.map(r => `
           <tr>
-            <td class="col-device" data-label="Device">${escapeHtml(r.device)}</td>
+            <td class="col-device" data-label="Device"><a class="hard-link" href="ps_hard.html#${encodeURIComponent([r.device, (r.platform||""), r.brand, (r.category||"")].join("||"))}">${escapeHtml(r.device)}</a></td>
             <td class="col-platform" data-label="Platform">${listCell(asArray(r.platform))}</td>
             <td class="col-brand" data-label="Brand">${escapeHtml(r.brand)}</td>
-            <td class="col-category" data-label="Category">${listCell(asArray(r.category))}</td>
-            <td class="col-notes" data-label="Notes">${listCell(r.notes || [])}</td>
+            <td class="col-category" data-label="Category">${categoryNotesCell(asArray(r.category))}</td>
+            <td class="col-notes" data-label="Notes">${notesCell(r.notes, r)}</td>
           </tr>
         `).join("");
 
