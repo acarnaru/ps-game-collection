@@ -523,6 +523,12 @@
         "Skylanders: Trap Team"
       ]);
 
+      const MORE_INFO_DISNEY_TITLES = new Set([
+        "Disney Infinity",
+        "Disney Infinity 2.0",
+        "Disney Infinity 3.0"
+      ]);
+
       const NOTE_ID_MAP = {
         "Stock": "stock",
         "Online Only": "online",
@@ -552,8 +558,9 @@
       function noteHrefForRow(label, row) {
         if (NOTE_NO_LINK.has(label)) return null;
         if (label === "More Info") {
-          if (MORE_INFO_SKY_TITLES.has(row.title)) return "ps_sky.html";
-          if (row.title === "Starlink: Battle for Atlas") return "ps_star.html";
+          if (MORE_INFO_SKY_TITLES.has(row.title)) return "ps_skyland/ps_sland.html";
+          if (MORE_INFO_DISNEY_TITLES.has(row.title)) return "ps_disney/ps_dinf.html";
+          if (row.title === "Starlink: Battle for Atlas") return "ps_starlink/ps_slink.html";
           return null;
         }
         const id = NOTE_ID_MAP[label] || noteToId(label);
@@ -576,7 +583,7 @@
         const tbody = document.getElementById("tbody");
         tbody.innerHTML = rows.map(r => `
           <tr>
-            <td class="col-title" data-label="Title"><a class="game-link" href="ps_game.html#${encodeURIComponent([r.title, r.platform, (r.format||""), (r.version||"")].join("||"))}">${escapeHtml(r.title)}</a></td>
+            <td class="col-title" data-label="Title"><a class="game-link" href="ps_game/ps_game.html#${encodeURIComponent([r.title, r.platform, (r.format||""), (r.version||"")].join("||"))}">${escapeHtml(r.title)}</a></td>
             <td class="col-platform" data-label="Platform">${escapeHtml(r.platform)}</td>
             <td class="col-genre" data-label="Genre">${genreCell(r.genre)}</td>
             <td class="col-format" data-label="Format">${escapeHtml(r.format)}</td>
@@ -622,7 +629,7 @@
         const tbody = document.getElementById("tbodyHardware");
         tbody.innerHTML = rows.map(r => `
           <tr>
-            <td class="col-device" data-label="Device"><a class="hard-link" href="ps_hard.html#${encodeURIComponent([r.device, (r.platform||""), r.brand, (r.category||"")].join("||"))}">${escapeHtml(r.device)}</a></td>
+            <td class="col-device" data-label="Device"><a class="hard-link" href="ps_game/ps_hard.html#${encodeURIComponent([r.device, (r.platform||""), r.brand, (r.category||"")].join("||"))}">${escapeHtml(r.device)}</a></td>
             <td class="col-platform" data-label="Platform">${listCell(asArray(r.platform))}</td>
             <td class="col-brand" data-label="Brand">${escapeHtml(r.brand)}</td>
             <td class="col-category" data-label="Category">${categoryNotesCell(asArray(r.category))}</td>

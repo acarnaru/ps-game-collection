@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="../ps_pic/ps_plat.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../ps_pic/ps_plat.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../ps_pic/ps_plat.png">
+
+    <title>Skylanders Catalogue</title>
+    <link rel="stylesheet" href="../ps_styles.css"/>
+    <link rel="stylesheet" href="../ps_resp.css"/>
+</head>
+
+  <body>
+    <button id="toTop" aria-label="Back to top">▲</button>
+    <header class="site-header">
+      <div class="site-title">PlayStation Trophy Hunter&#39;s Cache</div>
+    </header>
+
+    <div class="sticky-header">
+      <div class="mode-toggle tab-toggle" id="tabToggle" role="tablist" aria-label="Skylanders catalogue tabs"></div>
+
+      <div class="topbar topbar-2">
+        <div class="subtitle" id="subTitle">Skylanders Catalogue</div>
+        <div class="search">
+          <input id="q" type="search" placeholder="Search..." autocomplete="off"/>
+          <select id="variantSel" aria-label="Variant filter">
+            <option value="all">Variant: All</option>
+            <option value="regular">Regular</option>
+            <option value="special">Special</option>
+          </select>
+          <button id="clear" class="action-btn">Clear</button>
+          <a class="action-btn" href="../ps_index.html">Back to Games</a>
+        </div>
+      </div>
+
+      <div class="filterbar">
+        <div class="filtergroup" id="gameGroup">
+          <div class="filterlabel">Game</div>
+          <div class="chips" id="gameChips"></div>
+        </div>
+
+        <div class="filtergroup" id="elementGroup">
+          <div class="filterlabel">Element</div>
+          <div class="chips" id="elementChips"></div>
+        </div>
+
+        <div class="filtergroup" id="typeGroup" style="display:none;">
+          <div class="filterlabel">Type</div>
+          <div class="chips" id="typeChips"></div>
+        </div>
+
+        <div class="filtergroup" id="terrainGroup" style="display:none;">
+          <div class="filterlabel">Terrain</div>
+          <div class="chips" id="terrainChips"></div>
+        </div>
+
+        <div class="filtergroup" id="battleGroup" style="display:none;">
+          <div class="filterlabel">Battle Class</div>
+          <div class="chips" id="battleChips"></div>
+        </div>
+
+        <div class="filtermeta" id="filterMeta">
+          <span id="stats"></span>
+        </div>
+      </div>
+    </div>
+
+    <div id="skylandersContent" class="wrap">
+      <div class="table-card">
+        <table>
+          <thead id="thead"></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <script src="../ps_data.js"></script>
+    <script src="../ps_loader.js"></script>
+
+    <script>
+
+      const { DATA } = PSLOAD.getSkyData();
+
+      (function syncHeaderHeight(){
+        const header = document.querySelector(".sticky-header");
+        if (!header) return;
+
+        function setH(){
+          const h = header.getBoundingClientRect().height;
+          document.documentElement.style.setProperty("--appHeaderH", Math.ceil(h) + "px");
+        }
+
+        window.addEventListener("resize", setH);
+        window.addEventListener("load", setH);
+        window.addEventListener("orientationchange", setH);
+        setH();
+
+        if ("ResizeObserver" in window) {
+          const ro = new ResizeObserver(() => setH());
+          ro.observe(header);
+        }
+      })();
+
+      (function () {
+        const btn = document.getElementById("toTop");
+        if (!btn) return;
+        const wrap = document.querySelector(".wrap");
+        function scrollPos() {
+          const win = window.pageYOffset || document.documentElement.scrollTop || 0;
+          const box = wrap ? wrap.scrollTop : 0;
+          return Math.max(win, box);
+        }
+        function showOrHide() {
+          btn.classList.toggle("show", scrollPos() > 300);
+        }
+        window.addEventListener("scroll", showOrHide, { passive: true });
+        if (wrap) wrap.addEventListener("scroll", showOrHide, { passive: true });
+        showOrHide();
+        btn.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          if (wrap) wrap.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      })();
+
+        const REGULAR_TAGS = new Set(["Anchors Away", "Big Bang", "Big Bubble", "Blizzard", "Bone Bash", "Core", "Deep Dive", "Double Dare", "Fire Bone", "Fizzy Frenzy", "Full Blast", "Giant", "Heavy Duty", "Hog Wild", "Horn Blast", "Hurricane", "Hyper Beam", "Knockout", "Lava Barf", "Lava Lance", "Mega Ram", "Mini", "Ninja", "Phantom", "Shark Shooter", "Skylander Sensei", "Super Gulp", "Super Shot", "Sure Shot", "Swapper", "Thorn Horn", "Tidal Wave", "Trap Master", "Turbo", "Twin Blade", "Villain Sensei"]);
+              const TABS = [
+                { id:"skylanders", label:"Skylanders", subtitle:"Skylanders Catalogue", showVariant:true, chipGroups:["game","element"], extraGroups:[] },
+                { id:"magic", label:"Magic Items", subtitle:"Magic Catalogue", showVariant:true, chipGroups:["game", "type"], extraGroups:["type"] },
+                { id:"stages", label:"Stages", subtitle:"Stages Catalogue", showVariant:true, chipGroups:["game","type"], extraGroups:["type"] },
+                { id:"traps", label:"Traps", subtitle:"Traps Catalogue", showVariant:true, chipGroups:["element"], extraGroups:[] },
+                { id:"vehicles", label:"Vehicles", subtitle:"Vehicles Catalogue", showVariant:true, chipGroups:["element","terrain"], extraGroups:["terrain"] },
+                { id:"crystals", label:"Creation Crystals", subtitle:"Crystals Catalogue", showVariant:true, chipGroups:["element","battleClass"], extraGroups:["battleClass"] },
+                { id:"extra", label:"Extras", subtitle:"Extras Catalogue", showVariant:false, chipGroups:["game"], extraGroups:[] }
+              ];
+
+        const COLS = {
+          skylanders: [
+            { key:"name", label:"Skylander" },
+            { key:"element", label:"Element" },
+            { key:"game", label:"Game" },
+            { key:"variant", label:"Variant" },
+            { key:"build", label:"Build" },
+            { key:"hat", label:"Hat" },
+          ],
+          magic: [
+            { key:"name", label:"Item" },
+            { key:"type", label:"Type" },
+            { key:"variant", label:"Variant" },
+            { key:"game", label:"Game" },
+          ],
+          stages: [
+            { key:"name", label:"Stage" },
+            { key:"type", label:"Type" },
+            { key:"variant", label:"Variant" },
+            { key:"game", label:"Game" },
+          ],
+          traps: [
+            { key:"name", label:"Trap" },
+            { key:"element", label:"Element" },
+            { key:"variant", label:"Variant" },
+            { key:"villain", label:"Villain" },
+          ],
+          vehicles: [
+            { key:"name", label:"Vehicle" },
+            { key:"element", label:"Element" },
+            { key:"terrain", label:"Terrain" },
+            { key:"driver", label:"Driver" },
+            { key:"variant", label:"Variant" },
+            { key:"build", label:"Build" },
+          ],
+          crystals: [
+            { key:"name", label:"Crystal" },
+            { key:"element", label:"Element" },
+            { key:"variant", label:"Variant" },
+            { key:"battleClass", label:"Battle Class" },
+            { key:"build", label:"Build" },
+            { key:"hat", label:"Hat" },
+          ],
+          extra: [
+            { key:"name", label:"Item" },
+            { key:"game", label:"Game" },
+          ],
+        };
+
+        const GAME_VALUES = ["Spyro's Adventure","Giants","Swap Force","Trap Team","SuperChargers","Imaginators"];
+        const ELEMENT_VALUES_BASE = ["Air","Water","Fire","Earth","Life","Undead","Magic","Tech","Light","Dark"];
+        const ELEMENT_VALUES_WITH_CHAOS = [...ELEMENT_VALUES_BASE, "Chaos"];
+        const TYPE_VALUES_MAGIC = ["Buff","DPS","Utility"];
+        const TYPE_VALUES_STAGE = ["Adventure","Battle Arena","Race Track","Vehicle"];
+        const TERRAIN_VALUES = ["Sky","Sea","Land"];
+        const BATTLE_VALUES = ["Brawler","Sorcerer","Smasher","Bowslinger","Knight","Quickshot","Sentinel","Ninja","Bazooker","Swashbuckler"];
+
+        let activeTab = "skylanders";
+        let sortAsc = true;
+
+        const els = {
+          tabToggle: document.getElementById("tabToggle"),
+          subTitle: document.getElementById("subTitle"),
+          q: document.getElementById("q"),
+          variantSel: document.getElementById("variantSel"),
+          clear: document.getElementById("clear"),
+          thead: document.getElementById("thead"),
+          tbody: document.getElementById("tbody"),
+          stats: document.getElementById("stats"),
+          gameGroup: document.getElementById("gameGroup"),
+          elementGroup: document.getElementById("elementGroup"),
+          typeGroup: document.getElementById("typeGroup"),
+          terrainGroup: document.getElementById("terrainGroup"),
+          battleGroup: document.getElementById("battleGroup"),
+          gameChips: document.getElementById("gameChips"),
+          elementChips: document.getElementById("elementChips"),
+          typeChips: document.getElementById("typeChips"),
+          terrainChips: document.getElementById("terrainChips"),
+          battleChips: document.getElementById("battleChips"),
+        };
+
+        const contentWrap = document.querySelector('.wrap');
+
+        const state = {
+          q: "",
+          variant: "all",
+          game: new Set(),
+          element: new Set(),
+          type: new Set(),
+          terrain: new Set(),
+          battleClass: new Set(),
+        };
+
+      function fillSet(set, values) {
+        set.clear();
+        values.forEach(v => set.add(v));
+      }
+
+      function resetFiltersToDefault() {
+        state.variant = "all";
+        els.variantSel.value = "all";
+
+        state.game.clear();
+        state.element.clear();
+        state.type.clear();
+        state.terrain.clear();
+        state.battleClass.clear();
+
+        if (activeTab === "skylanders") {
+          fillSet(state.game, GAME_VALUES);
+          fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
+        } else if (activeTab === "magic") {
+          fillSet(state.game, GAME_VALUES);
+          fillSet(state.type, TYPE_VALUES_MAGIC);
+        } else if (activeTab === "stages") {
+          fillSet(state.game, GAME_VALUES);
+          fillSet(state.type, TYPE_VALUES_STAGE);
+        } else if (activeTab === "traps") {
+          fillSet(state.element, ELEMENT_VALUES_WITH_CHAOS);
+        } else if (activeTab === "vehicles") {
+          fillSet(state.element, ELEMENT_VALUES_BASE);
+          fillSet(state.terrain, TERRAIN_VALUES);
+        } else if (activeTab === "crystals") {
+          fillSet(state.element, ELEMENT_VALUES_BASE);
+          fillSet(state.battleClass, BATTLE_VALUES);
+        } else if (activeTab === "extra") {
+          fillSet(state.game, GAME_VALUES);
+        }
+      }
+
+      function makeChip(label, groupKey) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "chip";
+        btn.innerHTML = "<b>" + label + "</b>";
+        btn.addEventListener("click", () => {
+          const set = state[groupKey];
+          if (set.has(label)) set.delete(label); else set.add(label);
+          render();
+        });
+        return btn;
+      }
+
+      function buildTabs() {
+        els.tabToggle.innerHTML = "";
+        TABS.forEach(t => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "chip" + (t.id === activeTab ? " on" : "");
+          btn.setAttribute("role","tab");
+          btn.setAttribute("aria-selected", t.id === activeTab ? "true" : "false");
+          btn.innerHTML = "<b>" + t.label + "</b>";
+          btn.addEventListener("click", () => {
+            activeTab = t.id;
+            resetFiltersToDefault();
+            sortAsc = true;
+            render();
+            buildTabs();
+          });
+          els.tabToggle.appendChild(btn);
+        });
+      }
+
+      function buildChips() {
+        els.gameChips.innerHTML = "";
+        GAME_VALUES.forEach(v => els.gameChips.appendChild(makeChip(v, "game")));
+
+        els.elementChips.innerHTML = "";
+        const elementVals =
+          (activeTab === "skylanders" || activeTab === "traps")
+            ? ELEMENT_VALUES_WITH_CHAOS
+            : ELEMENT_VALUES_BASE;
+
+        elementVals.forEach(v => els.elementChips.appendChild(makeChip(v, "element")));
+
+        els.typeChips.innerHTML = "";
+        let typeVals = [];
+        if (activeTab === "magic") typeVals = TYPE_VALUES_MAGIC;
+        else if (activeTab === "stages") typeVals = TYPE_VALUES_STAGE;
+
+        typeVals.forEach(v => els.typeChips.appendChild(makeChip(v, "type")));
+
+        els.terrainChips.innerHTML = "";
+        TERRAIN_VALUES.forEach(v => els.terrainChips.appendChild(makeChip(v, "terrain")));
+
+        els.battleChips.innerHTML = "";
+        BATTLE_VALUES.forEach(v => els.battleChips.appendChild(makeChip(v, "battleClass")));
+      }
+
+
+      function chipOnOff() {
+        const tab = TABS.find(t => t.id === activeTab);
+        const showGame = tab.chipGroups.includes("game");
+        const showElement = tab.chipGroups.includes("element");
+        const showType = tab.chipGroups.includes("type");
+        const showTerrain = tab.chipGroups.includes("terrain");
+        const showBattle = tab.chipGroups.includes("battleClass");
+
+        els.gameGroup.style.display = showGame ? "" : "none";
+        els.elementGroup.style.display = showElement ? "" : "none";
+        els.typeGroup.style.display = showType ? "" : "none";
+        els.terrainGroup.style.display = showTerrain ? "" : "none";
+        els.battleGroup.style.display = showBattle ? "" : "none";
+      }
+
+      function syncChipUI() {
+        function sync(container, set) {
+          [...container.querySelectorAll(".chip")].forEach(ch => {
+            const label = ch.textContent.trim();
+            ch.classList.toggle("on", set.has(label));
+          });
+        }
+        sync(els.gameChips, state.game);
+        sync(els.elementChips, state.element);
+        sync(els.typeChips, state.type);
+        sync(els.terrainChips, state.terrain);
+        sync(els.battleChips, state.battleClass);
+      }
+
+      function buildHeader() {
+        const cols = COLS[activeTab] || [];
+        const first = cols[0];
+        const arrow = sortAsc ? "▼" : "▲";
+        let th = "<tr>";
+        cols.forEach((c, idx) => {
+          if (idx === 0) {
+            th += `<th class="col-title col-${c.key}">${c.label} <button id="nameSort" class="sort-arrow" aria-label="Toggle alphabetical sort" type="button">${arrow}</button></th>`;
+          } else {
+            th += `<th class="col-${c.key}">${c.label}</th>`;
+          }
+        });
+        th += "</tr>";
+        els.thead.innerHTML = th;
+
+        const btn = document.getElementById("nameSort");
+        if (btn) {
+          btn.addEventListener("click", () => {
+            sortAsc = !sortAsc;
+            render();
+          });
+        }
+      }
+
+      function matchText(item, q) {
+        if (!q) return true;
+        const hay = JSON.stringify(item).toLowerCase();
+        return hay.includes(q.toLowerCase());
+      }
+
+      function matchVariant(item) {
+        if (activeTab === "extra") return true;
+        const v = (item.variant || "").toString();
+        if (state.variant === "all") return true;
+        const isRegular = REGULAR_TAGS.has(v);
+        return state.variant === "regular" ? isRegular : !isRegular;
+      }
+
+      function matchSet(itemVal, set) {
+        if (!set || set.size === 0) return false;
+        return set.has((itemVal || "").toString());
+      }
+
+      function matchAnyInArray(arr, set) {
+        if (!set || set.size === 0) return false;
+        if (!Array.isArray(arr)) return false;
+        return arr.some(v => set.has((v||"").toString()));
+      }
+
+      function getTabSource(tabId) {
+        const base = DATA[tabId] || [];
+        const hybrid = DATA.hybrid || [];
+
+        if (tabId === "magic") {
+          const projected = hybrid
+            .filter(h => h.magicType) // only hybrids that have magic data
+            .map(h => ({
+              name: h.name,
+              variant: h.variant || "",
+              game: h.game || "",
+              type: h.magicType,      // Magic tab expects "type"
+            }));
+          return base.concat(projected);
+        }
+
+        if (tabId === "stages") {
+          const projected = hybrid
+            .filter(h => h.stageType) // only hybrids that have stage data
+            .map(h => ({
+              name: h.name,
+              variant: h.variant || "",
+              game: h.game || "",
+              type: h.stageType,      // Stages tab expects "type" (string OR array)
+            }));
+          return base.concat(projected);
+        }
+
+        return base;
+      }
+
+      function getFiltered() {
+        const src = getTabSource(activeTab);
+        const q = state.q.trim();
+        return src.filter(it => {
+          if (!matchText(it, q)) return false;
+          if (!matchVariant(it)) return false;
+
+          if (activeTab === "skylanders") {
+            if (!matchSet(it.game, state.game)) return false;
+            if (!matchSet(it.element, state.element)) return false;
+          } else if (activeTab === "magic" || activeTab === "stages") {
+            if (!matchSet(it.game, state.game)) return false;
+            const okType = Array.isArray(it.type)
+              ? matchAnyInArray(it.type, state.type)
+              : matchSet(it.type, state.type);
+            if (!okType) return false;
+          } else if (activeTab === "traps") {
+            if (!matchSet(it.element, state.element)) return false;
+          } else if (activeTab === "vehicles") {
+            if (!matchSet(it.element, state.element)) return false;
+            if (!matchSet(it.terrain, state.terrain)) return false;
+          } else if (activeTab === "crystals") {
+            if (!matchSet(it.element, state.element)) return false;
+            if (!matchSet(it.battleClass, state.battleClass)) return false;
+          } else if (activeTab === "extra") {
+            if (!matchSet(it.game, state.game)) return false;
+          }
+          return true;
+        });
+      }
+
+      function renderRows(items) {
+        const cols = COLS[activeTab] || [];
+        items = [...items].sort((a,b) => {
+          const av = (a.name || "").toString().toLowerCase();
+          const bv = (b.name || "").toString().toLowerCase();
+          if (av < bv) return sortAsc ? -1 : 1;
+          if (av > bv) return sortAsc ? 1 : -1;
+          const av2 = (a.variant || "").toString().toLowerCase();
+          const bv2 = (b.variant || "").toString().toLowerCase();
+          if (av2 < bv2) return -1;
+          if (av2 > bv2) return 1;
+          return 0;
+        });
+
+        function esc(s){
+          return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+        }
+
+        const rowsHtml = items.map(it => {
+          const tds = cols.map(c => {
+            let v = it[c.key];
+            if (Array.isArray(v)) {
+              const lis = v.filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("");
+              return `<td class="col-${c.key}"><ul class="stack">${lis}</ul></td>`;
+            }
+            return `<td class="col-${c.key}">${esc(v)}</td>`;
+          }).join("");
+          return `<tr>${tds}</tr>`;
+        }).join("");
+        els.tbody.innerHTML = rowsHtml;
+        const total = getTabSource(activeTab).length;
+        els.stats.textContent = `${items.length} visible out of ${total} total`;
+      }
+
+      function render() {
+        const tab = TABS.find(t => t.id === activeTab);
+        if (contentWrap) contentWrap.id = activeTab + 'Content';
+        els.subTitle.textContent = tab ? tab.subtitle : "";
+        els.variantSel.style.display = (tab && tab.showVariant) ? "" : "none";
+
+        chipOnOff();
+        buildChips();
+        syncChipUI();
+        buildHeader();
+
+        const items = getFiltered();
+        renderRows(items);
+        buildTabs();
+      }
+
+      els.q.addEventListener("input", (e) => {
+        state.q = e.target.value || "";
+        render();
+      });
+      els.variantSel.addEventListener("change", (e) => {
+        state.variant = e.target.value || "all";
+        render();
+      });
+      els.clear.addEventListener("click", () => {
+        state.q = "";
+        els.q.value = "";
+        resetFiltersToDefault();
+        sortAsc = true;
+        render();
+      });
+
+      state.q = "";
+      resetFiltersToDefault();
+      buildTabs();
+      render();
+    </script>
+  </body>
+
+  <footer class="site-footer">
+    <p><a href="../ps_index.html">PlayStation Trophy Hunter's Cache</a> is a personal, non-commercial catalogue created for informational and archival purposes only.</p>
+    <p>All game titles, trademarks, and logos are the property of their respective owners. <a href="https://www.playstation.com" target="_blank" rel="noopener">PlayStation</a> is a registered trademark of <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a>.</p>
+    <p>This site is not affiliated with or endorsed by <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a> or any game publishers.</p>
+  </footer>
+</html>
