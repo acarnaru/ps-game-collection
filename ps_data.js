@@ -994,26 +994,42 @@
     const PS_HARDWARE = [
 
         /*Placeholder:
-        {"device": "", "platform": "", "brand": "", "category": "", "notes": [], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
+        {"device": "", "platform": "", "brand": "", "colour": "", "category": "", "notes": [], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
         */
 
-        {"device": "Compact", "platform":"PS4", "brand":"Nacon", "category":"Controller", "notes":["Wired"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "DualShock 4", "platform":"PS4", "brand":"Sony", "category":"Controller", "notes":["Wireless"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "Onyx Plus", "platform":"PS4", "brand":"Hori", "category":"Controller", "notes":["Wireless"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PS Move Motion", "platform":"PS3", "brand":"Sony", "category":["Controller","PS Move"], "notes":["Wireless","Pack of 2"], "condition": "Used - Very Good", "seeAlso": ["PS Move Motion (PS4)", "PS Move Navigation"], "additionalInfo": ["Includes 2 x wireless Motion Controllers.", "Also PSVR compatible."]},
-        {"device": "PS Move Motion", "platform":"PS4", "brand":"Sony", "category":["Controller","PSVR"], "notes":["Wireless","Pack of 2"], "condition": "Used - Very Good", "seeAlso": ["PS Move Motion (PS3)", "PS Move Navigation"], "additionalInfo": ["Includes 2 x wireless Motion Controllers.", "Also PS Move compatible."]},
-        {"device": "PS Move Navigation", "platform":"PS3", "brand":"Sony", "category":["Controller","PS Move"], "notes":["Wireless"], "condition": "Used - Very Good", "seeAlso": ["PS Move Motion (PS3)", "PS Move Motion (PS4)"], "additionalInfo": ["Wireless Navigation Controller."]},
-        {"device": "PS Vita PCH-1104", "platform":"Vita", "brand":"Sony", "category":["Console","Handheld"], "notes":["Stock","64GB Memory Card"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PS3 Slim", "platform":"PS3", "brand":"Sony", "category":"Console", "notes":["Stock", "320GB HDD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PS3 Ultra Slim", "platform":"PS3", "brand":"Sony", "category":"Console", "notes":["1TB SSD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PS4 Pro", "platform":"PS4", "brand":"Sony", "category":"Console", "notes":["8TB SSD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PS5 Pro", "platform":"PS5", "brand":"Sony", "category":"Console", "notes":["8TB SSD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PSTV", "platform":"Vita", "brand":"Sony", "category":"Console", "notes":["Stock"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PSVR", "platform":"PS4", "brand":"Sony", "category":["VR","Headset"], "notes":["Stock"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "PSVR2", "platform":"PS5", "brand":"Sony", "category":["VR","Headset"], "notes":["Stock"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "T300: GT Edition", "platform":["PS4","PS5"], "brand":"Thrustmaster", "category":"Other", "notes":["Driving Wheel"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Includes Driving Wheel and Pedals.", "Does not include Gear Shifter."]},
-        {"device": "uDraw", "platform":"PS3", "brand":"THQ", "category":"Other", "notes":["Game Tablet"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []},
-        {"device": "VX3", "platform":"PS3", "brand":"Gioteck", "category":"Controller", "notes":["Wireless","Pack of 2"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": []}
+        {"device": "Aim Controller", "platform": "PS4", "brand": "Sony", "colour": "White", "category": ["Other", "PSVR"], "notes": ["Controller Adapter", "Wireless"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Wireless Controller Adapter for PS Move Motion controllers.", "Intended for PSVR FPS games."]},
+        {"device": "Compact", "platform": "PS4", "brand": "Nacon", "colour": "Black", "category": "Controller", "notes": ["Wired"], "condition": "Used - Very Good", "seeAlso": ["DualShock 4", "Onyx Plus", "Victrix Pro BFG", "Wireless RGB"], "additionalInfo": ["Mid-range wired controller with touchpad functionality and built-in 3.5mm audio jack."]},
+        {"device": "Cronus Max", "platform": ["PS3", "PS4", "PSTV"], "brand": "Collective Minds", "colour": "Black", "category": "Other", "notes": ["Controller Adapter"], "condition": "Used - Very Good", "seeAlso": ["Cronus Zen"], "additionalInfo": ["Macro tool for official Sony controllers."]},
+        {"device": "Cronus Zen", "platform": ["PS3", "PS4", "PS5"], "brand": "Collective Minds", "colour": "Black/Light Blue", "category": "Other", "notes": ["Controller Adapter"], "condition": "Used - Very Good", "seeAlso": ["Cronus Max"], "additionalInfo": ["Macro tool for official Sony controllers."]},
+        {"device": "DualSense", "platform": "PS5", "brand": "Sony", "colour": "White", "category": "Controller", "notes": ["Wireless"], "condition": "Used - Very Good", "seeAlso": ["Victrix Pro BFG"], "additionalInfo": ["Official Sony PS5 wireless controller, with vibration features, touchpad functionality and built-in speaker."]},
+        {"device": "DualShock 4", "platform": "PS4", "brand": "Sony", "colour": "Black", "category": "Controller", "notes": ["Wireless"], "condition": "Used - Very Good", "seeAlso": ["Compact", "Onyx Plus", "Victrix Pro BFG", "Wireless RGB"], "additionalInfo": ["Official Sony PS4 wireless controller, with vibration features, touchpad functionality and built-in speaker."]},
+        {"device": "Legend 2.1", "platform": ["PS4", "PS5"], "brand": "X Rocker", "colour": "White/Blue/Black", "category": "Other", "notes": ["Gaming Chair"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["2.1 speaker system, with integrated subwoofer and vibration features.", "Wired connectivity for DualShock 4 and DualSense/DualSense Edge controllers.", "Bluetooth connectivity for PC and mobile devices."]},
+        {"device": "Onyx Plus", "platform": "PS4", "brand": "Hori", "colour": "Black", "category": "Controller", "notes": ["Wireless"], "condition": "Used - Very Good", "seeAlso": ["Compact", "DualShock 4", "Victrix Pro BFG", "Wireless RGB"], "additionalInfo": ["Mid-range wireless asymmetrical controller, with touchpad functionality and built-in 3.5mm audio jack."]},
+        {"device": "PS Eye", "platform": "PS3", "brand": "Sony", "colour": "Black", "category": "Other", "notes": ["Webcam", "Wired"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Mainly used with PS Move compatible games."]},
+        {"device": "PS Move Motion", "platform": "PS3", "brand": "Sony", "colour": "Black", "category": ["Controller", "PS Move"], "notes": ["Wireless", "Pack of 2"], "condition": "Used - Very Good", "seeAlso": ["PS Move Motion (PS4)", "PS Move Navigation"], "additionalInfo": ["Includes 2 x official Sony wireless Motion Controllers for PS Move compatible games.", "Also PSVR compatible."]},
+        {"device": "PS Move Motion", "platform": "PS4", "brand": "Sony", "colour": "Black", "category": ["Controller", "PSVR"], "notes": ["Wireless", "Pack of 2"], "condition": "Used - Very Good", "seeAlso": ["PS Move Motion (PS3)", "PS Move Navigation"], "additionalInfo": ["Includes 2 x official Sony wireless Motion Controllers for PSVR compatible games.", "Also PS Move compatible."]},
+        {"device": "PS Move Navigation", "platform": "PS3", "brand": "Sony", "colour": "Black", "category": ["Controller", "PS Move"], "notes": ["Wireless"], "condition": "Used - Very Good", "seeAlso": ["PS Move Motion (PS3)", "PS Move Motion (PS4)"], "additionalInfo": ["Official Sony wireless Navigation Controller for PS Move compatible games."]},
+        {"device": "PS Vita PCH-1104", "platform": "Vita", "brand": "Sony", "colour": "Black", "category": ["Console", "Handheld"], "notes": ["Stock", "64GB Memory Card"], "condition": "Used - Very Good", "seeAlso": ["PSTV VTE-1016"], "additionalInfo": ["Wi-Fi and 3G compatibility (3G no longer supported by telecom providers).", "OLED touchscreen.", "64GB official Sony PS Vita memory card."]},
+        {"device": "PS3 Slim", "platform": "PS3", "brand": "Sony", "colour": "Black", "category": "Console", "notes": ["Stock", "320GB HDD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Standard 320GB HDD."]},
+        {"device": "PS3 Ultra Slim", "platform": "PS3", "brand": "Sony", "colour": "Black", "category": "Console", "notes": ["1TB SSD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Fitted with a Samsung 870 EVO 1TB SSD."]},
+        {"device": "PS4 Pro", "platform": "PS4", "brand": "Sony", "colour": "Black", "category": "Console", "notes": ["8TB SSD"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Fitted with a Samsung 870 QVO internal 8TB SSD."]},
+        {"device": "PS5 Pro", "platform": "PS5", "brand": "Sony", "colour": "White/Black", "category": "Console", "notes": ["8TB SSD", "Disc Drive"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Fitted with a WD_Black SN850P internal 8TB SSD and an official Sony PS5 external Blu-ray Disc Drive."]},
+        {"device": "PSTV VTE-1016", "platform": "Vita", "brand": "Sony", "colour": "Black", "category": ["Micro-Console"], "notes": ["Stock"], "condition": "Used - Very Good", "seeAlso": ["PS Vita PCH-1104"], "additionalInfo": []},
+        {"device": "PSVR", "platform": "PS4", "brand": "Sony", "colour": "White", "category": ["VR", "Headset"], "notes": ["Stock"], "condition": "Used - Very Good", "seeAlso": ["PSVR 2"], "additionalInfo": []},
+        {"device": "PSVR2", "platform": "PS5", "brand": "Sony", "colour": "White", "category": ["VR", "Headset"], "notes": ["Stock"], "condition": "Used - Very Good", "seeAlso": ["PSVR"], "additionalInfo": []},
+        {"device": "Pulse 3D", "platform": ["PS4", "PS5"], "brand": "Sony", "colour": "White/Black", "category": ["Headphone", "PSVR"], "notes": ["Wireless"], "condition": "Used - Very Good", "seeAlso": ["Pulse Elite"], "additionalInfo": []},
+        {"device": "Pulse Elite", "platform": "PS5", "brand": "Sony", "colour": "White/Black", "category": "Headphone", "notes": ["Wireless"], "condition": "Used - Very Good", "seeAlso": ["Pulse 3D"], "additionalInfo": []},
+        {"device": "T.Flight Hotas 4", "platform": ["PS4", "PS5"], "brand": "Thrustmaster", "colour": "Black", "category": "Other", "notes": ["Flight Stick", "Wired"], "condition": "Used - Very Good", "seeAlso": ["T.Flight Hotas X"], "additionalInfo": ["Detachable throttle and programmable buttons.", "Also PC compatible."]},
+        {"device": "T.Flight Hotas X", "platform": "PS3", "brand": "Thrustmaster", "colour": "Black", "category": "Other", "notes": ["Flight Stick", "Wired"], "condition": "Used - Very Good", "seeAlso": ["T.Flight Hotas 4"], "additionalInfo": ["Detachable throttle and programmable buttons.", "Also PC compatible."]},
+        {"device": "T300RS: GT Edition", "platform": ["PS4","PS5"], "brand": "Thrustmaster", "colour": "Black", "category": "Other", "notes": ["Driving Wheel", "Wired"], "condition": "Used - Very Good", "seeAlso": ["TH8S"], "additionalInfo": ["Includes Driving Wheel and metallic Pedals.", "Gear Shifter not included.", "Also PC compatible."]},
+        {"device": "TAC Four Type K2", "platform": ["PS3", "PS4"], "brand": "Hori", "colour": "Black", "category": "Other", "notes": ["Keypad & Mouse Combo", "Wired"], "condition": "Used - Very Good", "seeAlso": ["TAC Grip", "Tactical Assault Commander"], "additionalInfo": []},
+        {"device": "TAC Grip", "platform": ["PS3", "PS4"], "brand": "Hori", "colour": "Black", "category": "Other", "notes": ["Gamepad & Mouse Combo", "Wired"], "condition": "Used - Very Good", "seeAlso": ["TAC Four Type K2", "Tactical Assault Commander"], "additionalInfo": []},
+        {"device": "Tactical Assault Commander", "platform": ["PS4", "PS5"], "brand": "Hori", "colour": "Black/Blue", "category": "Other", "notes": ["Keypad", "Wired"], "condition": "Used - Very Good", "seeAlso": ["TAC Four Type K2", "TAC Grip"], "additionalInfo": ["Mechanical Keypad compatible with HID-compliant mice.", "HID-compliant mouse not included.", "Also PC compatible."]},
+        {"device": "TH8S", "platform": ["PS4", "PS5"], "brand": "Thrustmaster", "colour": "Black/Red", "category": "Other", "notes": ["Gear Shifter", "Wired"], "condition": "Used - Very Good", "seeAlso": ["T300RS: GT Edition"], "additionalInfo": ["Compatible with the T300RS: GT Edition Driving Wheel.", "Also usable on PC."]},
+        {"device": "uDraw", "platform": "PS3", "brand": "THQ", "colour": "Black", "category": "Other", "notes": ["Game Tablet", "Wireless"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Only usable with uDraw compatible games.", "Includes Stylus pen."]},
+        {"device": "Victrix Pro BFG", "platform": ["PS4", "PS5"], "brand": "PDP", "colour": "Black", "category": "Controller", "notes": ["Wireless", "Modular"], "condition": "Used - Very Good", "seeAlso": ["Compact", "DualSense", "DualShock 4", "Onyx Plus", "Wireless RGB"], "additionalInfo": ["Premium, fully customisable wireless controller with adaptive triggers.", "Also PC compatible."]},
+        {"device": "VX3", "platform": "PS3", "brand": "Gioteck", "colour": "Black", "category": "Controller", "notes": ["Wireless", "Pack of 2"], "condition": "Used - Very Good", "seeAlso": [], "additionalInfo": ["Includes 2 x budget wireless controllers with vibration function."]},
+        {"device": "Wireless RGB", "platform": "PS4", "brand": "BRHE", "colour": "Clear/Black", "category": "Controller", "notes": ["Wireless", "RGB"], "condition": "Used - Very Good", "seeAlso": ["Compact", "DualShock 4", "Onyx Plus", "Victrix Pro BFG"], "additionalInfo": ["Budget wireless PS4 controller, with RGB lighting.", "Vibration and touchpad functionality.", "Adaptive triggers and built-in speaker."]},
     ];
 
     const SKY_DB = {
@@ -1680,20 +1696,25 @@
     const MANUFACTURER_LINKS = {
 
         //Active
+        "8BitDo": "https://www.8bitdo.com/",
         "Collective Minds": "https://www.cronusmax.com/",
         "Corsair": "https://www.corsair.com/uk/en",
         "Gioteck": "https://www.gioteck.com/",
         "Hama": "https://uk.hama.com/",
         "Hori": "https://hori.co.uk/",
         "Logitech": "https://www.logitechg.com/en-gb",
+        "Mayflash": "https://www.mayflash.com/",
         "Nacon": "https://www.nacongaming.com/en-GB/",
         "Razer": "https://www.razer.com/gb-en",
         "Sony": "https://www.playstation.com/en-gb/",
         "SplitFish": "https://world.splitfish.com/",
         "Thrustmaster": "https://www.thrustmaster.com/en-gb/homepage/",
         "Turtle Beach": "https://uk.turtlebeach.com/",
+        "Western Digital": "https://www.westerndigital.com/en-gb/",
+        "X Rocker": "https://xrocker.co.uk/",
 
         //Closed/Rebranded
+        "BRHE": "",
         "PDP": "",
         "THQ": ""
     };

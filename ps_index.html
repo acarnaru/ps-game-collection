@@ -86,6 +86,7 @@
                 <th class="col-device">Device</th>
                 <th class="col-platform">Platform</th>
                 <th class="col-brand">Brand</th>
+                <th class="col-colour">Colour</th>
                 <th class="col-category">Category</th>
                 <th class="col-notes">Notes</th>
               </tr>
@@ -165,6 +166,12 @@
         return Array.isArray(x) ? x : [x];
       }
 
+      function platformKey(p) {
+        const v = norm(p);
+        if (v === "pstv") return "vita";
+        return v;
+      }
+
       const PUBLISHER_ALIAS_REVERSE = (() => {
         const rev = Object.create(null);
         const a = (PSDB && PSDB.publisherAliases) ? PSDB.publisherAliases : null;
@@ -221,9 +228,11 @@
           rec.device,
           ...(asArray(rec.platform)),
           rec.brand,
+          rec.colour,
           ...(asArray(rec.category)),
           ...(rec.notes || [])
         ];
+
         const hay = hayParts.join(" ").toLowerCase();
         return hay.includes(q);
       }
@@ -503,6 +512,19 @@
           .replaceAll("'","&#039;");
       }
 
+      function manufacturerLinkHtml(name){
+        const n = (name || "").toString().trim();
+        if (!n) return "";
+
+        const links = (window.PSDB && PSDB.manufacturerLinks) ? PSDB.manufacturerLinks : null;
+        const url = links ? links[n] : null;
+
+        if (!url) return escapeHtml(n);
+
+        const safeUrl = escapeHtml(url);
+        return `<a class="ext-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(n)}</a>`;
+      }
+
       function linkNoTrophies(text){
         if (typeof text !== "string") return text;
 
@@ -512,7 +534,7 @@
         );
       }
 
-      const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Controller Adapter", "Cooler", "Driving Wheel", "Flight Stick", "Game Tablet", "Gaming Chair", "Horizontal Stand", "Pack of 2", "USB Adapter", "Vertical Stand", "Wired", "Wireless", "x"]);
+      const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Controller Adapter", "Cooler", "Digital", "Disc Drive", "Driving Wheel", "Flight Stick", "Game Tablet", "Gamepad", "Gamepad & Mouse Combo", "Gaming Chair", "Gear Shifter", "Horizontal Stand", "Keypad", "Keypad & Mouse Combo", "Modular", "Pack of 2", "Remote Control", "RGB", "USB Adapter", "Vertical Stand", "Webcam", "Wired", "Wireless", "x"]);
 
       const MORE_INFO_SKY_TITLES = new Set([
         "Skylanders: Giants",
@@ -571,7 +593,7 @@
         const q = norm(state.q);
         const gSel = state.genre;
         let rows = DATA.filter(r =>
-          state.platforms.has(r.platform) &&
+          [...state.platforms].some(sel => platformKey(sel) === platformKey(r.platform)) &&
           state.formats.has(r.format) &&
           includesAny(r, q) &&
           alphaMatches(r.title) &&
@@ -601,7 +623,9 @@
 
       function platformMatchesHardware(row) {
         const plats = asArray(row.platform);
-        return plats.some(p => state.platforms.has(p));
+        return plats.some(p =>
+          [...state.platforms].some(sel => platformKey(sel) === platformKey(p))
+        );
       }
 
       function categoryMatchesHardware(row) {
@@ -631,7 +655,8 @@
           <tr>
             <td class="col-device" data-label="Device"><a class="hard-link" href="ps_game/ps_hard.html#${encodeURIComponent([r.device, (r.platform||""), r.brand, (r.category||"")].join("||"))}">${escapeHtml(r.device)}</a></td>
             <td class="col-platform" data-label="Platform">${listCell(asArray(r.platform))}</td>
-            <td class="col-brand" data-label="Brand">${escapeHtml(r.brand)}</td>
+            <td class="col-brand" data-label="Brand">${manufacturerLinkHtml(r.brand)}</td>
+            <td class="col-colour" data-label="Colour">${escapeHtml(r.colour || "—")}</td>
             <td class="col-category" data-label="Category">${categoryNotesCell(asArray(r.category))}</td>
             <td class="col-notes" data-label="Notes">${notesCell(r.notes, r)}</td>
           </tr>
@@ -768,6 +793,104 @@
       }
 
       switchEl.addEventListener("change", updateModeUI);
+      // --- Swipe support for the Games/Hardware toggle (touch + pen devices, any screen size) ---
+      (function enableToggleSwipe(){
+        const toggleWrap = document.querySelector(".mode-toggle");
+        if (!toggleWrap) return;
+
+        let startX = 0, startY = 0, lastX = 0, lastY = 0;
+        let tracking = false;
+
+        // Minimum distance in CSS px to count as a swipe (scaled slightly with viewport)
+        function threshold(){
+          return Math.max(35, Math.min(90, Math.round(window.innerWidth * 0.06)));
+        }
+
+        function startedOnInteractive(target){
+          return !!(target && (
+            target.closest("a") ||
+            target.closest("button") ||
+            target.closest("input") ||
+            target.closest("select") ||
+            target.closest("textarea") ||
+            target.closest("label")
+          ));
+        }
+
+        function onStartFromPoint(pt){
+          startX = lastX = pt.clientX;
+          startY = lastY = pt.clientY;
+          tracking = true;
+        }
+
+        function onStart(e){
+          // Touch events only fire for touch, so no extra gating needed.
+          if (startedOnInteractive(e.target)) return;
+          const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
+          onStartFromPoint(pt);
+        }
+
+        function onMove(e){
+          if (!tracking) return;
+          const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
+          lastX = pt.clientX;
+          lastY = pt.clientY;
+
+          // Only block default behavior if it's clearly a horizontal swipe.
+          const dx = lastX - startX;
+          const dy = lastY - startY;
+          if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.4) {
+            e.preventDefault();
+          }
+        }
+
+        function onEnd(){
+          if (!tracking) return;
+          tracking = false;
+
+          const dx = lastX - startX;
+          const dy = lastY - startY;
+
+          // Require a mostly-horizontal swipe with enough distance.
+          if (Math.abs(dx) < threshold()) return;
+          if (Math.abs(dx) <= Math.abs(dy) * 1.4) return;
+
+          // Swipe right => Hardware, swipe left => Games
+          const wantHardware = dx > 0;
+          if (switchEl.checked !== wantHardware) {
+            switchEl.checked = wantHardware;
+            updateModeUI();
+          }
+        }
+
+        // Touch events (phones/tablets/touch laptops)
+        toggleWrap.addEventListener("touchstart", onStart, { passive: true });
+        toggleWrap.addEventListener("touchmove", onMove, { passive: false });
+        toggleWrap.addEventListener("touchend", onEnd, { passive: true });
+        toggleWrap.addEventListener("touchcancel", () => { tracking = false; }, { passive: true });
+
+        // Pointer events (pen/touch on Windows devices, some tablets)
+        toggleWrap.addEventListener("pointerdown", (e) => {
+          if (e.pointerType === "mouse") return; // don't enable swipe for mouse drags
+          if (startedOnInteractive(e.target)) return;
+          onStartFromPoint(e);
+        }, { passive: true });
+
+        toggleWrap.addEventListener("pointermove", (e) => {
+          if (e.pointerType === "mouse") return;
+          onMove(e);
+        }, { passive: false });
+
+        toggleWrap.addEventListener("pointerup", (e) => {
+          if (e.pointerType === "mouse") return;
+          onEnd(e);
+        }, { passive: true });
+
+        toggleWrap.addEventListener("pointercancel", () => { tracking = false; }, { passive: true });
+
+        window.addEventListener("resize", () => { tracking = false; }, { passive: true });
+      })();
+
       updateModeUI();
     </script>
   </body>

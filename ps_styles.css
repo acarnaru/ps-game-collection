@@ -63,6 +63,24 @@ body {
     justify-content: center;
     gap: 18px;
     margin: 16px 0 8px;
+    touch-action: pan-y;
+  }
+
+.mode-toggle.tab-toggle {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0 6px;
+    padding: 0 10px;
+  }
+
+.mode-toggle.tab-toggle .chip {
+    border: 1px solid var(--border);
+    background: var(--chip);
+  }
+
+.mode-toggle.tab-toggle .chip.on {
+    background: var(--chipOn);
+    border-color: rgba(99,179,237,.55);
   }
 
 .mode-label {
@@ -442,16 +460,17 @@ tbody tr:hover td {
     background: rgba(99,179,237,.06); 
   }
 
-.col-title { width: 25%; }
+.col-title { width: 24%; }
 .col-platform { width: 5%; }
 .col-genre { width: 9%; }
 .col-format { width: 7%; }
 .col-version { width: 14%; }
 .col-included { width: 28%; }
-.col-notes { width: 12%; }
+.col-notes { width: 13%; }
 
-.col-device   { width: 41%; }
-.col-brand    { width: 21%; }
+.col-device   { width: 30%; }
+.col-brand    { width: 20%; }
+.col-colour { width: 11%; }
 .col-category { width: 21%; }
 
 .site-footer {
@@ -632,21 +651,19 @@ th .sort-arrow:focus-visible {
     outline: none;
   }
 
-.mode-toggle.tab-toggle {
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 12px 0 6px;
-    padding: 0 10px;
+.picture-placeholder {
+    text-align: center;
   }
 
-.mode-toggle.tab-toggle .chip {
-    border: 1px solid var(--border);
-    background: var(--chip);
+.picture-placeholder-title {
+    font-size: 14px;
+    opacity: 0.9;
   }
 
-.mode-toggle.tab-toggle .chip.on {
-    background: var(--chipOn);
-    border-color: rgba(99,179,237,.55);
+.picture-placeholder-sub {
+    font-size: 12px;
+    opacity: 0.65;
+    margin-top: 6px;
   }
 
 body.ps-game-page .game-page-main,

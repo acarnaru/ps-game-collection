@@ -1,7 +1,7 @@
 @charset "utf-8";
 
-/* MOBILE - up to 540px */
 
+/* MOBILE - up to 540px */
 @media (max-width: 540px) {
   
   table { 
@@ -14,6 +14,7 @@
   #gamesContent .col-format { display: none; }
 
   #hardwareContent .col-brand { display: none; }
+  #hardwareContent .col-colour { display: none; }
 
   #skylandersContent .col-hat    { display: none; }
   #crystalsContent   .col-hat    { display: none; }
@@ -236,13 +237,36 @@
     grid-template-columns: 1fr !important;
   }
 
+  .picture-placeholder-title { 
+    font-size: 13px; 
+  }
+
+  .picture-placeholder-sub { 
+    font-size: 11px; 
+  }
+
   .tri-cards { 
     grid-template-columns: 1fr; 
   }
 }
 
+
 /* MOBILE screen rotate - max-width 932px - max-height 430px */
 @media (max-width: 932px) and (max-height: 430px) and (orientation: landscape) {
+
+  body.ps-game-page {
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
+  body.ps-game-page #includedGames,
+  body.ps-game-page #additionalInfo,
+  body.ps-game-page #seeAlso,
+  body.ps-game-page #miniGrid .mini-body .mini-list {
+    overflow: visible;
+    max-height: none;
+  }
   
   .sticky-header {
     backdrop-filter: none;
@@ -295,10 +319,12 @@
     line-height: 1.15;
   }
 
-  input[type="search"],
-  select,
-  button,
-  a,
+  .topbar-2 input[type="search"],
+  .topbar-2 select,
+  .topbar-2 button,
+  .topbar-2 a,
+  .game-header button,
+  .game-header a,
   .action-btn {
     padding: 6px 8px;
     border-radius: 8px;
@@ -360,8 +386,8 @@
   }
 }
 
-/* TABLET - 541px to 1024px */
 
+/* TABLET - 541px to 1024px */
 @media (min-width: 541px) and (max-width: 1024px) {
   
   table { 
@@ -440,6 +466,7 @@
     display: contents;
   }
 }
+
 
 /* MOBILE and TABLET - up to 1024px */
 @media (max-width: 1024px) {
