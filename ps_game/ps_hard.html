@@ -110,6 +110,10 @@
         return out;
       }
 
+      function norm(s){
+        return String(s ?? "").trim().toLowerCase();
+      }
+
       function asArray(v){
         if (Array.isArray(v)) return v;
         if (v == null) return [];
@@ -307,8 +311,103 @@
         "uDraw": "udraw"
       };
 
+      const GENRE_ABBR = {
+        "RPG":  "Role-Playing Game",
+        "JRPG": "Japanese-style Role-Playing Game",
+        "CRPG": "Computer Role-Playing Game",
+        "TRPG": "Tactical turn-based Role-Playing Game",
+        "ARPG": "Action Role-Playing Game",
+        "RTS":  "Real-Time Strategy",
+        "TBS":  "Turn-Based Strategy",
+        "TBT":  "Turn-Based Tactics",
+        "FPS":  "First-Person Shooter"
+      };
+
+      let genreTooltipEl = null;
+      let genreTooltipTarget = null;
+      let genreTooltipHandlersBound = false;
+
+      function ensureGenreTooltip(){
+        if (genreTooltipEl) return genreTooltipEl;
+        const tooltip = document.createElement("div");
+        tooltip.className = "genre-tooltip";
+        tooltip.setAttribute("role", "tooltip");
+        document.body.appendChild(tooltip);
+        genreTooltipEl = tooltip;
+        return tooltip;
+      }
+
+      function positionGenreTooltip(){
+        if (!genreTooltipTarget) return;
+        const tooltip = ensureGenreTooltip();
+        const rect = genreTooltipTarget.getBoundingClientRect();
+        const left = rect.left + rect.width / 2;
+        const top  = rect.top;
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top  = `${top}px`;
+      }
+
+      function showGenreTooltip(target){
+        const tip = target.getAttribute("data-tip");
+        if (!tip) return;
+        const tooltip = ensureGenreTooltip();
+        genreTooltipTarget = target;
+        tooltip.textContent = tip;
+        tooltip.classList.add("show");
+        positionGenreTooltip();
+      }
+
+      function hideGenreTooltip(){
+        if (!genreTooltipEl) return;
+        genreTooltipEl.classList.remove("show");
+        genreTooltipTarget = null;
+      }
+
+      function bindGenreTooltipHandlers(){
+        if (genreTooltipHandlersBound) return;
+        genreTooltipHandlersBound = true;
+
+        document.addEventListener("mouseover", (e) => {
+          const t = e.target.closest?.(".genre-abbr");
+          if (t) showGenreTooltip(t);
+        });
+
+        document.addEventListener("mouseout", (e) => {
+          const t = e.target.closest?.(".genre-abbr");
+          if (t) hideGenreTooltip();
+        });
+
+        document.addEventListener("focusin", (e) => {
+          const t = e.target.closest?.(".genre-abbr");
+          if (t) showGenreTooltip(t);
+        });
+
+        document.addEventListener("focusout", (e) => {
+          const t = e.target.closest?.(".genre-abbr");
+          if (t) hideGenreTooltip();
+        });
+
+        window.addEventListener("scroll", () => {
+          if (genreTooltipTarget) positionGenreTooltip();
+        }, { passive: true });
+
+        window.addEventListener("resize", () => {
+          if (genreTooltipTarget) positionGenreTooltip();
+        }, { passive: true });
+      }
+
+      function genreAbbrHtmlize(escapedText){
+        return escapedText.replace(/\b([A-Za-z]{2,5})\b/g, (m) => {
+          const key = m.toUpperCase();
+          const tip = GENRE_ABBR[key];
+          if (!tip) return m;
+          return `<span class="genre-abbr" tabindex="0" data-tip="${escapeHtml(tip)}">${m}</span>`;
+        });
+      }
+
       function notesOrTextHtml(x) {
         let s = escapeHtml(String(x ?? ""));
+        s = genreAbbrHtmlize(s);
 
         const entries = Object.entries(NOTE_ID_MAP)
           .sort((a, b) => b[0].length - a[0].length);
@@ -372,11 +471,22 @@
         const platform = asArray(h.platform);
         const brandItems = mapBrandsToLinks(asArray(h.brand));
         const category = asArray(h.category);
+
+        let categoryItems = category.slice();
+
+          if (Array.isArray(h.notes) && h.notes.length > 0) {
+            const firstNote = String(h.notes[0] ?? "").trim();
+
+            if (firstNote && categoryItems.some(c => norm(c) === "other")) {
+              categoryItems = categoryItems.map(c => (norm(c) === "other" ? firstNote : c));
+              categoryItems = [...new Set(categoryItems)];
+            }
+          }
         
         const miniCondition = makeMini("Condition", condition, "mini-small");
         const miniPlatform  = makeMini("Platform", platform, "mini-small");
         const miniBrand     = makeMini("Brand", brandItems, "mini-small");
-        const miniCategory  = makeMini("Category", category, "mini-small");
+        const miniCategory  = makeMini("Category", categoryItems, "mini-small");
 
         const row = (arr) => `<div class="mini-row cols-${arr.length}">${arr.join("")}</div>`;
         const miniHtml = [
@@ -393,7 +503,6 @@
           ? additionalOnly.map(x => `<li>${notesOrTextHtml(x)}</li>`).join("")
           : "<li>—</li>";
 
-
         const seeAlsoList = document.getElementById("seeAlso");
         const seeAlso = Array.isArray(h.seeAlso) ? h.seeAlso : [];
 
@@ -409,6 +518,8 @@
           seeAlsoList.innerHTML = "<li>—</li>";
         }
       }
+
+      bindGenreTooltipHandlers();
 
       window.addEventListener("hashchange", () => renderHardware(getHashKey()));
       renderHardware(getHashKey());
