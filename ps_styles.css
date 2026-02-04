@@ -111,6 +111,10 @@ body {
     transition: background-color 0.25s ease;
   }
 
+.switch, .slider { 
+    touch-action: pan-x; 
+  }
+
 .slider::before {
     content: "";
     position: absolute;
@@ -129,6 +133,18 @@ body {
 
 .switch input:checked + .slider::before {
     transform: translateX(34px);
+  }
+
+.switch.dragging .slider {
+    transition: none;
+  }
+
+.switch.dragging .slider::before {
+    transition: none;
+  }
+
+.switch.dragging input + .slider.dragging-knob::before {
+    transform: translateX(var(--knobX, 0px));
   }
 
 .topbar {

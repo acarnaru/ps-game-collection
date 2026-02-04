@@ -793,38 +793,44 @@
       }
 
       switchEl.addEventListener("change", updateModeUI);
-      // --- Swipe support for the Games/Hardware toggle (touch + pen devices, any screen size) ---
       (function enableToggleSwipe(){
+        const switchWrap = document.querySelector(".switch");
+        const knobTravel = 34;
+        let startedChecked = false;
         const toggleWrap = document.querySelector(".mode-toggle");
         if (!toggleWrap) return;
 
         let startX = 0, startY = 0, lastX = 0, lastY = 0;
         let tracking = false;
 
-        // Minimum distance in CSS px to count as a swipe (scaled slightly with viewport)
         function threshold(){
           return Math.max(35, Math.min(90, Math.round(window.innerWidth * 0.06)));
         }
 
         function startedOnInteractive(target){
-          return !!(target && (
+          if (!target) return false;
+          if (target.closest(".switch")) return false;
+
+          return !!(
             target.closest("a") ||
             target.closest("button") ||
             target.closest("input") ||
             target.closest("select") ||
             target.closest("textarea") ||
             target.closest("label")
-          ));
+          );
         }
 
         function onStartFromPoint(pt){
           startX = lastX = pt.clientX;
           startY = lastY = pt.clientY;
+          startedChecked = switchEl.checked;
           tracking = true;
+
+          if (switchWrap) switchWrap.classList.add("dragging");
         }
 
         function onStart(e){
-          // Touch events only fire for touch, so no extra gating needed.
           if (startedOnInteractive(e.target)) return;
           const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
           onStartFromPoint(pt);
@@ -832,15 +838,27 @@
 
         function onMove(e){
           if (!tracking) return;
+
           const pt = (e.touches && e.touches[0]) ? e.touches[0] : e;
           lastX = pt.clientX;
           lastY = pt.clientY;
 
-          // Only block default behavior if it's clearly a horizontal swipe.
           const dx = lastX - startX;
           const dy = lastY - startY;
-          if (Math.abs(dx) > 12 && Math.abs(dx) > Math.abs(dy) * 1.4) {
-            e.preventDefault();
+
+          const isHorizontal = Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy) * 1.2;
+          if (isHorizontal) e.preventDefault();
+
+          const base = startedChecked ? knobTravel : 0;
+          let pos = base + dx;
+          pos = Math.max(0, Math.min(knobTravel, pos));
+
+          if (switchWrap) {
+            const knob = switchWrap.querySelector(".slider");
+            if (knob) {
+              knob.style.setProperty("--knobX", pos + "px");
+              knob.classList.add("dragging-knob");
+            }
           }
         }
 
@@ -851,38 +869,44 @@
           const dx = lastX - startX;
           const dy = lastY - startY;
 
-          // Require a mostly-horizontal swipe with enough distance.
-          if (Math.abs(dx) < threshold()) return;
-          if (Math.abs(dx) <= Math.abs(dy) * 1.4) return;
+          const commit = Math.abs(dx) >= threshold() && Math.abs(dx) > Math.abs(dy) * 1.2;
 
-          // Swipe right => Hardware, swipe left => Games
-          const wantHardware = dx > 0;
-          if (switchEl.checked !== wantHardware) {
-            switchEl.checked = wantHardware;
-            updateModeUI();
+          if (commit) {
+            const wantHardware = dx > 0;
+            if (switchEl.checked !== wantHardware) {
+              switchEl.checked = wantHardware;
+              updateModeUI();
+            }
+          } else {
+            if (switchEl.checked !== startedChecked) {
+              switchEl.checked = startedChecked;
+              updateModeUI();
+            }
+          }
+
+          if (switchWrap) switchWrap.classList.remove("dragging");
+          const knob = switchWrap ? switchWrap.querySelector(".slider") : null;
+          if (knob) {
+            knob.classList.remove("dragging-knob");
+            knob.style.removeProperty("--knobX");
           }
         }
 
-        // Touch events (phones/tablets/touch laptops)
         toggleWrap.addEventListener("touchstart", onStart, { passive: true });
         toggleWrap.addEventListener("touchmove", onMove, { passive: false });
         toggleWrap.addEventListener("touchend", onEnd, { passive: true });
         toggleWrap.addEventListener("touchcancel", () => { tracking = false; }, { passive: true });
 
-        // Pointer events (pen/touch on Windows devices, some tablets)
         toggleWrap.addEventListener("pointerdown", (e) => {
-          if (e.pointerType === "mouse") return; // don't enable swipe for mouse drags
           if (startedOnInteractive(e.target)) return;
           onStartFromPoint(e);
         }, { passive: true });
 
         toggleWrap.addEventListener("pointermove", (e) => {
-          if (e.pointerType === "mouse") return;
           onMove(e);
         }, { passive: false });
 
         toggleWrap.addEventListener("pointerup", (e) => {
-          if (e.pointerType === "mouse") return;
           onEnd(e);
         }, { passive: true });
 
