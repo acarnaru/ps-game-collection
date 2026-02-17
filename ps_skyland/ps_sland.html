@@ -393,15 +393,24 @@
         return state.variant === "regular" ? isRegular : !isRegular;
       }
 
+      function cleanVal(v) {
+        return String(v ?? "").trim().replace(/^\*/, "");
+      }
+
       function matchSet(itemVal, set) {
         if (!set || set.size === 0) return false;
-        return set.has((itemVal || "").toString());
+
+        if (Array.isArray(itemVal)) {
+          return itemVal.some(v => set.has(cleanVal(v)));
+        }
+
+        return set.has(cleanVal(itemVal));
       }
 
       function matchAnyInArray(arr, set) {
         if (!set || set.size === 0) return false;
         if (!Array.isArray(arr)) return false;
-        return arr.some(v => set.has((v||"").toString()));
+        return arr.some(v => set.has(cleanVal(v)));
       }
 
       function getTabSource(tabId) {
@@ -410,24 +419,24 @@
 
         if (tabId === "magic") {
           const projected = hybrid
-            .filter(h => h.magicType) // only hybrids that have magic data
+            .filter(h => h.magicType)
             .map(h => ({
               name: h.name,
               variant: h.variant || "",
               game: h.game || "",
-              type: h.magicType,      // Magic tab expects "type"
+              type: h.magicType,
             }));
           return base.concat(projected);
         }
 
         if (tabId === "stages") {
           const projected = hybrid
-            .filter(h => h.stageType) // only hybrids that have stage data
+            .filter(h => h.stageType)
             .map(h => ({
               name: h.name,
               variant: h.variant || "",
               game: h.game || "",
-              type: h.stageType,      // Stages tab expects "type" (string OR array)
+              type: h.stageType,
             }));
           return base.concat(projected);
         }
@@ -466,13 +475,31 @@
         });
       }
 
+      function primaryFromArray(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) return "";
+        const starred = arr.find(x => String(x ?? "").trim().startsWith("*"));
+        return cleanVal(starred ?? arr[0]);
+      }
+
+      function primaryBuildText(buildArr) {
+        const primary = primaryFromArray(buildArr);
+        if (!primary) return "";
+
+        const dashIndex = primary.indexOf("-");
+        if (dashIndex === -1) return primary.trim();
+        return primary.slice(dashIndex + 1).trim();
+      }
+
       function renderRows(items) {
         const cols = COLS[activeTab] || [];
-        items = [...items].sort((a,b) => {
+
+        // sort
+        const sorted = [...items].sort((a, b) => {
           const av = (a.name || "").toString().toLowerCase();
           const bv = (b.name || "").toString().toLowerCase();
           if (av < bv) return sortAsc ? -1 : 1;
           if (av > bv) return sortAsc ? 1 : -1;
+
           const av2 = (a.variant || "").toString().toLowerCase();
           const bv2 = (b.variant || "").toString().toLowerCase();
           if (av2 < bv2) return -1;
@@ -480,24 +507,42 @@
           return 0;
         });
 
-        function esc(s){
-          return String(s ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
+        function esc(s) {
+          return String(s ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;");
         }
 
-        const rowsHtml = items.map(it => {
+        const rowsHtml = sorted.map(it => {
           const tds = cols.map(c => {
             let v = it[c.key];
+
+            if ((activeTab === "skylanders" || activeTab === "magic" || activeTab === "stages" || activeTab === "extra") && c.key === "game") {
+              v = primaryFromArray(it.game);
+              return `<td class="col-${c.key}">${esc(v)}</td>`;
+            }
+
+            if (activeTab === "skylanders" && c.key === "build") {
+              v = primaryBuildText(it.build);
+              return `<td class="col-${c.key}">${esc(v)}</td>`;
+            }
+
             if (Array.isArray(v)) {
-              const lis = v.filter(Boolean).map(x => `<li>${esc(x)}</li>`).join("");
+              const lis = v.filter(Boolean).map(x => `<li>${esc(cleanVal(x))}</li>`).join("");
               return `<td class="col-${c.key}"><ul class="stack">${lis}</ul></td>`;
             }
+
             return `<td class="col-${c.key}">${esc(v)}</td>`;
           }).join("");
+
           return `<tr>${tds}</tr>`;
         }).join("");
+
         els.tbody.innerHTML = rowsHtml;
+
         const total = getTabSource(activeTab).length;
-        els.stats.textContent = `${items.length} visible out of ${total} total`;
+        els.stats.textContent = `${sorted.length} visible out of ${total} total`;
       }
 
       function render() {
