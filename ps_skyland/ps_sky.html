@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="../ps_pic/ps_plat.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../ps_pic/ps_plat.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="../ps_pic/ps_plat.png">
+
+    <title>Skylander Details</title>
+    <link rel="stylesheet" href="../ps_styles.css"/>
+    <link rel="stylesheet" href="../ps_resp.css"/>
+  </head>
+
+  <body class="ps-game-page">
+    <header class="site-header game-sticky">
+      <div class="wrap">
+        <div class="game-header">
+          <div class="nav-left">
+            <button class="action-btn" id="prevBtn">&laquo; Previous</button>
+          </div>
+
+          <h1 class="game-title" id="skyTitle">Skylander</h1>
+
+          <div class="nav-right">
+            <a class="action-btn" id="backBtn" href="ps_sland.html">Back to Skylanders</a>
+            <button class="action-btn" id="nextBtn">Next &raquo;</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="wrap game-page-main">
+      <div class="game-layout">
+        <section class="game-top">
+          <div class="game-card game-picture" id="pictureCard">
+            <div class="picture-placeholder">
+              <div class="picture-placeholder-title">[Picture Placeholder]</div>
+              <div class="picture-placeholder-sub">(You will add figure art later.)</div>
+            </div>
+          </div>
+
+          <div class="game-card" id="detailsCard">
+            <div class="mini-grid" id="miniGrid"></div>
+          </div>
+        </section>
+
+        <section class="tri-cards">
+          <div class="game-card tri-card center-all" id="compatCard">
+            <h3 class="card-title">Compatibility</h3>
+            <ul id="compatList" class="stack">
+              <li>—</li>
+            </ul>
+          </div>
+
+          <div class="game-card tri-card center-all" id="buildCard">
+            <h3 class="card-title title-center">Build</h3>
+            <ul id="buildList">
+              <li>—</li>
+            </ul>
+          </div>
+
+          <div class="game-card tri-card center-all" id="seeAlsoCard">
+            <h3 class="card-title">See Also</h3>
+            <ul id="seeAlso" class="stack">
+              <li>—</li>
+            </ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <button id="toTop" aria-label="Back to top">▲</button>
+
+    <script src="../ps_data.js"></script>
+    <script src="../ps_loader.js"></script>
+
+    <script>
+
+      const { DATA } = PSLOAD.getSkyData();
+
+      const SKY = Array.isArray(DATA?.skylanders) ? DATA.skylanders : [];
+      const GAMES = Array.isArray(window.PSDB?.games) ? window.PSDB.games : [];
+
+      const GAME_SHORT = ["Spyro's Adventure","Giants","Swap Force","Trap Team","SuperChargers","Imaginators"];
+
+      (function () {
+        const btn = document.getElementById("toTop");
+        if (!btn) return;
+
+        function getScrollY() {
+          return window.pageYOffset || document.documentElement.scrollTop || 0;
+        }
+
+        function showOrHide() {
+          btn.classList.toggle("show", getScrollY() > 300);
+        }
+
+        window.addEventListener("scroll", showOrHide, { passive: true });
+        window.addEventListener("load", showOrHide);
+
+        btn.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+
+        showOrHide();
+      })();
+
+      function escapeHtml(s){
+        return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+      }
+
+      function cleanVal(v){
+        return String(v ?? "").trim().replace(/^\*/, "").trim();
+      }
+
+      function asArray(v){
+        if (Array.isArray(v)) return v;
+        if (v == null) return [];
+        const s = String(v).trim();
+        return s ? [s] : [];
+      }
+
+      function primaryFromArray(arr){
+        if (!Array.isArray(arr) || arr.length === 0) return "";
+        const starred = arr.find(x => String(x ?? "").trim().startsWith("*"));
+        return cleanVal(starred ?? arr[0]);
+      }
+
+      function fullSkylandersGameTitle(shortTitle){
+        const s = cleanVal(shortTitle);
+        if (!s) return "";
+        return "Skylanders: " + s;
+      }
+
+      function makeGameKey(g){
+        return [g.title, g.platform, (g.format||""), (g.version||"")].join("||");
+      }
+
+      function findPS3SkylandersGameKey(shortTitle){
+        const full = fullSkylandersGameTitle(shortTitle);
+        if (!full) return null;
+
+        // Prefer Physical PS3, but fall back to any PS3 match.
+        let candidates = GAMES.filter(x => (x?.title === full) && (x?.platform === "PS3"));
+        if (!candidates.length) return null;
+
+        const phys = candidates.find(x => String(x?.format||"").toLowerCase() === "physical");
+        const pick = phys || candidates[0];
+        return makeGameKey(pick);
+      }
+
+      function makeSkyKey(s){
+        const name = s?.name ?? "";
+        const variant = (s?.variant ?? "") || "Core";
+        const intro = primaryFromArray(s?.game);
+        return [name, variant, intro].join("||");
+      }
+
+      function getHashKey(){
+        const raw = (location.hash || "").replace(/^#/, "");
+        if (!raw) return "";
+        try { return decodeURIComponent(raw); } catch(e) { return raw; }
+      }
+
+      function setHashKey(key){
+        location.hash = encodeURIComponent(key);
+      }
+
+      // Build lookup tables
+      const byKey = new Map();
+      const byName = new Map();
+
+      for (const s of SKY){
+        const k = makeSkyKey(s);
+        byKey.set(k, s);
+
+        const name = String(s?.name || "").trim();
+        if (!byName.has(name)) byName.set(name, []);
+        byName.get(name).push(s);
+      }
+
+      function gameSortIndex(g){
+        const ix = GAME_SHORT.indexOf(g);
+        return ix === -1 ? 999 : ix;
+      }
+
+      function chooseDefaultCoreEntry(name){
+        const list = byName.get(name) || [];
+        const cores = list.filter(x => String(x?.variant || "").trim().toLowerCase() === "core");
+        const pool = cores.length ? cores : list;
+        if (!pool.length) return null;
+
+        // Prefer entries whose introduced game is earliest in the canonical order.
+        const sorted = [...pool].sort((a,b) => {
+          const ai = gameSortIndex(primaryFromArray(a.game));
+          const bi = gameSortIndex(primaryFromArray(b.game));
+          if (ai !== bi) return ai - bi;
+          const av = String(a.variant || "").toLowerCase();
+          const bv = String(b.variant || "").toLowerCase();
+          if (av < bv) return -1;
+          if (av > bv) return 1;
+          return 0;
+        });
+        return sorted[0];
+      }
+
+      function resolveSeeAlsoToKey(entry){
+        const raw = String(entry || "").trim();
+        if (!raw) return null;
+
+        let baseName = raw;
+        let qualifier = "";
+        const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
+        if (m) {
+          baseName = m[1].trim();
+          qualifier = m[2].trim();
+        }
+
+        const list = byName.get(baseName) || [];
+        if (!list.length) return null;
+
+        if (!qualifier) {
+          const def = chooseDefaultCoreEntry(baseName);
+          return def ? makeSkyKey(def) : null;
+        }
+
+        // If qualifier matches a Skylanders game shorthand, treat it as the introduced game identifier (for Core duplicates).
+        if (GAME_SHORT.includes(qualifier)) {
+          const match = list.find(x => String(x?.variant || "").trim().toLowerCase() === "core" && primaryFromArray(x.game) === qualifier)
+                    || list.find(x => primaryFromArray(x.game) === qualifier)
+                    || null;
+          return match ? makeSkyKey(match) : null;
+        }
+
+        // Otherwise treat qualifier as a variant identifier.
+        const qLower = qualifier.toLowerCase();
+        const match = list.find(x => String(x?.variant || "").trim().toLowerCase() === qLower) || null;
+        if (match) return makeSkyKey(match);
+
+        // Fall back to default if nothing matched.
+        const def = chooseDefaultCoreEntry(baseName);
+        return def ? makeSkyKey(def) : null;
+      }
+
+      function renderMini(title, value){
+        const safeTitle = escapeHtml(title);
+        const safeValue = escapeHtml(value || "");
+        return (
+          '<div class="mini">' +
+            '<div class="mini-title">' + safeTitle + '</div>' +
+            '<div class="mini-body">' +
+              '<div class="mini-value">' + (safeValue || '—') + '</div>' +
+            '</div>' +
+          '</div>'
+        );
+      }
+
+      function renderMiniRow(minisArr){
+        return `<div class="mini-row cols-${minisArr.length}">${minisArr.join("")}</div>`;
+      }
+
+      function renderSkylander(s){
+        const titleEl = document.getElementById('skyTitle');
+        const grid = document.getElementById('miniGrid');
+        const compat = document.getElementById('compatList');
+        const build = document.getElementById('buildList');
+        const see = document.getElementById('seeAlso');
+
+        if (!s){
+          if (titleEl) titleEl.textContent = 'Skylander Not Found';
+          if (grid) grid.innerHTML = '';
+          if (compat) compat.innerHTML = '<li>—</li>';
+          if (build) build.innerHTML = '<li>—</li>';
+          if (see) see.innerHTML = '<li>—</li>';
+          return;
+        }
+
+        const introduced = primaryFromArray(s.game);
+        const variant = (s.variant || '') || 'Core';
+
+        if (titleEl) titleEl.textContent = s.name || "Skylander";
+
+        const r1 = [
+          renderMini("Condition", s.condition),
+          renderMini("Series", s.series),
+          renderMini("Base", s.base),
+        ];
+
+        const r2 = [
+          renderMini("Element", s.element),
+          renderMini("Variant", variant),
+          renderMini("Type", s.type || ""),
+        ];
+
+        const r3 = [
+          renderMini("Introduced", introduced),
+          renderMini("Hat", s.hat || ""),
+        ];
+
+        if (grid) grid.innerHTML = renderMiniRow(r1) + renderMiniRow(r2) + renderMiniRow(r3);
+
+        const games = asArray(s.game).map(cleanVal).filter(Boolean);
+        const compatLis = games.map(g => {
+          const key = findPS3SkylandersGameKey(g);
+          const label = cleanVal(g);
+
+          if (key) {
+            const href = '../ps_game/ps_game.html#' + encodeURIComponent(key);
+            return `<li><a class="row-link" href="${href}">${escapeHtml(label)}</a></li>`;
+          }
+
+          return `<li>${escapeHtml(label)}</li>`;
+        }).join('');
+        compat.innerHTML = compatLis || '<li>—</li>';
+
+        const buildArr = asArray(s.build).map(cleanVal).filter(Boolean);
+        const buildLis = buildArr.map(x => '<li>' + escapeHtml(x) + '</li>').join('');
+        build.innerHTML = buildLis || '<li>—</li>';
+
+        const seeArr = asArray(s.seeAlso).map(x => String(x || '').trim()).filter(Boolean);
+        const seeLis = seeArr.map(x => {
+          const k = resolveSeeAlsoToKey(x);
+          if (k && byKey.has(k)) {
+            const href = 'ps_sky.html#' + encodeURIComponent(k);
+            return '<li><a class="row-link" href="' + href + '">' + escapeHtml(x) + '</a></li>';
+          }
+          return '<li>' + escapeHtml(x) + '</li>';
+        }).join('');
+        see.innerHTML = seeLis || '<li>—</li>';
+      }
+
+      const ORDERED_KEYS = [...byKey.keys()].sort((ka, kb) => {
+        const a = byKey.get(ka);
+        const b = byKey.get(kb);
+
+        const an = String(a?.name || '').toLowerCase();
+        const bn = String(b?.name || '').toLowerCase();
+        if (an < bn) return -1;
+        if (an > bn) return 1;
+
+        const av = String(a?.variant || '').toLowerCase();
+        const bv = String(b?.variant || '').toLowerCase();
+        if (av < bv) return -1;
+        if (av > bv) return 1;
+
+        const ag = gameSortIndex(primaryFromArray(a?.game));
+        const bg = gameSortIndex(primaryFromArray(b?.game));
+        return ag - bg;
+      });
+
+      function currentIndex(){
+        const k = getHashKey();
+        return ORDERED_KEYS.indexOf(k);
+      }
+
+      function ensureValidHash(){
+        const k = getHashKey();
+        if (k && byKey.has(k)) return k;
+        if (ORDERED_KEYS.length) {
+          setHashKey(ORDERED_KEYS[0]);
+          return ORDERED_KEYS[0];
+        }
+        return '';
+      }
+
+      function renderFromHash(){
+        const k = ensureValidHash();
+        const s = byKey.get(k) || null;
+        renderSkylander(s);
+
+        const i = ORDERED_KEYS.indexOf(k);
+        const prev = document.getElementById('prevBtn');
+        const next = document.getElementById('nextBtn');
+        if (prev) prev.disabled = (i <= 0);
+        if (next) next.disabled = (i === -1 || i >= ORDERED_KEYS.length - 1);
+      }
+
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        const i = currentIndex();
+        if (i > 0) setHashKey(ORDERED_KEYS[i - 1]);
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        const i = currentIndex();
+        if (i >= 0 && i < ORDERED_KEYS.length - 1) setHashKey(ORDERED_KEYS[i + 1]);
+      });
+
+      window.addEventListener('hashchange', renderFromHash);
+      renderFromHash();
+
+    </script>
+  </body>
+
+  <footer class="site-footer">
+    <p><a href="../ps_index.html">PlayStation Trophy Hunter's Cache</a> is a personal, non-commercial catalogue created for informational and archival purposes only.</p>
+    <p>All game titles, trademarks, and logos are the property of their respective owners. <a href="https://www.playstation.com" target="_blank" rel="noopener">PlayStation</a> is a registered trademark of <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a>.</p>
+    <p>This site is not affiliated with or endorsed by <a href="https://www.sie.com" target="_blank" rel="noopener">Sony Interactive Entertainment</a> or any game publishers.</p>
+  </footer>
+</html>

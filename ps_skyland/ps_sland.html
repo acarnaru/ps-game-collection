@@ -518,6 +518,13 @@
           const tds = cols.map(c => {
             let v = it[c.key];
 
+            if (activeTab === "skylanders" && c.key === "name") {
+              const primary = primaryFromArray(it.game);
+              const key = [it.name || "", (it.variant || ""), (primary || "")].join("||");
+              const href = "ps_sky.html#" + encodeURIComponent(key);
+              return `<td class="col-${c.key}"><a class="row-link" href="${href}">${esc(it.name)}</a></td>`;
+            }
+
             if ((activeTab === "skylanders" || activeTab === "magic" || activeTab === "stages" || activeTab === "extra") && c.key === "game") {
               v = primaryFromArray(it.game);
               return `<td class="col-${c.key}">${esc(v)}</td>`;
