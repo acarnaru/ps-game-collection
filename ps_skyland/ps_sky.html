@@ -13,12 +13,13 @@
     <link rel="stylesheet" href="../ps_resp.css"/>
   </head>
 
-  <body class="ps-game-page">
+  <body class="ps-game-page ps-sky-page">
     <header class="site-header game-sticky">
       <div class="wrap">
         <div class="game-header">
           <div class="nav-left">
             <button class="action-btn" id="prevBtn">&laquo; Previous</button>
+            <a class="action-btn" href="../ps_index.html#games">Back to Games</a>
           </div>
 
           <h1 class="game-title" id="skyTitle">Skylander</h1>
@@ -84,6 +85,7 @@
       const GAMES = Array.isArray(window.PSDB?.games) ? window.PSDB.games : [];
 
       const GAME_SHORT = ["Spyro's Adventure","Giants","Swap Force","Trap Team","SuperChargers","Imaginators"];
+      const REGULAR_TAGS = new Set(["Anchors Away", "Big Bang", "Big Bubble", "Blizzard", "Bone Bash", "Core", "Deep Dive", "Double Dare", "Fire Bone", "Fizzy Frenzy", "Full Blast", "Giant", "Heavy Duty", "Hog Wild", "Horn Blast", "Hurricane", "Hyper Beam", "Knockout", "Lava Barf", "Lava Lance", "Mega Ram", "Mini", "Ninja", "Phantom", "Shark Shooter", "Skylander Sensei", "Super Gulp", "Super Shot", "SuperCharger", "Sure Shot", "Swapper", "Thorn Horn", "Tidal Wave", "Trap Master", "Turbo", "Twin Blade", "Villain Sensei"]);
 
       (function () {
         const btn = document.getElementById("toTop");
@@ -109,6 +111,55 @@
 
       function escapeHtml(s){
         return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+      }
+
+      function applySkyGameHighlights(root = document.body) {
+        const patterns = [
+          { re: /(?:Skylanders\s*:?\s*)?Spyro(?:'|’|`|´)s?\s+Adventure/gi, cls: "sky-ssa" },
+          { re: /(?:Skylanders\s*:?\s*)?Giants/gi, cls: "sky-giants" },
+          { re: /(?:Skylanders\s*:?\s*)?Swap\s+Force/gi, cls: "sky-swapforce" },
+          { re: /(?:Skylanders\s*:?\s*)?Trap\s+Team/gi, cls: "sky-trapteam" },
+          { re: /(?:Skylanders\s*:?\s*)?Super\s*Chargers/gi, cls: "sky-superchargers" },
+          { re: /(?:Skylanders\s*:?\s*)?Imaginators/gi, cls: "sky-imaginators" }
+        ];
+
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+          acceptNode(node) {
+            const p = node.parentElement;
+            if (!p) return NodeFilter.FILTER_REJECT;
+            const tag = p.tagName;
+            if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
+            if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+
+            const t = node.nodeValue;
+            if (!/(Spyro['’`´]s?\s+Adventure|Giants|Swap\s+Force|Trap\s+Team|Super\s*Chargers|Imaginators)/i.test(t)) {
+              return NodeFilter.FILTER_REJECT;
+            }
+
+            return NodeFilter.FILTER_ACCEPT;
+          }
+        });
+
+        const textNodes = [];
+        while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+        for (const node of textNodes) {
+          let html = node.nodeValue;
+
+          let changed = false;
+          for (const p of patterns) {
+            if (p.re.test(node.nodeValue)) {
+              changed = true;
+              html = html.replace(p.re, (m) => `<span class="${p.cls}">${m}</span>`);
+            }
+            p.re.lastIndex = 0;
+          }
+          if (!changed) continue;
+
+          const span = document.createElement("span");
+          span.innerHTML = html;
+          node.parentNode.replaceChild(span, node);
+        }
       }
 
       function cleanVal(v){
@@ -142,7 +193,6 @@
         const full = fullSkylandersGameTitle(shortTitle);
         if (!full) return null;
 
-        // Prefer Physical PS3, but fall back to any PS3 match.
         let candidates = GAMES.filter(x => (x?.title === full) && (x?.platform === "PS3"));
         if (!candidates.length) return null;
 
@@ -168,7 +218,6 @@
         location.hash = encodeURIComponent(key);
       }
 
-      // Build lookup tables
       const byKey = new Map();
       const byName = new Map();
 
@@ -186,24 +235,44 @@
         return ix === -1 ? 999 : ix;
       }
 
-      function chooseDefaultCoreEntry(name){
+      function chooseDefaultRegularEntry(name){
         const list = byName.get(name) || [];
-        const cores = list.filter(x => String(x?.variant || "").trim().toLowerCase() === "core");
-        const pool = cores.length ? cores : list;
-        if (!pool.length) return null;
+        if (!list.length) return null;
 
-        // Prefer entries whose introduced game is earliest in the canonical order.
-        const sorted = [...pool].sort((a,b) => {
+        function isRegularVariant(v){
+          const vv = String(v || "").trim();
+          return REGULAR_TAGS.has(vv);
+        }
+
+        const regulars = list.filter(x => isRegularVariant(x?.variant));
+        if (regulars.length) {
+          const sortedRegulars = [...regulars].sort((a,b) => {
+            const ai = gameSortIndex(primaryFromArray(a.game));
+            const bi = gameSortIndex(primaryFromArray(b.game));
+            if (ai !== bi) return ai - bi;
+
+            const av = String(a.variant || "").toLowerCase();
+            const bv = String(b.variant || "").toLowerCase();
+            if (av < bv) return -1;
+            if (av > bv) return 1;
+            return 0;
+          });
+          return sortedRegulars[0];
+        }
+
+        const sortedAll = [...list].sort((a,b) => {
           const ai = gameSortIndex(primaryFromArray(a.game));
           const bi = gameSortIndex(primaryFromArray(b.game));
           if (ai !== bi) return ai - bi;
+
           const av = String(a.variant || "").toLowerCase();
           const bv = String(b.variant || "").toLowerCase();
           if (av < bv) return -1;
           if (av > bv) return 1;
           return 0;
         });
-        return sorted[0];
+
+        return sortedAll[0];
       }
 
       function resolveSeeAlsoToKey(entry){
@@ -222,25 +291,24 @@
         if (!list.length) return null;
 
         if (!qualifier) {
-          const def = chooseDefaultCoreEntry(baseName);
+          const def = chooseDefaultRegularEntry(baseName);
           return def ? makeSkyKey(def) : null;
         }
 
-        // If qualifier matches a Skylanders game shorthand, treat it as the introduced game identifier (for Core duplicates).
         if (GAME_SHORT.includes(qualifier)) {
-          const match = list.find(x => String(x?.variant || "").trim().toLowerCase() === "core" && primaryFromArray(x.game) === qualifier)
-                    || list.find(x => primaryFromArray(x.game) === qualifier)
-                    || null;
-          return match ? makeSkyKey(match) : null;
+          const inThatGame = list.filter(x => primaryFromArray(x.game) === qualifier);
+
+          const regular = inThatGame.find(x => REGULAR_TAGS.has(String(x?.variant || "").trim()));
+          const pick = regular || inThatGame[0] || null;
+
+          return pick ? makeSkyKey(pick) : null;
         }
 
-        // Otherwise treat qualifier as a variant identifier.
         const qLower = qualifier.toLowerCase();
         const match = list.find(x => String(x?.variant || "").trim().toLowerCase() === qLower) || null;
         if (match) return makeSkyKey(match);
 
-        // Fall back to default if nothing matched.
-        const def = chooseDefaultCoreEntry(baseName);
+        const def = chooseDefaultRegularEntry(baseName);
         return def ? makeSkyKey(def) : null;
       }
 
@@ -318,6 +386,7 @@
         const buildArr = asArray(s.build).map(cleanVal).filter(Boolean);
         const buildLis = buildArr.map(x => '<li>' + escapeHtml(x) + '</li>').join('');
         build.innerHTML = buildLis || '<li>—</li>';
+        applySkyGameHighlights(build);
 
         const seeArr = asArray(s.seeAlso).map(x => String(x || '').trim()).filter(Boolean);
         const seeLis = seeArr.map(x => {
@@ -370,21 +439,29 @@
         const s = byKey.get(k) || null;
         renderSkylander(s);
 
-        const i = ORDERED_KEYS.indexOf(k);
+        const n = ORDERED_KEYS.length;
         const prev = document.getElementById('prevBtn');
         const next = document.getElementById('nextBtn');
-        if (prev) prev.disabled = (i <= 0);
-        if (next) next.disabled = (i === -1 || i >= ORDERED_KEYS.length - 1);
+        if (prev) prev.disabled = (n <= 1);
+        if (next) next.disabled = (n <= 1);
       }
 
       document.getElementById('prevBtn').addEventListener('click', () => {
+        const n = ORDERED_KEYS.length;
+        if (n <= 1) return;
+
         const i = currentIndex();
-        if (i > 0) setHashKey(ORDERED_KEYS[i - 1]);
+        const j = (i <= 0) ? (n - 1) : (i - 1);
+        setHashKey(ORDERED_KEYS[j]);
       });
 
       document.getElementById('nextBtn').addEventListener('click', () => {
+        const n = ORDERED_KEYS.length;
+        if (n <= 1) return;
+
         const i = currentIndex();
-        if (i >= 0 && i < ORDERED_KEYS.length - 1) setHashKey(ORDERED_KEYS[i + 1]);
+        const j = (i === -1 || i >= n - 1) ? 0 : (i + 1);
+        setHashKey(ORDERED_KEYS[j]);
       });
 
       window.addEventListener('hashchange', renderFromHash);
