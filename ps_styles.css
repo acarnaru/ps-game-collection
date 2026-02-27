@@ -382,6 +382,36 @@ a.no-trophies-link:focus-visible {
   font-weight: 800;
 }
 
+.sky-ssa {
+  color: #1cff6a !important;
+  font-weight: 800;
+}
+
+.sky-giants {
+  color: #ff9a1a !important;
+  font-weight: 800;
+}
+
+.sky-swapforce {
+  color: #5fd4ff !important;
+  font-weight: 800;
+}
+
+.sky-trapteam {
+  color: #ff2d2d !important;
+  font-weight: 800;
+}
+
+.sky-superchargers {
+  color: #dcdcdc !important;
+  font-weight: 800;
+}
+
+.sky-imaginators {
+  color: #b06cff !important;
+  font-weight: 800;
+}
+
 .section-title {
     font-size: 12px;
     letter-spacing: .6px;

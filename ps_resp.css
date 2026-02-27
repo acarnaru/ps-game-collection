@@ -3,11 +3,6 @@
 
 /* MOBILE - up to 540px */
 @media (max-width: 540px) {
-  
-  table { 
-    table-layout: auto; 
-    width: 100%; 
-  }
 
   #gamesContent .col-notes  { display: none; }
   #gamesContent .col-genre  { display: none; }
@@ -16,9 +11,7 @@
   #hardwareContent .col-brand { display: none; }
   #hardwareContent .col-colour { display: none; }
 
-  #skylandersContent .col-hat    { display: none; }
-  #crystalsContent   .col-hat    { display: none; }
-  #vehiclesContent   .col-driver { display: none; }
+  #vehiclesContent .col-driver { display: none; }
 
   .col-title    { width: 33%; }
   .col-platform { width: 1%; }
@@ -389,11 +382,6 @@
 
 /* TABLET - 541px to 1024px */
 @media (min-width: 541px) and (max-width: 1024px) {
-  
-  table { 
-    width: 100%; 
-    table-layout: auto; 
-  }
 
   th, td, td *, th * {
     white-space: normal;
@@ -663,5 +651,42 @@
     overflow: hidden;
     text-overflow: ellipsis;
     letter-spacing: -0.1px;
+  }
+
+  body.ps-sky-page .game-header {
+    grid-template-columns: 1fr auto;
+    grid-auto-rows: auto;
+  }
+
+  body.ps-sky-page .game-header .title-wrap {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  body.ps-sky-page .game-header .nav-left {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  body.ps-sky-page .game-header .nav-right {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+  }
+
+  body.ps-sky-page #backBtn,
+  body.ps-sky-page #nextBtn {
+    grid-column: auto;
+    grid-row: auto;
+    justify-self: auto;
   }
 }
