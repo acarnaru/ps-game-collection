@@ -8,19 +8,9 @@
   #gamesContent .col-genre  { display: none; }
   #gamesContent .col-format { display: none; }
 
-  #hardwareContent .col-brand { display: none; }
-  #hardwareContent .col-colour { display: none; }
+  #hardwareContent .col-brand  { display: none; }
 
   #vehiclesContent .col-driver { display: none; }
-
-  .col-title    { width: 33%; }
-  .col-platform { width: 1%; }
-  .col-version  { width: 22%; }
-  .col-included { width: 44%; }
-
-  .col-device   { width: 39%; }
-  .col-notes    { width: 22%; }
-  .col-category { width: 25%; }
 
   th, td,
   td *,
@@ -246,7 +236,7 @@
 
 /* MOBILE screen rotate - max-width 932px - max-height 430px */
 @media (max-width: 932px) and (max-height: 430px) and (orientation: landscape) {
-
+  
   body.ps-game-page {
     height: auto;
     min-height: 100vh;
@@ -462,6 +452,24 @@
   html, body { 
     max-width: 100%;
   }
+
+  #hardwareContent .col-colour { display: none; }
+
+  #gamesContent .col-title    { width: 30%; }
+  #gamesContent .col-platform { width: 15%; }
+  #gamesContent .col-version  { width: 20%; }
+  #gamesContent .col-included { width: 35%; }
+
+  #hardwareContent .col-device   { width: 35%; }
+  #hardwareContent .col-platform { width: 15%; }
+  #hardwareContent .col-category { width: 20%; }
+  #hardwareContent .col-notes    { width: 30%; }
+
+  #skylandersContent .col-name    { width: 25%; }
+  #skylandersContent .col-element { width: 13%; }
+  #skylandersContent .col-game    { width: 21%; }
+  #skylandersContent .col-variant { width: 18%; }
+  #skylandersContent .col-build   { width: 23%; }
   
   .sticky-header {
     position: -webkit-sticky;
