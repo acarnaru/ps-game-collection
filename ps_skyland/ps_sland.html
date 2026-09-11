@@ -377,10 +377,17 @@
         }
       }
 
-      function matchText(item, q) {
+      function matchText(item, q, nameOnly = false) {
         if (!q) return true;
+
+        const needle = q.toLowerCase();
+
+        if (nameOnly) {
+          return String(item?.name || "").toLowerCase().includes(needle);
+        }
+
         const hay = JSON.stringify(item).toLowerCase();
-        return hay.includes(q.toLowerCase());
+        return hay.includes(needle);
       }
 
       function matchVariant(item) {
@@ -445,15 +452,20 @@
       function getFiltered() {
         const src = getTabSource(activeTab);
         const q = state.q.trim();
+
+        const nameMatchExists = q
+          ? src.some(it => matchText(it, q, true))
+          : false;
+
         return src.filter(it => {
-          if (!matchText(it, q)) return false;
+          if (!matchText(it, q, nameMatchExists)) return false;
           if (!matchVariant(it)) return false;
 
           if (activeTab === "skylanders") {
-            if (!matchSet(it.game, state.game)) return false;
+            if (!matchSet(primaryFromArray(it.game), state.game)) return false;
             if (!matchSet(it.element, state.element)) return false;
           } else if (activeTab === "magic" || activeTab === "stages") {
-            if (!matchSet(it.game, state.game)) return false;
+            if (!matchSet(primaryFromArray(it.game), state.game)) return false;
             const okType = Array.isArray(it.type)
               ? matchAnyInArray(it.type, state.type)
               : matchSet(it.type, state.type);
@@ -467,7 +479,7 @@
             if (!matchSet(it.element, state.element)) return false;
             if (!matchSet(it.battleClass, state.battleClass)) return false;
           } else if (activeTab === "extra") {
-            if (!matchSet(it.game, state.game)) return false;
+            if (!matchSet(primaryFromArray(it.game), state.game)) return false;
           }
           return true;
         });
