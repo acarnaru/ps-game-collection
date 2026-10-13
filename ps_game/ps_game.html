@@ -446,10 +446,14 @@
 
           const cls = (term === "Discontinued")
             ? "status-link status-discontinued"
-            : "status-link";
+            : (term === "Servers Offline")
+              ? "status-link status-offline"
+              : "status-link";
 
           const safe = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-          s = s.replace(new RegExp(safe, "g"),
+
+          s = s.replace
+            (new RegExp(safe, "g"),
             `<a href="../ps_notes.html#${anchor}" class="${cls}">${term}</a>`
           );
         }
@@ -499,7 +503,7 @@
           }
 
           if (label.toLowerCase() === "servers offline") {
-            return `<li><span class="status-link status-offline">${escapeHtml(label)}</span></li>`;
+            return `<li><a class="status-link status-offline" href="../ps_notes.html#srv">${escapeHtml(label)}</a></li>`;
           }
 
           return `<li>${escapeHtml(label)}</li>`;
@@ -535,6 +539,8 @@
 
       const NOTES_TERMS = {
         "Online Only": "online",
+        "Download Required": "dld",
+        "Servers Offline": "srv",
         "Discontinued": "disc",
         "3D Compatible": "3d",
         "PS Move Compatible": "move-comp",
