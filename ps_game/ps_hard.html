@@ -64,6 +64,7 @@
 
     <script src="../ps_data.js"></script>
     <script src="../ps_loader.js"></script>
+    <script src="../ps_secure.js"></script>
 
     <script>
       const { DATA } = PSLOAD.getHardData();
@@ -423,27 +424,29 @@
       function makeMini(title, items, extraClass=""){
         const li = (items && items.length)
           ? items.map(x => {
-              if (x && typeof x === "object" && x.href) {
-                const label = escapeHtml(x.label ?? x.href);
-                const href  = escapeHtml(x.href);
+              
+            if (x && typeof x === "object" && x.href) {
+                const label = x.label ?? x.href;
 
-                const isExternal = /^https?:\/\//i.test(x.href);
-                const targetAttr = isExternal ? ` target="_blank" rel="noopener"` : "";
+                return `<li>${PSSEC.safeLink(
+                    label,
+                    x.href,
+                    "game-link"
+                )}</li>`;
+            }
 
-                return `<li><a class="game-link" href="${href}"${targetAttr}>${label}</a></li>`;
-              }
-              return `<li>${notesOrTextHtml(x)}</li>`;
-            }).join("")
+            return `<li>${notesOrTextHtml(x)}</li>`;
+          }).join("")
           : "<li>—</li>";
 
-        return `
-          <div class="mini ${extraClass}">
-            <h3 class="card-title mini-title">${escapeHtml(title)}</h3>
-            <div class="mini-body">
-              <ul class="mini-list">${li}</ul>
+          return `
+            <div class="mini ${extraClass}">
+              <h3 class="card-title mini-title">${escapeHtml(title)}</h3>
+              <div class="mini-body">
+                <ul class="mini-list">${li}</ul>
+              </div>
             </div>
-          </div>
-        `;
+          `;
       }
 
       function renderHardware(key) {
