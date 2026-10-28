@@ -99,6 +99,7 @@
 
     <script src="ps_data.js"></script>
     <script src="ps_loader.js"></script>
+    <script src="ps_secure.js"></script>
 
     <script>
 
@@ -348,7 +349,8 @@
         "TBS": "Turn-Based Strategy",
         "TBT": "Turn-Based Tactics",
         "FPS": "First-Person Shooter",
-        "MOBA": "Multiplayer Online Battle Arena"
+        "MOBA": "Multiplayer Online Battle Arena",
+        "MMORPG": "Massive Multiplayer Online Role-Playing Game"
       };
 
       function genreItemHtml(raw){
@@ -513,17 +515,17 @@
           .replaceAll("'","&#039;");
       }
 
-      function manufacturerLinkHtml(name){
-        const n = (name || "").toString().trim();
-        if (!n) return "";
+      
+      function manufacturerLinkHtml(name) {
+          const n = String(name ?? "").trim();
+          if (!n) return "";
 
-        const links = (window.PSDB && PSDB.manufacturerLinks) ? PSDB.manufacturerLinks : null;
-        const url = links ? links[n] : null;
+          const links = window.PSDB?.manufacturerLinks;
+          const url = links ? links[n] : null;
 
-        if (!url) return escapeHtml(n);
+          if (!url) return escapeHtml(n);
 
-        const safeUrl = escapeHtml(url);
-        return `<a class="ext-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${escapeHtml(n)}</a>`;
+          return PSSEC.safeLink(n, url, "ext-link");
       }
 
       function linkNoTrophies(text){
@@ -535,7 +537,7 @@
         );
       }
 
-      const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Arcade Stick", "Controller Adapter", "Cooler", "Digital", "Disc Drive", "Driving Wheel", "Flight Stick", "Game Tablet", "Gamepad", "Gamepad & Mouse Combo", "Gaming Chair", "Gear Shifter", "Horizontal Stand", "Keypad", "Keypad & Mouse Combo", "Modular", "Pack of 2", "Remote Control", "RGB", "USB Adapter", "Vertical Stand", "Webcam", "Wired", "Wireless", "x"]);
+      const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Arcade Stick", "Controller Adapter", "Cooler", "Digital", "Disc Drive", "Driving Wheel", "Flight Stick", "Game Tablet", "Gamepad", "Gamepad & Mouse Combo", "Gaming Chair", "Gear Shifter", "Gun Accessory", "Horizontal Stand", "Keypad", "Keypad & Mouse Combo", "Modular", "Pack of 2", "Remote Control", "RGB", "USB Adapter", "Vertical Stand", "Webcam", "Wired", "Wireless", "x"]);
 
       const MORE_INFO_SKY_TITLES = new Set([
         "Skylanders: Giants",
@@ -739,7 +741,15 @@
         )).sort((a,b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
 
         const opts = [{ value: "All", label: "Genre: All" }, ...genres.map(g => ({ value: g, label: `Genre: ${g}` }))];
-        sortSelect.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+        
+        sortSelect.replaceChildren(
+            ...opts.map(o => {
+                const option = document.createElement("option");
+                option.value = String(o.value);
+                option.textContent = String(o.label);
+                return option;
+            })
+        );
 
         const values = new Set(opts.map(o => o.value));
         if (!values.has(state.genre)) state.genre = "All";
@@ -763,7 +773,16 @@
         const brands = Array.from(new Set(DATA_HARDWARE.map(r => r.brand).filter(Boolean)))
           .sort((a,b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
         const opts = [{ value: "All", label: "Brand: All" }, ...brands.map(b => ({ value: b, label: `Brand: ${b}` }))];
-        sortSelect.innerHTML = opts.map(o => `<option value="${o.value}">${o.label}</option>`).join("");
+        
+        sortSelect.replaceChildren(
+            ...opts.map(o => {
+                const option = document.createElement("option");
+                option.value = String(o.value);
+                option.textContent = String(o.label);
+                return option;
+            })
+        );
+
         const values = new Set(opts.map(o => o.value));
         if (!values.has(state.brand)) state.brand = "All";
         sortSelect.value = state.brand;
