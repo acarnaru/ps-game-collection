@@ -1,0 +1,490 @@
+const { DATA } = PSLOAD.getHardData();
+
+(function () {
+const btn = document.getElementById("toTop");
+if (!btn) return;
+
+function getScrollY() {
+    return window.pageYOffset || document.documentElement.scrollTop || 0;
+}
+
+function showOrHide() {
+    btn.classList.toggle("show", getScrollY() > 300);
+}
+
+window.addEventListener("scroll", showOrHide, { passive: true });
+window.addEventListener("load", showOrHide);
+
+btn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
+})();
+
+function escapeHtml(s) {
+return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function uniq(arr) {
+const seen = new Set();
+const out = [];
+for (const x of (arr || [])) {
+    const k = String(x ?? "");
+    if (!k) continue;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(x);
+}
+return out;
+}
+
+function norm(s){
+return String(s ?? "").trim().toLowerCase();
+}
+
+function asArray(v){
+if (Array.isArray(v)) return v;
+if (v == null) return [];
+const s = String(v).trim();
+return s ? [s] : [];
+}
+
+function deviceKey(t) {
+return String(t).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function makeKey(h) {
+return [h.device, (h.platform || ""), h.brand, (h.category || "")].join("||");
+}
+
+function getHashKey() {
+const raw = (location.hash || "").replace(/^#/, "");
+if (!raw) return "";
+try { return decodeURIComponent(raw); } catch (e) { return raw; }
+}
+
+function setHashKey(key) {
+location.hash = encodeURIComponent(key);
+}
+
+const byKey = new Map();
+for (const h of DATA) byKey.set(makeKey(h), h);
+
+const keysSorted = Array.from(byKey.keys()).sort((a, b) => {
+const da = byKey.get(a)?.device ?? "";
+const db = byKey.get(b)?.device ?? "";
+return deviceKey(da).localeCompare(deviceKey(db));
+});
+
+const platformAliases = new Set(["PS3", "PS4", "PS5", "Vita"]);
+const brandSet = new Set(DATA.map(x => String(x.brand || "").trim()).filter(Boolean));
+const categorySet = new Set(DATA.map(x => String(x.category || "").trim()).filter(Boolean));
+
+const QUALIFIED_TARGET_KEYS = new Set();
+
+function resolveSeeAlsoToKey(entry, _opts) {
+if (entry && typeof entry === "object") {
+    const spec = {
+    device: entry.device || entry.title || "",
+    platform: entry.platform || "",
+    brand: entry.brand || "",
+    category: entry.category || ""
+    };
+    const key = makeKey(spec);
+    return byKey.has(key) ? key : null;
+}
+
+const raw = String(entry || "").trim();
+if (!raw) return null;
+
+const DEVICE_ALIASES = {
+    "PSVR": "PSVR CUH-ZVR2",
+    "PSVR 2": "PSVR2 CFI-ZVR1",
+    "PSVR2": "PSVR2 CFI-ZVR1"
+};
+
+if (Object.hasOwn(DEVICE_ALIASES, raw)) {
+    const targetDevice = DEVICE_ALIASES[raw];
+
+    const targetKey = keysSorted.find(key =>
+        byKey.get(key)?.device === targetDevice
+    );
+
+    return targetKey ?? null;
+}
+
+let baseDevice = raw;
+let qualifier = "";
+const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
+if (m) {
+    baseDevice = m[1].trim();
+    qualifier = m[2].trim();
+}
+
+const chunks = qualifier
+    ? qualifier.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+let desiredPlatform = "";
+let desiredBrand = "";
+let desiredCategory = "";
+
+function extractPlatformFromText(text) {
+    let out = String(text || "").trim();
+
+    for (const p of platformAliases) {
+    const re = new RegExp(`(?:^|\\s)${p}(?:\\s|$)`, "i");
+    if (re.test(out)) {
+        if (!desiredPlatform) desiredPlatform = p;
+        out = out.replace(re, "").replace(/\s+/g, " ").trim();
+    }
+    }
+
+    return out;
+}
+
+function normToken(s) {
+    return String(s ?? "")
+    .trim()
+    .replace(/^\((.*)\)$/, "$1")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+for (const c of chunks) {
+    const rest = extractPlatformFromText(c);
+    if (!rest) continue;
+
+    const restNorm = normToken(rest);
+
+    const catMatch = Array.from(categorySet).find(x => normToken(x) === restNorm);
+    if (catMatch && !desiredCategory) {
+    desiredCategory = catMatch;
+    continue;
+    }
+
+    const brandMatch = Array.from(brandSet).find(x => normToken(x) === restNorm);
+    if (brandMatch && !desiredBrand) {
+    desiredBrand = brandMatch;
+    continue;
+    }
+}
+
+const collectMatches = (d) => keysSorted
+    .map(k => ({ key: k, hard: byKey.get(k) }))
+    .filter(x => x.hard && String(x.hard.device).trim() === d);
+
+let matches = collectMatches(baseDevice);
+if (!matches.length && baseDevice !== raw) matches = collectMatches(raw);
+if (!matches.length) return null;
+
+if (!_opts?.building && !qualifier && matches.length > 1 && QUALIFIED_TARGET_KEYS.size) {
+    const filtered = matches.filter(x => !QUALIFIED_TARGET_KEYS.has(x.key));
+    if (filtered.length) matches = filtered;
+}
+
+if (desiredPlatform) {
+    const filtered = matches.filter(x => String(x.hard.platform).trim() === desiredPlatform);
+    if (filtered.length) matches = filtered;
+}
+
+if (desiredBrand) {
+    const filtered = matches.filter(x => String(x.hard.brand).trim() === desiredBrand);
+    if (filtered.length) matches = filtered;
+}
+
+if (desiredCategory) {
+    const filtered = matches.filter(x => String(x.hard.category).trim() === desiredCategory);
+    if (filtered.length) matches = filtered;
+}
+
+if (matches.length === 1) return matches[0].key;
+
+const current = byKey.get(getHashKey());
+if (current && current.platform) {
+    const filtered = matches.filter(x => String(x.hard.platform).trim() === String(current.platform).trim());
+    if (filtered.length === 1) return filtered[0].key;
+}
+
+return matches[0].key;
+}
+
+for (const h of DATA) {
+const sa = h && h.seeAlso;
+if (!Array.isArray(sa)) continue;
+
+for (const entry of sa) {
+    if (typeof entry === "string") {
+    const s = entry.trim();
+    if (!s) continue;
+    if (!/\(.+\)/.test(s)) continue;
+    const key = resolveSeeAlsoToKey(entry, { building: true });
+    if (key) QUALIFIED_TARGET_KEYS.add(key);
+    } else if (entry && typeof entry === "object") {
+    const isQualifiedObj = !!(entry.platform || entry.brand || entry.category);
+    if (!isQualifiedObj) continue;
+    const key = resolveSeeAlsoToKey(entry, { building: true });
+    if (key) QUALIFIED_TARGET_KEYS.add(key);
+    }
+}
+}
+
+function mapBrandsToLinks(brands) {
+if (!Array.isArray(brands)) return [];
+
+return brands
+    .map(name => {
+    const label = String(name || "").trim();
+    if (!label) return null;
+
+    const url = PSDB.manufacturerLinks?.[label] || "";
+
+    return url ? { label, href: url } : label;
+    })
+    .filter(Boolean);
+}
+
+const NOTE_ID_MAP = {
+"General": "general",
+"Stock": "stock",
+"3D Compatible": "3d",
+"3D": "3d",
+"PS Move": "move-game",
+"PSVR2": "vr2-game",
+"PSVR": "vr-game",
+"uDraw": "udraw"
+};
+
+const GENRE_ABBR = {
+"RPG":  "Role-Playing Game",
+"JRPG": "Japanese-style Role-Playing Game",
+"CRPG": "Computer Role-Playing Game",
+"TRPG": "Tactical turn-based Role-Playing Game",
+"ARPG": "Action Role-Playing Game",
+"RTS":  "Real-Time Strategy",
+"TBS":  "Turn-Based Strategy",
+"TBT":  "Turn-Based Tactics",
+"FPS":  "First-Person Shooter"
+};
+
+let genreTooltipEl = null;
+let genreTooltipTarget = null;
+let genreTooltipHandlersBound = false;
+
+function ensureGenreTooltip(){
+if (genreTooltipEl) return genreTooltipEl;
+const tooltip = document.createElement("div");
+tooltip.className = "genre-tooltip";
+tooltip.setAttribute("role", "tooltip");
+document.body.appendChild(tooltip);
+genreTooltipEl = tooltip;
+return tooltip;
+}
+
+function positionGenreTooltip(){
+if (!genreTooltipTarget) return;
+const tooltip = ensureGenreTooltip();
+const rect = genreTooltipTarget.getBoundingClientRect();
+const left = rect.left + rect.width / 2;
+const top  = rect.top;
+tooltip.style.left = `${left}px`;
+tooltip.style.top  = `${top}px`;
+}
+
+function showGenreTooltip(target){
+const tip = target.getAttribute("data-tip");
+if (!tip) return;
+const tooltip = ensureGenreTooltip();
+genreTooltipTarget = target;
+tooltip.textContent = tip;
+tooltip.classList.add("show");
+positionGenreTooltip();
+}
+
+function hideGenreTooltip(){
+if (!genreTooltipEl) return;
+genreTooltipEl.classList.remove("show");
+genreTooltipTarget = null;
+}
+
+function bindGenreTooltipHandlers(){
+if (genreTooltipHandlersBound) return;
+genreTooltipHandlersBound = true;
+
+document.addEventListener("mouseover", (e) => {
+    const t = e.target.closest?.(".genre-abbr");
+    if (t) showGenreTooltip(t);
+});
+
+document.addEventListener("mouseout", (e) => {
+    const t = e.target.closest?.(".genre-abbr");
+    if (t) hideGenreTooltip();
+});
+
+document.addEventListener("focusin", (e) => {
+    const t = e.target.closest?.(".genre-abbr");
+    if (t) showGenreTooltip(t);
+});
+
+document.addEventListener("focusout", (e) => {
+    const t = e.target.closest?.(".genre-abbr");
+    if (t) hideGenreTooltip();
+});
+
+window.addEventListener("scroll", () => {
+    if (genreTooltipTarget) positionGenreTooltip();
+}, { passive: true });
+
+window.addEventListener("resize", () => {
+    if (genreTooltipTarget) positionGenreTooltip();
+}, { passive: true });
+}
+
+function genreAbbrHtmlize(escapedText){
+return escapedText.replace(/\b([A-Za-z]{2,5})\b/g, (m) => {
+    const key = m.toUpperCase();
+    const tip = GENRE_ABBR[key];
+    if (!tip) return m;
+    return `<span class="genre-abbr" tabindex="0" data-tip="${escapeHtml(tip)}">${m}</span>`;
+});
+}
+
+function notesOrTextHtml(x) {
+let s = escapeHtml(String(x ?? ""));
+s = genreAbbrHtmlize(s);
+
+const entries = Object.entries(NOTE_ID_MAP)
+    .sort((a, b) => b[0].length - a[0].length);
+
+for (const [term, id] of entries) {
+    const safeTerm = escapeHtml(term);
+    s = s.split(safeTerm).join(`<a class="note-link" href="../ps_info/ps_notes.html#${id}">${safeTerm}</a>`);
+}
+
+return s;
+}
+
+function makeMini(title, items, extraClass=""){
+const li = (items && items.length)
+    ? items.map(x => {
+        
+    if (x && typeof x === "object" && x.href) {
+        const label = x.label ?? x.href;
+
+        return `<li>${PSSEC.safeLink(
+            label,
+            x.href,
+            "game-link"
+        )}</li>`;
+    }
+
+    return `<li>${notesOrTextHtml(x)}</li>`;
+    }).join("")
+    : "<li>—</li>";
+
+    return `
+    <div class="mini ${extraClass}">
+        <h3 class="card-title mini-title">${escapeHtml(title)}</h3>
+        <div class="mini-body">
+        <ul class="mini-list">${li}</ul>
+        </div>
+    </div>
+    `;
+}
+
+function renderHardware(key) {
+let currentKey = key;
+
+if (!currentKey || !byKey.has(currentKey)) {
+    currentKey = keysSorted[0] || "";
+    if (currentKey) setHashKey(currentKey);
+}
+
+const h = byKey.get(currentKey);
+if (!h) return;
+
+const titleEl = document.getElementById("hardTitle");
+titleEl.textContent = h.device || "Hardware";
+
+const i = keysSorted.indexOf(currentKey);
+const prevKey = keysSorted[(i - 1 + keysSorted.length) % keysSorted.length];
+const nextKey = keysSorted[(i + 1) % keysSorted.length];
+
+document.getElementById("prevBtn").onclick = () => setHashKey(prevKey);
+document.getElementById("nextBtn").onclick = () => setHashKey(nextKey);
+
+const condition = (h.condition ? [h.condition] : []);
+const platform = asArray(h.platform);
+const brandItems = mapBrandsToLinks(asArray(h.brand));
+const category = asArray(h.category);
+
+let categoryItems = category.slice();
+
+    if (Array.isArray(h.notes) && h.notes.length > 0) {
+    const firstNote = String(h.notes[0] ?? "").trim();
+
+    if (firstNote && categoryItems.some(c => norm(c) === "other")) {
+        categoryItems = categoryItems.map(c => (norm(c) === "other" ? firstNote : c));
+        categoryItems = [...new Set(categoryItems)];
+    }
+    }
+
+const miniCondition = makeMini("Condition", condition, "mini-small");
+const miniPlatform  = makeMini("Platform", platform, "mini-small");
+const miniBrand     = makeMini("Brand", brandItems, "mini-small");
+const miniCategory  = makeMini("Category", categoryItems, "mini-small");
+
+const row = (arr) => `<div class="mini-row cols-${arr.length}">${arr.join("")}</div>`;
+const miniHtml = [
+    row([miniCondition, miniPlatform]),
+    row([miniBrand, miniCategory])
+].join("");
+
+document.getElementById("miniGrid").innerHTML = miniHtml;
+
+const additionalOnly = Array.isArray(h.additionalInfo) ? h.additionalInfo : [];
+
+const additionalInfoList = document.getElementById("additionalInfo");
+additionalInfoList.innerHTML = (additionalOnly && additionalOnly.length)
+    ? additionalOnly.map(x => `<li>${notesOrTextHtml(x)}</li>`).join("")
+    : "<li>—</li>";
+
+const seeAlsoList = document.getElementById("seeAlso");
+const seeAlso = Array.isArray(h.seeAlso) ? h.seeAlso : [];
+
+if (seeAlso.length && seeAlso[0] !== "—") {
+    seeAlsoList.innerHTML = seeAlso.map(entry => {
+    const label = (entry && typeof entry === "object") ? (entry.label || entry.device || entry.title) : String(entry || "");
+    const key = resolveSeeAlsoToKey(entry);
+
+    if (!key) return `<li>${escapeHtml(label)}</li>`;
+    return `<li><a class="game-link" href="#${encodeURIComponent(key)}">${escapeHtml(label)}</a></li>`;
+    }).join("");
+} else {
+    seeAlsoList.innerHTML = "<li>—</li>";
+}
+}
+
+bindGenreTooltipHandlers();
+
+window.addEventListener("hashchange", () => renderHardware(getHashKey()));
+renderHardware(getHashKey());
+
+const backToTopBtn = document.getElementById("toTop");
+
+function toggleBackToTop() {
+if (!backToTopBtn) return;
+
+const enabled = window.innerWidth <= 1024;
+const scrolled = (window.pageYOffset || document.documentElement.scrollTop || 0) > 300;
+
+backToTopBtn.classList.toggle("show", enabled && scrolled);
+}
+
+window.addEventListener("scroll", toggleBackToTop, { passive: true });
+window.addEventListener("resize", toggleBackToTop);
+window.addEventListener("load", toggleBackToTop);

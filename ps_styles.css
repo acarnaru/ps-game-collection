@@ -184,6 +184,15 @@ body {
     flex-wrap: wrap;
   }
 
+
+#hardwareGroup,
+#hardwareContent,
+#typeGroup,
+#terrainGroup,
+#battleGroup {
+    display: none;
+  }
+
 .filterlabel {
     font-size: 12px;
     letter-spacing: .8px;

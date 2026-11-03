@@ -1,0 +1,732 @@
+const { DATA } = PSLOAD.getGameData();
+
+(function () {
+const btn = document.getElementById("toTop");
+if (!btn) return;
+
+function getScrollY() {
+    return window.pageYOffset || document.documentElement.scrollTop || 0;
+}
+
+function showOrHide() {
+    btn.classList.toggle("show", getScrollY() > 300);
+}
+
+window.addEventListener("scroll", showOrHide, { passive: true });
+window.addEventListener("load", showOrHide);
+
+btn.addEventListener("click", function () {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+showOrHide();
+})();
+
+function escapeHtml(s){
+return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+}
+
+function linkNoTrophies(text){
+if (typeof text !== "string") return text;
+
+return text.replace(
+    /\(no trophies\)/gi,
+    '( <a class="no-trophies-link" href="../ps_info/ps_notes.html#trophy">no trophies</a> )'
+);
+}
+
+function applyTrophyHighlights(root = document.body) {
+const patterns = [
+    { re: /\bPlatinum Troph(?:y|ies)\b/g, cls: "trophy-platinum" },
+    { re: /\bGold Troph(?:y|ies)\b/g, cls: "trophy-gold" },
+    { re: /\bSilver Troph(?:y|ies)\b/g, cls: "trophy-silver" },
+    { re: /\bBronze Troph(?:y|ies)\b/g, cls: "trophy-bronze" }
+];
+
+const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+    const p = node.parentElement;
+    if (!p) return NodeFilter.FILTER_REJECT;
+    const tag = p.tagName;
+    if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
+    if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+
+    const t = node.nodeValue;
+    if (!/Troph(?:y|ies)\b/i.test(t)) return NodeFilter.FILTER_REJECT;
+
+    return NodeFilter.FILTER_ACCEPT;
+    }
+});
+
+const textNodes = [];
+while (walker.nextNode()) textNodes.push(walker.currentNode);
+
+for (const node of textNodes) {
+    let html = escapeHtml(node.nodeValue);
+
+    let changed = false;
+    for (const p of patterns) {
+    if (p.re.test(node.nodeValue)) {
+        changed = true;
+        html = html.replace(p.re, (m) => `<span class="${p.cls}">${m}</span>`);
+    }
+    p.re.lastIndex = 0;
+    }
+    if (!changed) continue;
+
+    const span = document.createElement("span");
+    span.innerHTML = html;
+    node.parentNode.replaceChild(span, node);
+}
+}
+
+function asArray(v){
+if (Array.isArray(v)) return v;
+if (v == null) return [];
+const str = String(v).trim();
+if (!str) return [];
+return [str];
+}
+function uniq(arr){
+const out = [];
+const seen = new Set();
+for (const x of arr){
+    const k = String(x);
+    if (!seen.has(k)) { seen.add(k); out.push(x); }
+}
+return out;
+}
+function titleKey(t) {
+return String(t).toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+}
+
+function makeKey(g){
+return [g.title, g.platform, (g.format||""), (g.version||"")].join("||");
+}
+
+function getHashKey(){
+const raw = (location.hash || "").replace(/^#/, "");
+if (!raw) return "";
+try { return decodeURIComponent(raw); } catch(e) { return raw; }
+}
+
+function setHashKey(key){
+location.hash = encodeURIComponent(key);
+}
+
+const QUALIFIED_TARGET_KEYS = new Set();
+
+function resolveSeeAlsoToKey(entry, _opts){
+if (entry && typeof entry === "object") {
+    const spec = {
+    title: entry.title || "",
+    platform: entry.platform || "",
+    version: entry.version || "",
+    format: entry.format || ""
+    };
+    const key = makeKey(spec);
+    return byKey.has(key) ? key : null;
+}
+
+const raw = String(entry || "").trim();
+if (!raw) return null;
+
+let baseTitle = raw;
+let qualifier = "";
+const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
+if (m) {
+    baseTitle = m[1].trim();
+    qualifier = m[2].trim();
+}
+
+const platformAliases = new Set(["PS3","PS4","PS5","Vita"]);
+
+const chunks = qualifier
+    ? qualifier.split(",").map(s => s.trim()).filter(Boolean)
+    : [];
+
+let desiredPlatform = "";
+const desiredVersionParts = [];
+
+function extractPlatformFromText(text){
+    let out = String(text || "").trim();
+
+    for (const p of platformAliases) {
+    const re = new RegExp(`(?:^|\\s)${p}(?:\\s|$)`, "i");
+
+    if (re.test(out)) {
+        if (!desiredPlatform) desiredPlatform = p;
+        out = out.replace(re, "").replace(/\s+/g, " ").trim();
+    }
+    }
+
+    return out;
+}
+
+function normVerToken(s){
+    return String(s ?? "")
+    .trim()
+    .replace(/^\((.*)\)$/, "$1")
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+}
+
+for (const c of chunks) {
+    const rest = extractPlatformFromText(c);
+    if (!rest) continue;
+
+    desiredVersionParts.push(normVerToken(rest));
+}
+
+const collectMatches = (t) => keysSorted
+    .map(k => ({ key: k, game: byKey.get(k) }))
+    .filter(x => x.game && String(x.game.title).trim() === t);
+
+let matches = collectMatches(baseTitle);
+if (!matches.length && baseTitle !== raw) matches = collectMatches(raw);
+if (!matches.length) return null;
+
+if (!_opts?.building && !qualifier && matches.length > 1 && QUALIFIED_TARGET_KEYS.size) {
+    const filtered = matches.filter(x => !QUALIFIED_TARGET_KEYS.has(x.key));
+    if (filtered.length) matches = filtered;
+}
+
+if (desiredPlatform) {
+    const filtered = matches.filter(x => String(x.game.platform).trim() === desiredPlatform);
+    if (filtered.length) matches = filtered;
+}
+
+function gameVersionParts(v){
+    if (Array.isArray(v)) return v.map(normVerToken).filter(Boolean);
+    const s = String(v ?? "").trim();
+    return s ? [normVerToken(s)] : [];
+}
+
+    if (!desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+    const baseOnly = matches.filter(x => gameVersionParts(x.game.version).length === 0);
+    if (baseOnly.length) matches = baseOnly;
+    }
+
+    if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+    const baseOnPlatform = matches.filter(x => gameVersionParts(x.game.version).length === 0);
+    if (baseOnPlatform.length) matches = baseOnPlatform;
+    }
+
+    if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+    const firstVerRaw = (v) => {
+        if (Array.isArray(v)) return String(v[0] ?? "").trim();
+        return String(v ?? "").trim();
+    };
+
+    const nonParen = matches.filter(x => {
+        const v0 = firstVerRaw(x.game.version);
+        return v0 && !/^\(/.test(v0);
+    });
+
+    if (nonParen.length) matches = nonParen;
+    }
+
+function prefixMatch(need, have){
+    if (need.length === 0) return true;
+    if (have.length < need.length) return false;
+    for (let i = 0; i < need.length; i++){
+    if (String(have[i]).trim() !== String(need[i]).trim()) return false;
+    }
+    return true;
+}
+
+if (desiredVersionParts.length) {
+    const versionMatched = matches
+    .map(x => ({ ...x, vparts: gameVersionParts(x.game.version) }))
+    .filter(x => prefixMatch(desiredVersionParts, x.vparts));
+
+    if (versionMatched.length) {
+    const wantSingle = desiredVersionParts.length === 1;
+
+    versionMatched.sort((a,b) => {
+        const aArr = Array.isArray(a.game.version);
+        const bArr = Array.isArray(b.game.version);
+        if (wantSingle && aArr !== bArr) return aArr ? 1 : -1;
+        return a.vparts.length - b.vparts.length;
+    });
+
+    matches = versionMatched;
+    }
+}
+
+const current = byKey.get(getHashKey());
+if (current && matches.length > 1) {
+    const samePlatform = matches.find(x => x.game.platform === current.platform);
+    if (samePlatform) return samePlatform.key;
+}
+
+return matches[0].key;
+}
+
+function cmpStr(a,b){
+return String(a||"").localeCompare(String(b||""), undefined, { sensitivity:"base" });
+}
+
+const keysSorted = DATA.slice().sort((a,b) => {
+const t = cmpStr(a.title, b.title);
+if (t) return t;
+const p = cmpStr(a.platform, b.platform);
+if (p) return p;
+const f = cmpStr(a.format, b.format);
+if (f) return f;
+return cmpStr(a.version, b.version);
+}).map(makeKey);
+
+const byKey = new Map(DATA.map(g => [makeKey(g), g]));
+
+(function buildQualifiedTargets(){
+for (const g of DATA) {
+    const sa = g && g.seeAlso;
+    if (!Array.isArray(sa)) continue;
+
+    for (const entry of sa) {
+    if (typeof entry === "string") {
+        const s = entry.trim();
+        if (!s) continue;
+        if (!/\(.+\)/.test(s)) continue;
+        const key = resolveSeeAlsoToKey(entry, { building: true });
+        if (key) QUALIFIED_TARGET_KEYS.add(key);
+    } else if (entry && typeof entry === "object") {
+        const isQualifiedObj = !!(entry.platform || entry.format || entry.version);
+        if (!isQualifiedObj) continue;
+        const key = resolveSeeAlsoToKey(entry, { building: true });
+        if (key) QUALIFIED_TARGET_KEYS.add(key);
+    }
+    }
+}
+})();
+
+function mapPublishersToLinks(publishers){
+if (!Array.isArray(publishers)) return [];
+
+return publishers.map(name => {
+    const label = String(name || "").trim();
+    if (!label) return null;
+
+    const canonical = (PSDB.publisherAliases && PSDB.publisherAliases[label]) || label;
+    const url = (PSDB.publisherLinks && PSDB.publisherLinks[canonical]) || "";
+
+    if (!url) return label;
+
+    return { label: canonical, href: url };
+}).filter(Boolean);
+}
+
+function linkNotesTerm(text){
+const label = String(text ?? "").trim();
+
+if (
+    label === "General Notes" ||
+    label === "No Trophies" ||
+    label === "no trophies"
+) {
+    return escapeHtml(label);
+}
+
+const anchor = NOTES_TERMS[label];
+if (!anchor) return escapeHtml(label);
+
+return `<a href="../ps_info/ps_notes.html#${anchor}" class="status-link">${escapeHtml(label)}</a>`;
+}
+
+const MORE_INFO_ROUTES = [
+{ test: t => /\bSkylanders\b/i.test(t), href: "../ps_skyland/ps_sland.html" },
+{ test: t => /^Disney\s+Infinity\b/i.test(t), href: "../ps_disney/ps_dinf.html" },
+{ test: t => t === "Starlink: Battle for Atlas", href: "../ps_starlink/ps_slink.html" }
+];
+
+function moreInfoHrefForGame(game){
+const t = String(game?.title || "").trim();
+const match = MORE_INFO_ROUTES.find(r => r.test(t));
+return match?.href ?? null;
+}
+
+function notesOrTextHtml(raw, gameCtx){
+let s = String(raw ?? "");
+s = escapeHtml(s);
+s = linkNoTrophies(s);
+const moreInfoHref = moreInfoHrefForGame(gameCtx);
+    if (moreInfoHref) {
+    const href = escapeHtml(moreInfoHref);
+    s = s.replace(/\bMore Info\b/g, `<a class="game-link" href="${href}">More Info</a>`);
+    }
+const excluded = new Set(["General Notes", "No Trophies", "no trophies"]);
+const terms = Object.keys(NOTES_TERMS)
+    .filter(t => !excluded.has(t))
+    .sort((a, b) => b.length - a.length);
+
+for (const term of terms) {
+    const anchor = NOTES_TERMS[term];
+    if (!anchor) continue;
+
+    const cls = (term === "Discontinued")
+    ? "status-link status-discontinued"
+    : (term === "Servers Offline")
+        ? "status-link status-offline"
+        : "status-link";
+
+    const safe = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+    s = s.replace
+    (new RegExp(safe, "g"),
+    `<a href="../ps_info/ps_notes.html#${anchor}" class="${cls}">${term}</a>`
+    );
+}
+return s;
+}
+
+function makeMini(title, items, extraClass=""){
+const li = (items && items.length)
+    ? items.map(x => {
+        
+    if (x && typeof x === "object" && x.href) {
+        const label = x.label ?? x.href;
+
+        return `<li>${PSSEC.safeLink(
+            label,
+            x.href,
+            "game-link"
+        )}</li>`;
+    }
+
+    if (title === "Genre") {
+        return `<li>${genreOrNotesHtml(x)}</li>`;
+    }
+    return `<li>${notesOrTextHtml(x)}</li>`;
+    }).join("")
+    : "<li>—</li>";
+    
+    return `
+    <div class="mini ${extraClass}">
+        <h3 class="card-title mini-title">${escapeHtml(title)}</h3>
+        <div class="mini-body">
+        <ul class="mini-list">${li}</ul>
+        </div>
+    </div>
+    `;
+}
+
+function makeStatusMini(title, items, extraClass=""){
+const arr = (items && items.length) ? items : ["—"];
+
+const lis = arr.map(x => {
+    const label = String(x).trim();
+
+    if (label.toLowerCase() === "discontinued") {
+    return `<li><a class="status-link status-discontinued" href="../ps_info/ps_notes.html#disc">${escapeHtml(label)}</a></li>`;
+    }
+
+    if (label.toLowerCase() === "active" || label.toLowerCase() === "working") {
+    return `<li><span class="status-link status-active">${escapeHtml(label)}</span></li>`;
+    }
+
+    if (label.toLowerCase() === "servers offline") {
+    return `<li><a class="status-link status-offline" href="../ps_info/ps_notes.html#srv">${escapeHtml(label)}</a></li>`;
+    }
+
+    return `<li>${escapeHtml(label)}</li>`;
+}).join("");
+
+return `
+    <div class="mini ${extraClass}">
+    <h4 class="mini-title">${escapeHtml(title)}</h4>
+    <div class="mini-body">
+        <ul class="mini-list">${lis}</ul>
+    </div>
+    </div>
+`;
+}
+
+function splitGenre(genre){
+const arr = asArray(genre).flatMap(g => String(g).split(",").map(x => x.trim()).filter(Boolean));
+return uniq(arr);
+}
+
+const GENRE_ABBR = {
+"RPG": "Role-Playing Game",
+"JRPG": "Japanese-style Role-Playing Game",
+"CRPG": "Computer Role-Playing Game",
+"TRPG": "Tactical turn-based Role-Playing Game",
+"ARPG": "Action Role-Playing Game",
+"RTS": "Real-Time Strategy",
+"TBS": "Turn-Based Strategy",
+"TBT": "Turn-Based Tactics",
+"FPS": "First-Person Shooter",
+"MOBA": "Multiplayer Online Battle Arena",
+"MMORPG": "Massive Multiplayer Online Role-Playing Game"
+};
+
+const NOTES_TERMS = {
+"Online Only": "online",
+"Download Required": "dld",
+"Servers Offline": "srv",
+"Discontinued": "disc",
+"3D Compatible": "3d",
+"PS Move Compatible": "move-comp",
+"PS Move Features": "move-feat",
+"PS Move Game": "move-game",
+"PSVR Compatible": "vr-comp",
+"PSVR Features": "vr-feat",
+"PSVR Game": "vr-game",
+"PSVR2 Compatible": "vr2-comp",
+"PSVR2 Features": "vr2-feat",
+"PSVR2 Game": "vr2-game",
+"uDraw Game": "udraw",
+"Strictly Limited": "strict",
+"Limited Run": "limited"
+};
+
+function genreItemHtml(raw){
+const label = String(raw ?? "").trim();
+const tip = GENRE_ABBR[label.toUpperCase()];
+if (!tip) return linkNoTrophies(escapeHtml(label));
+return `<span class="genre-abbr" tabindex="0" data-tip="${escapeHtml(tip)}">${escapeHtml(label)}</span>`;
+}
+
+function genreOrNotesHtml(raw){
+const label = String(raw ?? "").trim();
+
+const maybeLinked = linkNotesTerm(label);
+if (typeof maybeLinked === "string" && maybeLinked.includes("<a ")) {
+    return maybeLinked;
+}
+return genreItemHtml(label);
+}
+
+let genreTooltipEl = null;
+let genreTooltipTarget = null;
+let genreTooltipHandlersBound = false;
+
+function ensureGenreTooltip(){
+if (genreTooltipEl) return genreTooltipEl;
+const tooltip = document.createElement("div");
+tooltip.className = "genre-tooltip";
+tooltip.setAttribute("role", "tooltip");
+document.body.appendChild(tooltip);
+genreTooltipEl = tooltip;
+return tooltip;
+}
+
+function positionGenreTooltip(){
+if (!genreTooltipTarget) return;
+const tooltip = ensureGenreTooltip();
+const rect = genreTooltipTarget.getBoundingClientRect();
+const left = rect.left + rect.width / 2;
+const top = rect.top;
+tooltip.style.left = `${left}px`;
+tooltip.style.top = `${top}px`;
+}
+
+function showGenreTooltip(target){
+const tip = target.getAttribute("data-tip");
+if (!tip) return;
+const tooltip = ensureGenreTooltip();
+genreTooltipTarget = target;
+tooltip.textContent = tip;
+tooltip.classList.add("show");
+positionGenreTooltip();
+}
+
+function hideGenreTooltip(){
+if (!genreTooltipEl) return;
+genreTooltipEl.classList.remove("show");
+genreTooltipTarget = null;
+}
+
+function bindGenreTooltipHandlers(){
+if (genreTooltipHandlersBound) return;
+genreTooltipHandlersBound = true;
+
+window.addEventListener("scroll", hideGenreTooltip, true);
+window.addEventListener("resize", () => {
+    if (genreTooltipTarget) positionGenreTooltip();
+});
+
+document.addEventListener("mouseover", (event) => {
+    const target = event.target.closest(".genre-abbr");
+    if (!target) return;
+    showGenreTooltip(target);
+});
+
+document.addEventListener("mouseout", (event) => {
+    if (!genreTooltipTarget) return;
+    const leaving = event.target.closest(".genre-abbr");
+    if (!leaving || leaving !== genreTooltipTarget) return;
+    hideGenreTooltip();
+});
+
+document.addEventListener("focusin", (event) => {
+    const target = event.target.closest(".genre-abbr");
+    if (!target) return;
+    showGenreTooltip(target);
+});
+
+document.addEventListener("focusout", (event) => {
+    if (!genreTooltipTarget) return;
+    const leaving = event.target.closest(".genre-abbr");
+    if (!leaving || leaving !== genreTooltipTarget) return;
+    hideGenreTooltip();
+});
+}
+
+async function renderGame(key){
+let game = byKey.get(key);
+if (!game) {
+    const firstKey = keysSorted[0] || "";
+    game = byKey.get(firstKey);
+    key = firstKey;
+    if (game && firstKey) setHashKey(firstKey);
+}
+
+document.getElementById("gameTitle").textContent = game.title;
+
+const len = keysSorted.length;
+let i = keysSorted.findIndex(k => k === key);
+if (i < 0) i = 0;
+
+const prevKey = (len > 0) ? keysSorted[(i - 1 + len) % len] : null;
+const nextKey = (len > 0) ? keysSorted[(i + 1) % len] : null;
+
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+
+const canCycle = len > 1;
+prevBtn.disabled = !canCycle;
+nextBtn.disabled = !canCycle;
+
+prevBtn.onclick = () => canCycle && prevKey && setHashKey(prevKey);
+nextBtn.onclick = () => canCycle && nextKey && setHashKey(nextKey);
+
+const condition = (game.condition && game.condition.length)
+    ? asArray(game.condition)
+    : ["—"];
+
+const platform = asArray(game.platform);
+const format   = asArray(game.format);
+const version  = asArray(game.version);
+
+const included = (game.included && game.included.length) ? game.included : [];
+const genre    = splitGenre(game.genre);
+
+let publisherNames = (game.publisher && game.publisher.length) ? asArray(game.publisher) : [];
+let year = (game.year ?? "").toString().trim();
+
+if (!publisherNames.length || !year) {
+    try {
+
+    if (!publisherNames.length) {
+        const metaPub = (meta.publisher || "").toString().trim();
+
+        publisherNames = metaPub
+        ? metaPub.split(",").map(s => s.trim()).filter(Boolean)
+        : [];
+    }
+
+    if (!year) year = (meta.year || "").toString().trim();
+    } catch (e) {}
+}
+
+if (!publisherNames.length) publisherNames = ["—"];
+const publisherItems = mapPublishersToLinks(publisherNames);
+
+const status = (game.status && game.status.length)
+    ? asArray(game.status)
+    : ["—"];
+
+const seeAlso = (game.seeAlso && game.seeAlso.length)
+    ? asArray(game.seeAlso)
+    : ["—"];
+
+const additionalInfo = (game.additionalInfo && game.additionalInfo.length)
+    ? asArray(game.additionalInfo)
+    : ["—"];
+
+const grid = document.getElementById("miniGrid");
+
+const isPhysical = format.some(f => String(f).toLowerCase() === "physical");
+const isDigital  = format.some(f => String(f).toLowerCase() === "digital");
+
+const row = (arr) => `<div class="mini-row cols-${arr.length}">${arr.join("")}</div>`;
+
+const miniCondition = makeMini("Condition", condition, "mini-small");
+const miniPlatform  = makeMini("Platform", platform, "mini-small");
+const miniFormat    = makeMini("Format", format, "mini-small");
+const miniVersion   = makeMini("Version", version);
+const miniGenre     = makeMini("Genre", genre);
+const miniPublisher = makeMini("Publisher/Developer", publisherItems);
+const miniYear      = makeMini("Year", year ? [year] : []);
+const miniStatus    = makeStatusMini("Status", status);
+
+const rows = [];
+if (isPhysical && !isDigital) {
+    rows.push(row([miniCondition, miniPlatform, miniFormat]));
+    rows.push(row([miniVersion, miniGenre]));
+    rows.push(row([miniPublisher, miniYear, miniStatus]));
+} else if (isDigital && !isPhysical) {
+    rows.push(row([miniPlatform, miniFormat]));
+    rows.push(row([miniVersion, miniGenre]));
+    rows.push(row([miniPublisher, miniYear, miniStatus]));
+} else {
+    rows.push(row([miniPlatform, miniFormat, miniVersion]));
+    rows.push(row([miniGenre, miniPublisher, miniYear]));
+    rows.push(row([miniStatus]));
+}
+
+grid.innerHTML = rows.join("");
+bindGenreTooltipHandlers();
+
+const includedList = document.getElementById("includedGames");
+includedList.innerHTML = (included && included.length)
+    ? included.map(x => `<li>${linkNoTrophies(escapeHtml(x))}</li>`).join("")
+    : "<li>—</li>";
+
+const additionalInfoList = document.getElementById("additionalInfo");
+additionalInfoList.innerHTML = (additionalInfo && additionalInfo.length)
+    ? additionalInfo.map(x => `<li>${notesOrTextHtml(x, game)}</li>`).join("")
+    : "<li>—</li>";
+
+const seeAlsoList = document.getElementById("seeAlso");
+    if (seeAlso && seeAlso.length && seeAlso[0] !== "—") {
+    seeAlsoList.innerHTML = seeAlso.map(entry => {
+        const label = (entry && typeof entry === "object") ? (entry.label || entry.title) : String(entry || "");
+        const key = resolveSeeAlsoToKey(entry);
+
+        if (!key) return `<li>${escapeHtml(label)}</li>`;
+
+        return `<li><a class="game-link" href="#${encodeURIComponent(key)}">${escapeHtml(label)}</a></li>`;
+    }).join("");
+    } else {
+    seeAlsoList.innerHTML = "<li>—</li>";
+    }
+
+applyTrophyHighlights(document.querySelector("main"));
+}
+
+window.addEventListener("hashchange", () => renderGame(getHashKey()));
+renderGame(getHashKey());
+
+const backToTopBtn = document.getElementById("toTop");
+
+function toggleBackToTop() {
+    if (!backToTopBtn) return;
+
+    const enabled = window.innerWidth <= 1024;
+    const scrolled = (window.pageYOffset || document.documentElement.scrollTop || 0) > 300;
+
+    backToTopBtn.classList.toggle("show", enabled && scrolled);
+}
+
+if (backToTopBtn) {
+    backToTopBtn.addEventListener("click", () =>
+    window.scrollTo({ top: 0, behavior: "smooth" })
+    );
+    window.addEventListener("scroll", toggleBackToTop, { passive: true });
+    window.addEventListener("resize", toggleBackToTop);
+    window.addEventListener("load", toggleBackToTop);
+    toggleBackToTop();
+}
