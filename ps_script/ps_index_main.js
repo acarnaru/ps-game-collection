@@ -641,6 +641,9 @@ const isHardware = document.getElementById("modeSwitch").checked;
 state.q = "";
 document.getElementById("q").value = "";
 
+state.platforms.clear();
+["PS3","PS4","PS5","Vita"].forEach(p => state.platforms.add(p));
+
 state.hardwarePlatforms.clear();
 ["PS3","PS4","PS5","Vita","PSTV","Portal"].forEach(
     p => state.hardwarePlatforms.add(p)
@@ -663,7 +666,15 @@ else setGamesDropdown();
 renderChips();
 if (isHardware) renderHardware();
 else render();
+
+// Reset both page and catalogue scroll positions after rebuilding the table.
+window.scrollTo({ top: 0, behavior: "instant" });
+document.querySelectorAll("#gamesContent .wrap, #hardwareContent .wrap").forEach(wrap => {
+    wrap.scrollTop = 0;
 });
-renderChips();
+if (history.state?.psCatalogue) {
+    const { psCatalogue, ...remainingState } = history.state;
+    history.replaceState(remainingState, "");
+}
+});
 bindGenreTooltipHandlers();
-render();

@@ -59,60 +59,25 @@ const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
     }
 });
 
-
 const textNodes = [];
-while (walker.nextNode()) {
-    textNodes.push(walker.currentNode);
-}
-
-const combinedPattern = new RegExp(
-    patterns.map(p => `(?:${p.re.source})`).join("|"),
-    "gi"
-);
+while (walker.nextNode()) textNodes.push(walker.currentNode);
 
 for (const node of textNodes) {
-    const text = node.nodeValue;
-    const matches = [...text.matchAll(combinedPattern)];
+    let html = node.nodeValue;
 
-    if (!matches.length) continue;
-
-    const fragment = document.createDocumentFragment();
-    let lastIndex = 0;
-
-    for (const match of matches) {
-        const index = match.index;
-        const value = match[0];
-
-        fragment.appendChild(
-            document.createTextNode(
-                text.slice(lastIndex, index)
-            )
-        );
-
-        const pattern = patterns.find(p => {
-            p.re.lastIndex = 0;
-            return p.re.test(value);
-        });
-
-        if (pattern) {
-            const span = document.createElement("span");
-            span.className = pattern.cls;
-            span.textContent = value;
-            fragment.appendChild(span);
-        } else {
-            fragment.appendChild(
-                document.createTextNode(value)
-            );
-        }
-
-        lastIndex = index + value.length;
+    let changed = false;
+    for (const p of patterns) {
+    if (p.re.test(node.nodeValue)) {
+        changed = true;
+        html = html.replace(p.re, (m) => `<span class="${p.cls}">${m}</span>`);
     }
+    p.re.lastIndex = 0;
+    }
+    if (!changed) continue;
 
-    fragment.appendChild(
-        document.createTextNode(text.slice(lastIndex))
-    );
-
-    node.replaceWith(fragment);
+    const span = document.createElement("span");
+    span.innerHTML = html;
+    node.parentNode.replaceChild(span, node);
 }
 }
 
@@ -202,8 +167,33 @@ try { return decodeURIComponent(raw); } catch(e) { return raw; }
 }
 
 function setHashKey(key){
-location.hash = encodeURIComponent(key);
+    if (key === getHashKey()) return;
+    const depth = history.state?.psCatalogueDepth;
+    history.pushState(Number.isSafeInteger(depth) && depth > 0
+        ? { psCatalogueDepth: depth + 1 } : null, "", "#" + encodeURIComponent(key));
+    renderFromHash();
 }
+
+const catalogueMarker = "#~catalogue~";
+if (location.hash.startsWith(catalogueMarker)) {
+    history.replaceState(history.length > 1 ? { psCatalogueDepth: 1 } : null,
+        "", "#" + location.hash.slice(catalogueMarker.length));
+}
+document.getElementById("backBtn").addEventListener("click", event => {
+    if (event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+        event.metaKey || event.shiftKey || event.altKey) return;
+    const depth = history.state?.psCatalogueDepth;
+    if (!Number.isSafeInteger(depth) || depth < 1 || depth >= history.length) return;
+    event.preventDefault();
+    history.go(-depth);
+});
+document.getElementById("seeAlso").addEventListener("click", event => {
+    const link = event.target.closest('a.row-link[href^="#"]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+        event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setHashKey(decodeURIComponent(link.hash.slice(1)));
+});
 
 const byKey = new Map();
 const byName = new Map();
@@ -381,7 +371,7 @@ const seeArr = asArray(s.seeAlso).map(x => String(x || '').trim()).filter(Boolea
 const seeLis = seeArr.map(x => {
     const k = resolveSeeAlsoToKey(x);
     if (k && byKey.has(k)) {
-    const href = 'ps_sky.html#' + encodeURIComponent(k);
+    const href = '#' + encodeURIComponent(k);
     return '<li><a class="row-link" href="' + href + '">' + escapeHtml(x) + '</a></li>';
     }
     return '<li>' + escapeHtml(x) + '</li>';
@@ -417,7 +407,7 @@ function ensureValidHash(){
 const k = getHashKey();
 if (k && byKey.has(k)) return k;
 if (ORDERED_KEYS.length) {
-    setHashKey(ORDERED_KEYS[0]);
+    history.replaceState(history.state, "", "#" + encodeURIComponent(ORDERED_KEYS[0]));
     return ORDERED_KEYS[0];
 }
 return '';

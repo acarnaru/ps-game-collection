@@ -124,8 +124,41 @@ function getHashKey(){
 }
 
 function setHashKey(key){
-    location.hash = encodeURIComponent(key);
+    if (key === getHashKey()) return;
+    const depth = history.state?.psCatalogueDepth;
+    history.pushState(
+        Number.isSafeInteger(depth) && depth > 0 ? { psCatalogueDepth: depth + 1 } : null,
+        "", "#" + encodeURIComponent(key)
+    );
+    renderGame(key);
 }
+
+// Only ordinary navigation from the catalogue can establish a return path.
+const catalogueMarker = "#~catalogue~";
+if (location.hash.startsWith(catalogueMarker)) {
+    // file:// pages may omit the referrer and prohibit changing the query
+    // via replaceState. Only the ordinary catalogue click adds this marker.
+    const gameHash = "#" + location.hash.slice(catalogueMarker.length);
+    history.replaceState(history.length > 1 ? { psCatalogueDepth: 1 } : null, "", gameHash);
+}
+
+document.getElementById("backBtn").addEventListener("click", event => {
+    if (event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+        event.metaKey || event.shiftKey || event.altKey) return;
+    const depth = history.state?.psCatalogueDepth;
+    if (!Number.isSafeInteger(depth) || depth < 1 || depth >= history.length) return;
+    event.preventDefault();
+    history.go(-depth);
+});
+
+// Keep See Also navigation in the same tracked history as Previous and Next.
+document.getElementById("seeAlso").addEventListener("click", event => {
+    const link = event.target.closest('a.game-link[href^="#"]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+        event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setHashKey(decodeURIComponent(link.hash.slice(1)));
+});
 
 const QUALIFIED_TARGET_KEYS = new Set();
 
@@ -643,7 +676,7 @@ if (!game) {
     const firstKey = keysSorted[0] || "";
     game = byKey.get(firstKey);
     key = firstKey;
-    if (game && firstKey) setHashKey(firstKey);
+    if (game && firstKey) history.replaceState(history.state, "", "#" + encodeURIComponent(firstKey));
 }
 
 document.getElementById("gameTitle").textContent = game.title;

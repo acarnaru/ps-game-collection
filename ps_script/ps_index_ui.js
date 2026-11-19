@@ -217,4 +217,51 @@ toggleWrap.addEventListener("pointercancel", () => { tracking = false; }, { pass
 window.addEventListener("resize", () => { tracking = false; }, { passive: true });
 })();
 
+// Restore this history entry if the browser had to rebuild the catalogue.
+const savedCatalogue = history.state?.psCatalogue;
+if (savedCatalogue) {
+    for (const key of ["platforms", "hardwarePlatforms", "formats", "hardwareCats", "letters"]) {
+        if (Array.isArray(savedCatalogue.filters[key])) state[key] = new Set(savedCatalogue.filters[key]);
+    }
+    for (const key of ["q", "genre", "brand", "titleDir"]) {
+        if (typeof savedCatalogue.filters[key] === "string") state[key] = savedCatalogue.filters[key];
+    }
+    switchEl.checked = savedCatalogue.hardware;
+    document.getElementById("q").value = state.q;
+}
+
 updateModeUI();
+
+if (savedCatalogue) {
+    requestAnimationFrame(() => {
+        const wrap = (savedCatalogue.hardware ? hardware : games).querySelector(".wrap");
+        if (wrap) wrap.scrollTop = savedCatalogue.wrapScroll;
+        window.scrollTo(0, savedCatalogue.scroll);
+    });
+}
+
+// Mark ordinary catalogue navigation without affecting new-tab or modified clicks.
+function saveCatalogueNavigation(event) {
+    const link = event.target.closest("a.game-link, a.hard-link");
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+
+    const filters = Object.fromEntries(Object.entries(state).map(([key, value]) =>
+        [key, value instanceof Set ? [...value] : value]));
+    history.replaceState({
+        ...history.state,
+        psCatalogue: {
+            filters,
+            hardware: switchEl.checked,
+            scroll: window.scrollY,
+            wrapScroll: (switchEl.checked ? hardware : games).querySelector(".wrap")?.scrollTop || 0
+        }
+    }, "");
+
+    const url = new URL(link.href);
+    url.hash = "~catalogue~" + url.hash.slice(1);
+    event.preventDefault();
+    location.assign(url.href);
+}
+document.getElementById("tbody").addEventListener("click", saveCatalogueNavigation);
+document.getElementById("tbodyHardware").addEventListener("click", saveCatalogueNavigation);

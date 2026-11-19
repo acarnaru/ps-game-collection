@@ -184,11 +184,7 @@ function makeChip(label, groupKey) {
 const btn = document.createElement("button");
 btn.type = "button";
 btn.className = "chip";
-
-const bold = document.createElement("b");
-bold.textContent = label;
-btn.appendChild(bold);
-
+btn.innerHTML = "<b>" + label + "</b>";
 btn.addEventListener("click", () => {
     const set = state[groupKey];
     if (set.has(label)) set.delete(label); else set.add(label);
@@ -205,17 +201,12 @@ TABS.forEach(t => {
     btn.className = "chip" + (t.id === activeTab ? " on" : "");
     btn.setAttribute("role","tab");
     btn.setAttribute("aria-selected", t.id === activeTab ? "true" : "false");
-
-    const bold = document.createElement("b");
-    bold.textContent = t.label;
-    btn.appendChild(bold);
-    
+    btn.innerHTML = "<b>" + t.label + "</b>";
     btn.addEventListener("click", () => {
     activeTab = t.id;
     resetFiltersToDefault();
     sortAsc = true;
     render();
-    buildTabs();
     });
     els.tabToggle.appendChild(btn);
 });
@@ -454,7 +445,7 @@ const rowsHtml = sorted.map(it => {
 
     if (activeTab === "skylanders" && c.key === "name") {
         const primary = primaryFromArray(it.game);
-        const key = [it.name || "", (it.variant || ""), (primary || "")].join("||");
+        const key = [it.name || "", (it.variant || "Core"), (primary || "")].join("||");
         const href = "ps_sky.html#" + encodeURIComponent(key);
         return `<td class="col-${c.key}"><a class="row-link" href="${href}">${esc(it.name)}</a></td>`;
     }
@@ -486,20 +477,25 @@ const total = getTabSource(activeTab).length;
 els.stats.textContent = `${sorted.length} visible out of ${total} total`;
 }
 
+let renderedTab = null;
 function render() {
 const tab = TABS.find(t => t.id === activeTab);
-if (contentWrap) contentWrap.id = activeTab + 'Content';
-els.subTitle.textContent = tab ? tab.subtitle : "";
-els.variantSel.style.display = (tab && tab.showVariant) ? "" : "none";
-
-chipOnOff();
-buildChips();
+if (renderedTab !== activeTab) {
+    if (contentWrap) contentWrap.id = activeTab + 'Content';
+    els.subTitle.textContent = tab ? tab.subtitle : "";
+    els.variantSel.style.display = (tab && tab.showVariant) ? "" : "none";
+    chipOnOff();
+    buildChips();
+    buildHeader();
+    buildTabs();
+    renderedTab = activeTab;
+}
 syncChipUI();
-buildHeader();
+const sortButton = document.getElementById("nameSort");
+if (sortButton) sortButton.textContent = sortAsc ? "▼" : "▲";
 
 const items = getFiltered();
 renderRows(items);
-buildTabs();
 }
 
 els.q.addEventListener("input", (e) => {
@@ -516,9 +512,52 @@ els.q.value = "";
 resetFiltersToDefault();
 sortAsc = true;
 render();
+window.scrollTo({ top: 0, behavior: "instant" });
+if (contentWrap) contentWrap.scrollTop = 0;
+if (history.state?.psSkyCatalogue) {
+    const { psSkyCatalogue, ...remainingState } = history.state;
+    history.replaceState(remainingState, "");
+}
 });
 
-state.q = "";
+const savedCatalogue = history.state?.psSkyCatalogue;
+if (savedCatalogue && TABS.some(tab => tab.id === savedCatalogue.activeTab)) {
+    activeTab = savedCatalogue.activeTab;
+}
 resetFiltersToDefault();
-buildTabs();
+if (savedCatalogue) {
+    for (const key of ["game", "element", "type", "terrain", "battleClass"]) {
+        if (Array.isArray(savedCatalogue.filters[key])) state[key] = new Set(savedCatalogue.filters[key]);
+    }
+    state.q = savedCatalogue.filters.q || "";
+    state.variant = savedCatalogue.filters.variant || "all";
+    sortAsc = savedCatalogue.sortAsc;
+    els.q.value = state.q;
+    els.variantSel.value = state.variant;
+}
 render();
+if (savedCatalogue) {
+    requestAnimationFrame(() => {
+        if (contentWrap) contentWrap.scrollTop = savedCatalogue.wrapScroll;
+        window.scrollTo(0, savedCatalogue.scroll);
+    });
+}
+els.tbody.addEventListener("click", event => {
+    const link = event.target.closest("a.row-link");
+    if (!link || event.defaultPrevented || event.button !== 0 ||
+        event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+    const filters = Object.fromEntries(Object.entries(state).map(([key, value]) =>
+        [key, value instanceof Set ? [...value] : value]));
+    history.replaceState({
+        ...history.state,
+        psSkyCatalogue: {
+            filters, activeTab, sortAsc,
+            scroll: window.scrollY,
+            wrapScroll: contentWrap?.scrollTop || 0
+        }
+    }, "");
+    const url = new URL(link.href);
+    url.hash = "~catalogue~" + url.hash.slice(1);
+    event.preventDefault();
+    location.assign(url.href);
+});

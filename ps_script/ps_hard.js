@@ -71,8 +71,33 @@ try { return decodeURIComponent(raw); } catch (e) { return raw; }
 }
 
 function setHashKey(key) {
-location.hash = encodeURIComponent(key);
+    if (key === getHashKey()) return;
+    const depth = history.state?.psCatalogueDepth;
+    history.pushState(Number.isSafeInteger(depth) && depth > 0
+        ? { psCatalogueDepth: depth + 1 } : null, "", "#" + encodeURIComponent(key));
+    renderHardware(key);
 }
+
+const catalogueMarker = "#~catalogue~";
+if (location.hash.startsWith(catalogueMarker)) {
+    history.replaceState(history.length > 1 ? { psCatalogueDepth: 1 } : null,
+        "", "#" + location.hash.slice(catalogueMarker.length));
+}
+document.getElementById("backBtn").addEventListener("click", event => {
+    if (event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+        event.metaKey || event.shiftKey || event.altKey) return;
+    const depth = history.state?.psCatalogueDepth;
+    if (!Number.isSafeInteger(depth) || depth < 1 || depth >= history.length) return;
+    event.preventDefault();
+    history.go(-depth);
+});
+document.getElementById("seeAlso").addEventListener("click", event => {
+    const link = event.target.closest('a.game-link[href^="#"]');
+    if (!link || event.defaultPrevented || event.button !== 0 || event.ctrlKey ||
+        event.metaKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setHashKey(decodeURIComponent(link.hash.slice(1)));
+});
 
 const byKey = new Map();
 const byId = new Map();
@@ -452,7 +477,7 @@ let currentKey = key;
 
 if (!currentKey || !byKey.has(currentKey)) {
     currentKey = keysSorted[0] || "";
-    if (currentKey) setHashKey(currentKey);
+    if (currentKey) history.replaceState(history.state, "", "#" + encodeURIComponent(currentKey));
 }
 
 const h = byKey.get(currentKey);
