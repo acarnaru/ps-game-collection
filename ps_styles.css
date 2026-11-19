@@ -135,10 +135,7 @@ body {
     transform: translateX(34px);
   }
 
-.switch.dragging .slider {
-    transition: none;
-  }
-
+.switch.dragging .slider,
 .switch.dragging .slider::before {
     transition: none;
   }
@@ -259,10 +256,6 @@ a.btn:hover,
 a.btn:focus-visible {
     color: rgb(99,179,237);
     border-color: rgba(99,179,237,.55);
-  }
-
-button { 
-    cursor:pointer; 
   }
 
 .action-btn {
@@ -721,13 +714,16 @@ th .sort-arrow:focus-visible {
     margin-top: 6px;
   }
 
+body.ps-game-page .tri-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
 body.ps-game-page .game-page-main,
 body.ps-game-page .tri-cards {
-    display:grid;
-    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
     align-items: stretch;
-    min-width:0;
+    min-width: 0;
   }
 
 body.ps-hard-page .tri-cards{
@@ -744,38 +740,39 @@ body.ps-game-page .tri-card {
     min-height: 0;
   }
 
-body.ps-game-page #includedGames,
-body.ps-game-page #additionalInfo,
-body.ps-game-page #seeAlso {
+body.ps-game-page #includedGames .included-digital,
+#gamesContent .col-included .included-digital {
+    color: #ff9a1a;
+    font-style: italic;
+  }
+
+body.ps-game-page #additionalInfo .voucher-valid {
+    color: #4ade80;
+  }
+
+body.ps-game-page #additionalInfo .voucher-expired {
+    color: #ff2d2d;
+  }
+
+body.ps-game-page :is(#includedGames, #additionalInfo, #seeAlso) {
     flex: 1 1 auto;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
-  }
-
-body.ps-game-page #includedGames,
-body.ps-game-page #additionalInfo,
-body.ps-game-page #seeAlso {
     scrollbar-width: thin;
     scrollbar-color: rgba(99,179,237,.55) rgba(255,255,255,.05);
   }
 
-body.ps-game-page #includedGames::-webkit-scrollbar,
-body.ps-game-page #additionalInfo::-webkit-scrollbar,
-body.ps-game-page #seeAlso::-webkit-scrollbar {
+body.ps-game-page :is(#includedGames, #additionalInfo, #seeAlso)::-webkit-scrollbar {
     width: 8px;
   }
 
-body.ps-game-page #includedGames::-webkit-scrollbar-track,
-body.ps-game-page #additionalInfo::-webkit-scrollbar-track,
-body.ps-game-page #seeAlso::-webkit-scrollbar-track {
+body.ps-game-page :is(#includedGames, #additionalInfo, #seeAlso)::-webkit-scrollbar-track {
     background: rgba(255,255,255,.05);
     border-radius: 10px;
   }
 
-body.ps-game-page #includedGames::-webkit-scrollbar-thumb,
-body.ps-game-page #additionalInfo::-webkit-scrollbar-thumb,
-body.ps-game-page #seeAlso::-webkit-scrollbar-thumb {
+body.ps-game-page :is(#includedGames, #additionalInfo, #seeAlso)::-webkit-scrollbar-thumb {
     background: linear-gradient(
       180deg,
       rgba(99,179,237,.65),
@@ -785,9 +782,7 @@ body.ps-game-page #seeAlso::-webkit-scrollbar-thumb {
     border: 2px solid rgba(11,15,23,.6);
   }
 
-body.ps-game-page #includedGames::-webkit-scrollbar-thumb:hover,
-body.ps-game-page #additionalInfo::-webkit-scrollbar-thumb:hover,
-body.ps-game-page #seeAlso::-webkit-scrollbar-thumb:hover {
+body.ps-game-page :is(#includedGames, #additionalInfo, #seeAlso)::-webkit-scrollbar-thumb:hover {
     background: linear-gradient(
       180deg,
       rgba(99,179,237,.9),
@@ -835,8 +830,16 @@ body.ps-game-page #seeAlso::-webkit-scrollbar-thumb:hover {
     text-align:center;
   }
 
-.game-layout,
 body.ps-game-page .game-top {
+    display: flex;
+    gap: 14px;
+    width: 100%;
+    max-width: 100%;
+    min-height: 0;
+    min-width: 0;
+}
+
+.game-layout {
     width: 100%;
     max-width: 100%;
   }
@@ -909,14 +912,6 @@ body.ps-game-page .mini-grid {
     height: 100%;
     min-height: 0;
     padding-bottom: 14px;
-    box-sizing: border-box;
-  }
-
-.game-top {
-    display:grid;
-    grid-template-columns: minmax(0, 3fr) minmax(0, 7fr);
-    gap: 14px;
-    min-height: 0;
   }
 
 .game-card {
@@ -927,13 +922,30 @@ body.ps-game-page .mini-grid {
     min-height: 0;
   }
 
-.game-picture {
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:700;
-    opacity:.85;
-  }
+body.ps-game-page .game-picture {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    height: 100%;
+    width: auto;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+    font-weight: 700;
+    opacity: .85;
+}
+
+body.ps-game-page .game-picture .game-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    object-fit: contain;
+    object-position: center;
+    border-radius: 8px;
+    opacity: 1;
+}
 
 .mini-grid {
     display:flex;
@@ -1059,7 +1071,9 @@ body.ps-game-page .mini-body {
 
   body.ps-game-page #detailsCard {
     display: flex;
+    flex: 1 1 0;
     flex-direction: column;
+    min-width: 0;
     min-height: 0;
     overflow: hidden;
   }
@@ -1073,18 +1087,10 @@ body.ps-game-page .mini-body {
   body.ps-game-page #miniGrid .mini-row {
     flex: 1 1 0;
     min-height: 0;
-    align-items: stretch;
   }
 
   body.ps-game-page #miniGrid .mini {
     height: 100%;
-    min-height: 0;
-    overflow: visible;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    text-align: center;
   }
 
   body.ps-game-page #miniGrid .mini-title,
@@ -1096,15 +1102,10 @@ body.ps-game-page .mini-body {
 
   body.ps-game-page #miniGrid .mini-body {
     flex: 1 1 auto;
-    min-height: 0;
-    width: 100%;
-    overflow: visible;
     position: relative;
     z-index: 2;
-    display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
   }
 
   body.ps-game-page #miniGrid .mini-body .mini-list {
@@ -1174,10 +1175,6 @@ body.ps-game-page .mini-body {
     text-decoration: underline;
   }
 
-.game-link:hover {
-    border-bottom-color: rgba(255,255,255,.6);
-  }
-
 body.ps-game-page {
     height: 100vh;
     overflow: hidden;
@@ -1209,10 +1206,9 @@ body.ps-game-page .site-footer {
   }
 
 button.action-btn {
-    appearance:none;
-    -webkit-appearance:none;
-    cursor:pointer;
-    font:inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    font: inherit;
   }
 
 .genre-abbr{

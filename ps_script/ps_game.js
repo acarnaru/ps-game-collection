@@ -27,244 +27,257 @@ return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&g
 }
 
 function linkNoTrophies(text){
-if (typeof text !== "string") return text;
+    if (typeof text !== "string") return text;
 
-return text.replace(
-    /\(no trophies\)/gi,
-    '( <a class="no-trophies-link" href="../ps_info/ps_notes.html#trophy">no trophies</a> )'
-);
+    return text.replace(
+        /\(no trophies\)/gi,
+        '( <a class="no-trophies-link" href="../ps_info/ps_notes.html#trophy">no trophies</a> )'
+    );
+}
+
+function includedGameHtml(raw){
+    const text = String(raw ?? "");
+    const marked = text.match(/^\*\s*([^()]+?)(\s*(?:\(.*)?)$/);
+    if (!marked) return linkNoTrophies(escapeHtml(text));
+    return `<span class="included-digital">${escapeHtml(marked[1])}</span>${linkNoTrophies(escapeHtml(marked[2]))}`;
+}
+
+function additionalInfoHtml(raw, gameCtx){
+    return notesOrTextHtml(raw, gameCtx).replace(/\*(valid|expired)\b/gi, (_, status) =>
+        `<span class="voucher-${status.toLowerCase()}">${status}</span>`
+    );
 }
 
 function applyTrophyHighlights(root = document.body) {
-const patterns = [
-    { re: /\bPlatinum Troph(?:y|ies)\b/g, cls: "trophy-platinum" },
-    { re: /\bGold Troph(?:y|ies)\b/g, cls: "trophy-gold" },
-    { re: /\bSilver Troph(?:y|ies)\b/g, cls: "trophy-silver" },
-    { re: /\bBronze Troph(?:y|ies)\b/g, cls: "trophy-bronze" }
-];
+    const patterns = [
+        { re: /\bPlatinum Troph(?:y|ies)\b/g, cls: "trophy-platinum" },
+        { re: /\bGold Troph(?:y|ies)\b/g, cls: "trophy-gold" },
+        { re: /\bSilver Troph(?:y|ies)\b/g, cls: "trophy-silver" },
+        { re: /\bBronze Troph(?:y|ies)\b/g, cls: "trophy-bronze" }
+    ];
 
-const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
-    acceptNode(node) {
-    const p = node.parentElement;
-    if (!p) return NodeFilter.FILTER_REJECT;
-    const tag = p.tagName;
-    if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
-    if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+        acceptNode(node) {
+        const p = node.parentElement;
+        if (!p) return NodeFilter.FILTER_REJECT;
+        const tag = p.tagName;
+        if (tag === "SCRIPT" || tag === "STYLE" || tag === "NOSCRIPT") return NodeFilter.FILTER_REJECT;
+        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
 
-    const t = node.nodeValue;
-    if (!/Troph(?:y|ies)\b/i.test(t)) return NodeFilter.FILTER_REJECT;
+        const t = node.nodeValue;
+        if (!/Troph(?:y|ies)\b/i.test(t)) return NodeFilter.FILTER_REJECT;
 
-    return NodeFilter.FILTER_ACCEPT;
-    }
-});
+        return NodeFilter.FILTER_ACCEPT;
+        }
+    });
 
-const textNodes = [];
-while (walker.nextNode()) textNodes.push(walker.currentNode);
+    const textNodes = [];
+        while (walker.nextNode()) textNodes.push(walker.currentNode);
 
-for (const node of textNodes) {
-    let html = escapeHtml(node.nodeValue);
+        for (const node of textNodes) {
+            let html = escapeHtml(node.nodeValue);
 
-    let changed = false;
-    for (const p of patterns) {
-    if (p.re.test(node.nodeValue)) {
-        changed = true;
-        html = html.replace(p.re, (m) => `<span class="${p.cls}">${m}</span>`);
-    }
-    p.re.lastIndex = 0;
-    }
-    if (!changed) continue;
+            let changed = false;
+            for (const p of patterns) {
+            if (p.re.test(node.nodeValue)) {
+                changed = true;
+                html = html.replace(p.re, (m) => `<span class="${p.cls}">${m}</span>`);
+            }
+            p.re.lastIndex = 0;
+            }
+            if (!changed) continue;
 
-    const span = document.createElement("span");
-    span.innerHTML = html;
-    node.parentNode.replaceChild(span, node);
-}
+            const span = document.createElement("span");
+            span.innerHTML = html;
+            node.parentNode.replaceChild(span, node);
+        }
 }
 
 function asArray(v){
-if (Array.isArray(v)) return v;
-if (v == null) return [];
-const str = String(v).trim();
-if (!str) return [];
-return [str];
+    if (Array.isArray(v)) return v;
+    if (v == null) return [];
+    const str = String(v).trim();
+    if (!str) return [];
+    return [str];
 }
 function uniq(arr){
-const out = [];
-const seen = new Set();
-for (const x of arr){
-    const k = String(x);
-    if (!seen.has(k)) { seen.add(k); out.push(x); }
-}
-return out;
+    const out = [];
+    const seen = new Set();
+    for (const x of arr){
+        const k = String(x);
+        if (!seen.has(k)) { seen.add(k); out.push(x); }
+    }
+    return out;
 }
 function titleKey(t) {
-return String(t).toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
-}
+    return String(t).toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+    }
 
-function makeKey(g){
-return [g.title, g.platform, (g.format||""), (g.version||"")].join("||");
+    function makeKey(g){
+    return [g.title, g.platform, (g.format||""), (g.version||"")].join("||");
 }
 
 function getHashKey(){
-const raw = (location.hash || "").replace(/^#/, "");
-if (!raw) return "";
-try { return decodeURIComponent(raw); } catch(e) { return raw; }
+    const raw = (location.hash || "").replace(/^#/, "");
+    if (!raw) return "";
+    try { return decodeURIComponent(raw); } catch(e) { return raw; }
 }
 
 function setHashKey(key){
-location.hash = encodeURIComponent(key);
+    location.hash = encodeURIComponent(key);
 }
 
 const QUALIFIED_TARGET_KEYS = new Set();
 
 function resolveSeeAlsoToKey(entry, _opts){
-if (entry && typeof entry === "object") {
-    const spec = {
-    title: entry.title || "",
-    platform: entry.platform || "",
-    version: entry.version || "",
-    format: entry.format || ""
-    };
-    const key = makeKey(spec);
-    return byKey.has(key) ? key : null;
-}
-
-const raw = String(entry || "").trim();
-if (!raw) return null;
-
-let baseTitle = raw;
-let qualifier = "";
-const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
-if (m) {
-    baseTitle = m[1].trim();
-    qualifier = m[2].trim();
-}
-
-const platformAliases = new Set(["PS3","PS4","PS5","Vita"]);
-
-const chunks = qualifier
-    ? qualifier.split(",").map(s => s.trim()).filter(Boolean)
-    : [];
-
-let desiredPlatform = "";
-const desiredVersionParts = [];
-
-function extractPlatformFromText(text){
-    let out = String(text || "").trim();
-
-    for (const p of platformAliases) {
-    const re = new RegExp(`(?:^|\\s)${p}(?:\\s|$)`, "i");
-
-    if (re.test(out)) {
-        if (!desiredPlatform) desiredPlatform = p;
-        out = out.replace(re, "").replace(/\s+/g, " ").trim();
-    }
+    if (entry && typeof entry === "object") {
+        const spec = {
+        title: entry.title || "",
+        platform: entry.platform || "",
+        version: entry.version || "",
+        format: entry.format || ""
+        };
+        const key = makeKey(spec);
+        return byKey.has(key) ? key : null;
     }
 
-    return out;
-}
+    const raw = String(entry || "").trim();
+    if (!raw) return null;
 
-function normVerToken(s){
-    return String(s ?? "")
-    .trim()
-    .replace(/^\((.*)\)$/, "$1")
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-}
-
-for (const c of chunks) {
-    const rest = extractPlatformFromText(c);
-    if (!rest) continue;
-
-    desiredVersionParts.push(normVerToken(rest));
-}
-
-const collectMatches = (t) => keysSorted
-    .map(k => ({ key: k, game: byKey.get(k) }))
-    .filter(x => x.game && String(x.game.title).trim() === t);
-
-let matches = collectMatches(baseTitle);
-if (!matches.length && baseTitle !== raw) matches = collectMatches(raw);
-if (!matches.length) return null;
-
-if (!_opts?.building && !qualifier && matches.length > 1 && QUALIFIED_TARGET_KEYS.size) {
-    const filtered = matches.filter(x => !QUALIFIED_TARGET_KEYS.has(x.key));
-    if (filtered.length) matches = filtered;
-}
-
-if (desiredPlatform) {
-    const filtered = matches.filter(x => String(x.game.platform).trim() === desiredPlatform);
-    if (filtered.length) matches = filtered;
-}
-
-function gameVersionParts(v){
-    if (Array.isArray(v)) return v.map(normVerToken).filter(Boolean);
-    const s = String(v ?? "").trim();
-    return s ? [normVerToken(s)] : [];
-}
-
-    if (!desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
-    const baseOnly = matches.filter(x => gameVersionParts(x.game.version).length === 0);
-    if (baseOnly.length) matches = baseOnly;
+    let baseTitle = raw;
+    let qualifier = "";
+    const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
+    if (m) {
+        baseTitle = m[1].trim();
+        qualifier = m[2].trim();
     }
 
-    if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
-    const baseOnPlatform = matches.filter(x => gameVersionParts(x.game.version).length === 0);
-    if (baseOnPlatform.length) matches = baseOnPlatform;
+    const platformAliases = new Set(["PS3","PS4","PS5","Vita"]);
+
+    const chunks = qualifier
+        ? qualifier.split(",").map(s => s.trim()).filter(Boolean)
+        : [];
+
+    let desiredPlatform = "";
+    const desiredVersionParts = [];
+
+    function extractPlatformFromText(text){
+        let out = String(text || "").trim();
+
+        for (const p of platformAliases) {
+        const re = new RegExp(`(?:^|\\s)${p}(?:\\s|$)`, "i");
+
+        if (re.test(out)) {
+            if (!desiredPlatform) desiredPlatform = p;
+            out = out.replace(re, "").replace(/\s+/g, " ").trim();
+        }
+        }
+
+        return out;
     }
 
-    if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
-    const firstVerRaw = (v) => {
-        if (Array.isArray(v)) return String(v[0] ?? "").trim();
-        return String(v ?? "").trim();
-    };
-
-    const nonParen = matches.filter(x => {
-        const v0 = firstVerRaw(x.game.version);
-        return v0 && !/^\(/.test(v0);
-    });
-
-    if (nonParen.length) matches = nonParen;
+    function normVerToken(s){
+        return String(s ?? "")
+        .trim()
+        .replace(/^\((.*)\)$/, "$1")
+        .replace(/\s+/g, " ")
+        .toLowerCase();
     }
 
-function prefixMatch(need, have){
-    if (need.length === 0) return true;
-    if (have.length < need.length) return false;
-    for (let i = 0; i < need.length; i++){
-    if (String(have[i]).trim() !== String(need[i]).trim()) return false;
+    for (const c of chunks) {
+        const rest = extractPlatformFromText(c);
+        if (!rest) continue;
+
+        desiredVersionParts.push(normVerToken(rest));
     }
-    return true;
-}
 
-if (desiredVersionParts.length) {
-    const versionMatched = matches
-    .map(x => ({ ...x, vparts: gameVersionParts(x.game.version) }))
-    .filter(x => prefixMatch(desiredVersionParts, x.vparts));
+    const collectMatches = (t) => keysSorted
+        .map(k => ({ key: k, game: byKey.get(k) }))
+        .filter(x => x.game && String(x.game.title).trim() === t);
 
-    if (versionMatched.length) {
-    const wantSingle = desiredVersionParts.length === 1;
+    let matches = collectMatches(baseTitle);
+    if (!matches.length && baseTitle !== raw) matches = collectMatches(raw);
+    if (!matches.length) return null;
 
-    versionMatched.sort((a,b) => {
-        const aArr = Array.isArray(a.game.version);
-        const bArr = Array.isArray(b.game.version);
-        if (wantSingle && aArr !== bArr) return aArr ? 1 : -1;
-        return a.vparts.length - b.vparts.length;
-    });
-
-    matches = versionMatched;
+    if (!_opts?.building && !qualifier && matches.length > 1 && QUALIFIED_TARGET_KEYS.size) {
+        const filtered = matches.filter(x => !QUALIFIED_TARGET_KEYS.has(x.key));
+        if (filtered.length) matches = filtered;
     }
-}
 
-const current = byKey.get(getHashKey());
-if (current && matches.length > 1) {
-    const samePlatform = matches.find(x => x.game.platform === current.platform);
-    if (samePlatform) return samePlatform.key;
-}
+    if (desiredPlatform) {
+        const filtered = matches.filter(x => String(x.game.platform).trim() === desiredPlatform);
+        if (filtered.length) matches = filtered;
+    }
 
-return matches[0].key;
-}
+    function gameVersionParts(v){
+        if (Array.isArray(v)) return v.map(normVerToken).filter(Boolean);
+        const s = String(v ?? "").trim();
+        return s ? [normVerToken(s)] : [];
+    }
 
-function cmpStr(a,b){
-return String(a||"").localeCompare(String(b||""), undefined, { sensitivity:"base" });
+        if (!desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+        const baseOnly = matches.filter(x => gameVersionParts(x.game.version).length === 0);
+        if (baseOnly.length) matches = baseOnly;
+        }
+
+        if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+        const baseOnPlatform = matches.filter(x => gameVersionParts(x.game.version).length === 0);
+        if (baseOnPlatform.length) matches = baseOnPlatform;
+        }
+
+        if (desiredPlatform && desiredVersionParts.length === 0 && matches.length > 1) {
+        const firstVerRaw = (v) => {
+            if (Array.isArray(v)) return String(v[0] ?? "").trim();
+            return String(v ?? "").trim();
+        };
+
+        const nonParen = matches.filter(x => {
+            const v0 = firstVerRaw(x.game.version);
+            return v0 && !/^\(/.test(v0);
+        });
+
+        if (nonParen.length) matches = nonParen;
+        }
+
+    function prefixMatch(need, have){
+        if (need.length === 0) return true;
+        if (have.length < need.length) return false;
+        for (let i = 0; i < need.length; i++){
+        if (String(have[i]).trim() !== String(need[i]).trim()) return false;
+        }
+        return true;
+    }
+
+    if (desiredVersionParts.length) {
+        const versionMatched = matches
+        .map(x => ({ ...x, vparts: gameVersionParts(x.game.version) }))
+        .filter(x => prefixMatch(desiredVersionParts, x.vparts));
+
+        if (versionMatched.length) {
+        const wantSingle = desiredVersionParts.length === 1;
+
+        versionMatched.sort((a,b) => {
+            const aArr = Array.isArray(a.game.version);
+            const bArr = Array.isArray(b.game.version);
+            if (wantSingle && aArr !== bArr) return aArr ? 1 : -1;
+            return a.vparts.length - b.vparts.length;
+        });
+
+        matches = versionMatched;
+        }
+    }
+
+    const current = byKey.get(getHashKey());
+    if (current && matches.length > 1) {
+        const samePlatform = matches.find(x => x.game.platform === current.platform);
+        if (samePlatform) return samePlatform.key;
+    }
+
+    return matches[0].key;
+    }
+
+    function cmpStr(a,b){
+    return String(a||"").localeCompare(String(b||""), undefined, { sensitivity:"base" });
 }
 
 const keysSorted = DATA.slice().sort((a,b) => {
@@ -574,6 +587,56 @@ document.addEventListener("focusout", (event) => {
 });
 }
 
+function renderGameArtwork(game) {
+    const card = document.getElementById("pictureCard");
+    if (!card) return;
+
+    if (!card.dataset.placeholderSaved) {
+        card.dataset.placeholderSaved = "true";
+        card._originalPlaceholder = card.innerHTML;
+    }
+
+    card.innerHTML = card._originalPlaceholder;
+
+    const formats = Array.isArray(game.format)
+        ? game.format
+        : [game.format];
+
+    const isDigital = formats.some(
+        f => String(f).trim().toLowerCase() === "digital"
+    );
+
+    const isPhysical = formats.some(
+        f => String(f).trim().toLowerCase() === "physical"
+    );
+
+    if (!isDigital || isPhysical || !game.coverArt) {
+        return;
+    }
+
+    const path = String(game.coverArt);
+ 
+    if (!/^(?:ps_(?:3|4|5|vita)digi|ps_shared)\/[a-z0-9_-]+\.avif$/i.test(path)) {
+        return;
+    }
+
+    const img = document.createElement("img");
+
+    img.className = "game-cover";
+    img.src = "../ps_pic/ps_cover/" + path;
+    img.alt = game.title + " official cover artwork";
+    img.decoding = "async";
+    img.draggable = false;
+
+    img.onerror = function () {
+        if (card.contains(img)) {
+            card.innerHTML = card._originalPlaceholder;
+        }
+    };
+
+    card.replaceChildren(img);
+}
+
 async function renderGame(key){
 let game = byKey.get(key);
 if (!game) {
@@ -584,6 +647,8 @@ if (!game) {
 }
 
 document.getElementById("gameTitle").textContent = game.title;
+
+renderGameArtwork(game);
 
 const len = keysSorted.length;
 let i = keysSorted.findIndex(k => k === key);
@@ -682,12 +747,12 @@ bindGenreTooltipHandlers();
 
 const includedList = document.getElementById("includedGames");
 includedList.innerHTML = (included && included.length)
-    ? included.map(x => `<li>${linkNoTrophies(escapeHtml(x))}</li>`).join("")
+    ? included.map(x => `<li>${includedGameHtml(x)}</li>`).join("")
     : "<li>—</li>";
 
 const additionalInfoList = document.getElementById("additionalInfo");
 additionalInfoList.innerHTML = (additionalInfo && additionalInfo.length)
-    ? additionalInfo.map(x => `<li>${notesOrTextHtml(x, game)}</li>`).join("")
+    ? additionalInfo.map(x => `<li>${additionalInfoHtml(x, game)}</li>`).join("")
     : "<li>—</li>";
 
 const seeAlsoList = document.getElementById("seeAlso");

@@ -1,7 +1,8 @@
 @charset "utf-8";
 
+/* Breakpoints use CSS viewport dimensions; rule order preserves the cascade. */
 
-/* MOBILE - up to 540px */
+/* MOBILE — up to 540px */
 @media (max-width: 540px) {
 
   #gamesContent .col-notes  { display: none; }
@@ -233,30 +234,9 @@
   }
 }
 
-
-/* MOBILE screen rotate - max-width 932px - max-height 430px */
+/* SHORT LANDSCAPE — early controls and filter overrides */
 @media (max-width: 932px) and (max-height: 430px) and (orientation: landscape) {
   
-  body.ps-game-page {
-    height: auto;
-    min-height: 100vh;
-    overflow: auto;
-  }
-
-  body.ps-game-page #includedGames,
-  body.ps-game-page #additionalInfo,
-  body.ps-game-page #seeAlso,
-  body.ps-game-page #miniGrid .mini-body .mini-list {
-    overflow: visible;
-    max-height: none;
-  }
-  
-  .sticky-header {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: rgba(11, 15, 23, 0.95);
-  }
-
   .mode-toggle {
     margin: 6px 0 4px;
     gap: 10px;
@@ -369,9 +349,8 @@
   }
 }
 
-
-/* TABLET - 541px to 1024px */
-@media (min-width: 541px) and (max-width: 1024px) {
+/* TABLET — 541px to 1100px */
+@media (min-width: 541px) and (max-width: 1100px) {
 
   th, td, td *, th * {
     white-space: normal;
@@ -429,15 +408,10 @@
     margin-left: 0;
   }
 
-  body.ps-game-page .game-top {
-    grid-template-columns: 1fr !important;
-  }
-
   body.ps-game-page #miniGrid.mini-grid {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-    height: auto !important;
   }
 
   body.ps-game-page #miniGrid .mini-row {
@@ -445,9 +419,8 @@
   }
 }
 
-
-/* MOBILE and TABLET - up to 1024px */
-@media (max-width: 1024px) {
+/* MOBILE AND TABLET — up to 1100px */
+@media (max-width: 1100px) {
   
   html, body { 
     max-width: 100%;
@@ -498,11 +471,7 @@
     padding: 0 12px;
   }
 
-  .chips {
-    justify-content: center;
-    flex-wrap: wrap;
-  }
-
+  .chips,
   #alphaChips .chip {
     justify-content: center;
     flex-wrap: wrap;
@@ -519,6 +488,7 @@
     border-right: 0;
   }
 
+  /* Game details: content-driven vertical layout on mobile and tablets. */
   body.ps-game-page {
     height: auto !important;
     min-height: 100vh;
@@ -528,6 +498,8 @@
 
   body.ps-game-page .game-page-main {
     display: block !important;
+    height: auto;
+    min-height: 0;
   }
 
   body.ps-game-page .game-layout {
@@ -538,42 +510,88 @@
   }
 
   body.ps-game-page .game-top {
-    grid-template-columns: 1fr !important;
+    display: flex;
+    flex: 0 0 auto;
+    flex-direction: column;
+    height: auto;
     min-height: 0 !important;
+    align-items: stretch;
   }
 
-  body.ps-game-page .game-picture {
-    min-height: 220px;
+  body.ps-game-page #pictureCard.game-picture {
+    flex: 0 0 auto;
+    align-self: center;
+    width: min(100%, 420px);
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    aspect-ratio: 1 / 1;
   }
 
-  body.ps-game-page .tri-cards {
-    grid-template-columns: 1fr !important;
-  }
-
-  body.ps-game-page .mini-grid {
-    height: auto !important;
+  body.ps-game-page #pictureCard .game-cover {
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: none;
+    object-fit: contain;
   }
 
   body.ps-game-page #detailsCard {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
     overflow: visible;
   }
 
   body.ps-game-page #miniGrid.mini-grid {
-    height: auto;
+    flex: none;
+    height: auto !important;
+    min-height: 0;
+    grid-auto-rows: auto;
   }
 
-  body.ps-game-page #miniGrid .mini-row {
-    flex: 0 0 auto;
+  body.ps-game-page #miniGrid .mini-row,
+  body.ps-game-page #miniGrid .mini {
+    flex: none;
+    height: auto;
+    min-height: 0;
   }
 
   body.ps-game-page #miniGrid .mini {
+    overflow: visible;
+  }
+
+  body.ps-game-page #miniGrid .mini-body,
+  body.ps-game-page #miniGrid .mini-body .mini-list {
+    flex: none;
     height: auto;
+    min-height: 0;
+    max-height: none;
     overflow: visible;
   }
 
   body.ps-game-page #miniGrid .mini-body {
-    overflow: visible;
     display: block;
+  }
+
+  body.ps-game-page .tri-cards {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-auto-rows: auto;
+    align-items: stretch;
+  }
+
+  body.ps-game-page .tri-card,
+  body.ps-game-page #includedGames,
+  body.ps-game-page #additionalInfo,
+  body.ps-game-page #seeAlso {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
   }
 
   body.ps-game-page #additionalInfoCard {
@@ -616,7 +634,6 @@
     margin: 0;
     padding: 2px 6px;
     line-height: 1.15;
-
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -624,26 +641,23 @@
     overflow: hidden;
   }
 
-  body.ps-game-page .nav-left { 
-    grid-column: 1; 
-    grid-row: 2; 
-  }
-
-  body.ps-game-page #backBtn  { 
-    grid-column: 2; 
-    grid-row: 2; 
-    justify-self: center; 
-  }
-
-  body.ps-game-page #nextBtn  { 
-    grid-column: 3; 
-    grid-row: 2; 
-    justify-self: end; 
-  }
-
   body.ps-game-page .nav-left {
+    grid-column: 1;
+    grid-row: 2;
     display: flex;
     justify-content: flex-start;
+  }
+
+  body.ps-game-page #backBtn {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: center;
+  }
+
+  body.ps-game-page #nextBtn {
+    grid-column: 3;
+    grid-row: 2;
+    justify-self: end;
   }
 
   body.ps-game-page .nav-right {
@@ -696,5 +710,14 @@
     grid-column: auto;
     grid-row: auto;
     justify-self: auto;
+  }
+}
+
+/* SHORT LANDSCAPE — final square-art sizing */
+@media (max-width: 932px) and (max-height: 430px) and (orientation: landscape) {
+  body.ps-game-page #pictureCard.game-picture {
+    width: min(100%, 65svh, 280px);
+    height: auto;
+    min-height: 0;
   }
 }

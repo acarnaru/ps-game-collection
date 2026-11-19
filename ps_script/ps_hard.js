@@ -58,7 +58,10 @@ return String(t).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
 }
 
 function makeKey(h) {
-return [h.device, (h.platform || ""), h.brand, (h.category || "")].join("||");
+    if (h.id) {
+        return "hardware:" + String(h.id).trim();
+    }
+    return [h.device, (h.platform || ""), h.brand, (h.category || "")].join("||");
 }
 
 function getHashKey() {
@@ -72,165 +75,211 @@ location.hash = encodeURIComponent(key);
 }
 
 const byKey = new Map();
-for (const h of DATA) byKey.set(makeKey(h), h);
-
-const keysSorted = Array.from(byKey.keys()).sort((a, b) => {
-const da = byKey.get(a)?.device ?? "";
-const db = byKey.get(b)?.device ?? "";
-return deviceKey(da).localeCompare(deviceKey(db));
-});
-
-const platformAliases = new Set(["PS3", "PS4", "PS5", "Vita"]);
-const brandSet = new Set(DATA.map(x => String(x.brand || "").trim()).filter(Boolean));
-const categorySet = new Set(DATA.map(x => String(x.category || "").trim()).filter(Boolean));
-
-const QUALIFIED_TARGET_KEYS = new Set();
-
-function resolveSeeAlsoToKey(entry, _opts) {
-if (entry && typeof entry === "object") {
-    const spec = {
-    device: entry.device || entry.title || "",
-    platform: entry.platform || "",
-    brand: entry.brand || "",
-    category: entry.category || ""
-    };
-    const key = makeKey(spec);
-    return byKey.has(key) ? key : null;
-}
-
-const raw = String(entry || "").trim();
-if (!raw) return null;
-
-const DEVICE_ALIASES = {
-    "PSVR": "PSVR CUH-ZVR2",
-    "PSVR 2": "PSVR2 CFI-ZVR1",
-    "PSVR2": "PSVR2 CFI-ZVR1"
-};
-
-if (Object.hasOwn(DEVICE_ALIASES, raw)) {
-    const targetDevice = DEVICE_ALIASES[raw];
-
-    const targetKey = keysSorted.find(key =>
-        byKey.get(key)?.device === targetDevice
-    );
-
-    return targetKey ?? null;
-}
-
-let baseDevice = raw;
-let qualifier = "";
-const m = raw.match(/^(.*)\s\(([^)]+)\)\s*$/);
-if (m) {
-    baseDevice = m[1].trim();
-    qualifier = m[2].trim();
-}
-
-const chunks = qualifier
-    ? qualifier.split(",").map(s => s.trim()).filter(Boolean)
-    : [];
-
-let desiredPlatform = "";
-let desiredBrand = "";
-let desiredCategory = "";
-
-function extractPlatformFromText(text) {
-    let out = String(text || "").trim();
-
-    for (const p of platformAliases) {
-    const re = new RegExp(`(?:^|\\s)${p}(?:\\s|$)`, "i");
-    if (re.test(out)) {
-        if (!desiredPlatform) desiredPlatform = p;
-        out = out.replace(re, "").replace(/\s+/g, " ").trim();
-    }
-    }
-
-    return out;
-}
-
-function normToken(s) {
-    return String(s ?? "")
-    .trim()
-    .replace(/^\((.*)\)$/, "$1")
-    .replace(/\s+/g, " ")
-    .toLowerCase();
-}
-
-for (const c of chunks) {
-    const rest = extractPlatformFromText(c);
-    if (!rest) continue;
-
-    const restNorm = normToken(rest);
-
-    const catMatch = Array.from(categorySet).find(x => normToken(x) === restNorm);
-    if (catMatch && !desiredCategory) {
-    desiredCategory = catMatch;
-    continue;
-    }
-
-    const brandMatch = Array.from(brandSet).find(x => normToken(x) === restNorm);
-    if (brandMatch && !desiredBrand) {
-    desiredBrand = brandMatch;
-    continue;
-    }
-}
-
-const collectMatches = (d) => keysSorted
-    .map(k => ({ key: k, hard: byKey.get(k) }))
-    .filter(x => x.hard && String(x.hard.device).trim() === d);
-
-let matches = collectMatches(baseDevice);
-if (!matches.length && baseDevice !== raw) matches = collectMatches(raw);
-if (!matches.length) return null;
-
-if (!_opts?.building && !qualifier && matches.length > 1 && QUALIFIED_TARGET_KEYS.size) {
-    const filtered = matches.filter(x => !QUALIFIED_TARGET_KEYS.has(x.key));
-    if (filtered.length) matches = filtered;
-}
-
-if (desiredPlatform) {
-    const filtered = matches.filter(x => String(x.hard.platform).trim() === desiredPlatform);
-    if (filtered.length) matches = filtered;
-}
-
-if (desiredBrand) {
-    const filtered = matches.filter(x => String(x.hard.brand).trim() === desiredBrand);
-    if (filtered.length) matches = filtered;
-}
-
-if (desiredCategory) {
-    const filtered = matches.filter(x => String(x.hard.category).trim() === desiredCategory);
-    if (filtered.length) matches = filtered;
-}
-
-if (matches.length === 1) return matches[0].key;
-
-const current = byKey.get(getHashKey());
-if (current && current.platform) {
-    const filtered = matches.filter(x => String(x.hard.platform).trim() === String(current.platform).trim());
-    if (filtered.length === 1) return filtered[0].key;
-}
-
-return matches[0].key;
-}
+const byId = new Map();
 
 for (const h of DATA) {
-const sa = h && h.seeAlso;
-if (!Array.isArray(sa)) continue;
+    const key = makeKey(h);
 
-for (const entry of sa) {
-    if (typeof entry === "string") {
-    const s = entry.trim();
-    if (!s) continue;
-    if (!/\(.+\)/.test(s)) continue;
-    const key = resolveSeeAlsoToKey(entry, { building: true });
-    if (key) QUALIFIED_TARGET_KEYS.add(key);
-    } else if (entry && typeof entry === "object") {
-    const isQualifiedObj = !!(entry.platform || entry.brand || entry.category);
-    if (!isQualifiedObj) continue;
-    const key = resolveSeeAlsoToKey(entry, { building: true });
-    if (key) QUALIFIED_TARGET_KEYS.add(key);
+    if (byKey.has(key)) {
+        console.error("Duplicate hardware key:", key, h);
+    }
+
+    byKey.set(key, h);
+
+    if (h.id) {
+        const id = norm(h.id);
+
+        if (byId.has(id)) {
+            console.error("Duplicate hardware ID:", id);
+        }
+
+        byId.set(id, key);
     }
 }
+
+const keysSorted = Array.from(byKey.keys()).sort((a, b) => {
+    const da = byKey.get(a)?.device ?? "";
+    const db = byKey.get(b)?.device ?? "";
+
+    return deviceKey(da).localeCompare(deviceKey(db));
+});
+
+const platformAliases = new Map([
+    ["ps3", "ps3"],
+    ["ps4", "ps4"],
+    ["ps5", "ps5"],
+    ["vita", "vita"],
+    ["ps vita", "vita"],
+    ["pstv", "pstv"],
+    ["ps tv", "pstv"],
+    ["portal", "portal"],
+    ["ps portal", "portal"]
+]);
+
+function normalisePlatform(value) {
+    const key = norm(value).replace(/\s+/g, " ");
+    return platformAliases.get(key) || key;
+}
+
+function hardwarePlatforms(h) {
+    return asArray(h.platform).map(normalisePlatform);
+}
+
+function matchesHardwarePlatform(h, platform) {
+    const requested = normalisePlatform(platform);
+
+    return hardwarePlatforms(h).includes(requested);
+}
+
+function matchesDeviceName(device, requestedName) {
+    const actual = deviceKey(device);
+    const requested = deviceKey(requestedName);
+
+    if (!requested) return false;
+
+    return actual === requested ||
+        actual.startsWith(requested + " ");
+}
+
+function resolveSeeAlsoToKey(entry) {
+
+    const isObject =
+        entry !== null &&
+        typeof entry === "object" &&
+        !Array.isArray(entry);
+
+    if (isObject && entry.id) {
+        return byId.get(norm(entry.id)) || null;
+    }
+
+    const raw = String(
+        isObject
+            ? (entry.device || entry.title || entry.label || "")
+            : (entry || "")
+    ).trim();
+
+    if (!raw) return null;
+
+    let requestedName = raw;
+    let qualifier = "";
+
+    const match = raw.match(/^(.*?)\s+\(([^)]+)\)\s*$/);
+
+    if (match) {
+        requestedName = match[1].trim();
+        qualifier = match[2].trim();
+    }
+
+    let desiredPlatform = isObject
+        ? String(entry.platform || "").trim()
+        : "";
+
+    let desiredBrand = isObject
+        ? String(entry.brand || "").trim()
+        : "";
+
+    let desiredCategory = isObject
+        ? String(entry.category || "").trim()
+        : "";
+
+    if (qualifier) {
+        const parts = qualifier
+            .split(",")
+            .map(x => x.trim())
+            .filter(Boolean);
+
+        for (const part of parts) {
+            const token = norm(part).replace(/\s+/g, " ");
+
+            if (platformAliases.has(token)) {
+                desiredPlatform = part;
+                continue;
+            }
+
+            const brandExists = DATA.some(
+                h => norm(h.brand) === norm(part)
+            );
+
+            if (brandExists) {
+                desiredBrand = part;
+                continue;
+            }
+
+            const categoryExists = DATA.some(
+                h => asArray(h.category).some(
+                    c => norm(c) === norm(part)
+                )
+            );
+
+            if (categoryExists) {
+                desiredCategory = part;
+                continue;
+            }
+
+            console.warn(
+                "Unknown hardware qualifier:",
+                part,
+                "in",
+                raw
+            );
+
+            return null;
+        }
+    }
+
+    let matches = keysSorted
+        .map(key => ({
+            key,
+            hard: byKey.get(key)
+        }))
+        .filter(x =>
+            matchesDeviceName(x.hard.device, requestedName)
+        );
+
+    if (desiredPlatform) {
+        matches = matches.filter(x =>
+            matchesHardwarePlatform(x.hard, desiredPlatform)
+        );
+    }
+
+    if (desiredBrand) {
+        matches = matches.filter(x =>
+            norm(x.hard.brand) === norm(desiredBrand)
+        );
+    }
+
+    if (desiredCategory) {
+        matches = matches.filter(x =>
+            asArray(x.hard.category).some(
+                c => norm(c) === norm(desiredCategory)
+            )
+        );
+    }
+
+    if (!matches.length) {
+        console.warn("Hardware See Also not found:", raw);
+        return null;
+    }
+
+    const exactMatches = matches.filter(x =>
+        deviceKey(x.hard.device) === deviceKey(requestedName)
+    );
+
+    if (exactMatches.length) {
+        matches = exactMatches;
+    }
+
+    if (matches.length === 1) {
+        return matches[0].key;
+    }
+
+    console.warn(
+        "Ambiguous hardware See Also:",
+        raw,
+        matches.map(x => x.hard.device)
+    );
+
+    return null;
 }
 
 function mapBrandsToLinks(brands) {
@@ -268,7 +317,9 @@ const GENRE_ABBR = {
 "RTS":  "Real-Time Strategy",
 "TBS":  "Turn-Based Strategy",
 "TBT":  "Turn-Based Tactics",
-"FPS":  "First-Person Shooter"
+"FPS":  "First-Person Shooter",
+"MOBA": "Multiplayer Online Battle Arena",
+"MMORPG": "Massive Multiplayer Online Role-Playing Game"
 };
 
 let genreTooltipEl = null;

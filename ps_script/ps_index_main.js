@@ -47,6 +47,7 @@ btn.addEventListener("click", function () {
 const state = {
 q: "",
 platforms: new Set(["PS3","PS4","PS5","Vita"]),
+hardwarePlatforms: new Set(["PS3","PS4","PS5","Vita","PSTV","Portal"]),
 formats: new Set(["Physical","Digital"]),
 hardwareCats: new Set(["Console","VR","Controller","Headphone","Other"]),
 letters: new Set(),
@@ -168,16 +169,21 @@ pWrap.innerHTML = "";
 fWrap.innerHTML = "";
 if (hWrap) hWrap.innerHTML = "";
 
-const platforms = ["PS3","PS4","PS5","Vita"];
+const platforms = isHardware
+    ? ["PS3","PS4","PS5","Vita","PSTV","Portal"]
+    : ["PS3","PS4","PS5","Vita"];
+const activePlatforms = isHardware
+    ? state.hardwarePlatforms
+    : state.platforms;
 const formats = ["Physical","Digital"];
 const hardwareCats = ["Console","VR","Controller","Headphone","Other"];
 
 for (const p of platforms) {
     const el = document.createElement("div");
-    el.className = "chip " + (state.platforms.has(p) ? "on" : "");
+    el.className = "chip " + (activePlatforms.has(p) ? "on" : "");
     el.innerHTML = `<b>${p}</b>`;
     el.onclick = () => {
-    if (state.platforms.has(p)) state.platforms.delete(p); else state.platforms.add(p);
+    if (activePlatforms.has(p)) activePlatforms.delete(p); else activePlatforms.add(p);
     el.classList.toggle("on");
     if (isHardware) renderHardware(); else render();
     };
@@ -296,57 +302,72 @@ genreTooltipTarget = null;
 }
 
 function bindGenreTooltipHandlers(){
-if (genreTooltipHandlersBound) return;
-genreTooltipHandlersBound = true;
+    if (genreTooltipHandlersBound) return;
+    genreTooltipHandlersBound = true;
 
-window.addEventListener("scroll", hideGenreTooltip, true);
-window.addEventListener("resize", () => {
-    if (genreTooltipTarget) positionGenreTooltip();
-});
+    window.addEventListener("scroll", hideGenreTooltip, true);
+    window.addEventListener("resize", () => {
+        if (genreTooltipTarget) positionGenreTooltip();
+    });
 
-document.addEventListener("mouseover", (event) => {
-    const target = event.target.closest(".genre-abbr");
-    if (!target) return;
-    showGenreTooltip(target);
-});
+    document.addEventListener("mouseover", (event) => {
+        const target = event.target.closest(".genre-abbr");
+        if (!target) return;
+        showGenreTooltip(target);
+    });
 
-document.addEventListener("mouseout", (event) => {
-    if (!genreTooltipTarget) return;
-    const leaving = event.target.closest(".genre-abbr");
-    if (!leaving || leaving !== genreTooltipTarget) return;
-    hideGenreTooltip();
-});
+    document.addEventListener("mouseout", (event) => {
+        if (!genreTooltipTarget) return;
+        const leaving = event.target.closest(".genre-abbr");
+        if (!leaving || leaving !== genreTooltipTarget) return;
+        hideGenreTooltip();
+    });
 
-document.addEventListener("focusin", (event) => {
-    const target = event.target.closest(".genre-abbr");
-    if (!target) return;
-    showGenreTooltip(target);
-});
+    document.addEventListener("focusin", (event) => {
+        const target = event.target.closest(".genre-abbr");
+        if (!target) return;
+        showGenreTooltip(target);
+    });
 
-document.addEventListener("focusout", (event) => {
-    if (!genreTooltipTarget) return;
-    const leaving = event.target.closest(".genre-abbr");
-    if (!leaving || leaving !== genreTooltipTarget) return;
-    hideGenreTooltip();
-});
+    document.addEventListener("focusout", (event) => {
+        if (!genreTooltipTarget) return;
+        const leaving = event.target.closest(".genre-abbr");
+        if (!leaving || leaving !== genreTooltipTarget) return;
+        hideGenreTooltip();
+    });
 }
 
 function genreCell(items){
-if (!items || items.length === 0) return `<span class="empty">—</span>`;
+    if (!items || items.length === 0) return `<span class="empty">—</span>`;
 
-const arr = asArray(items)
-    .flatMap(g => String(g).split(",").map(x => x.trim()).filter(Boolean));
+    const arr = asArray(items)
+        .flatMap(g => String(g).split(",").map(x => x.trim()).filter(Boolean));
 
-if (!arr.length) return `<span class="empty">—</span>`;
+    if (!arr.length) return `<span class="empty">—</span>`;
 
-const lis = arr.map(x => `<li>${genreItemHtml(x)}</li>`).join("");
-return `<ul class="stack">${lis}</ul>`;
+    const lis = arr.map(x => `<li>${genreItemHtml(x)}</li>`).join("");
+    return `<ul class="stack">${lis}</ul>`;
 }
 
 function listCell(items) {
-if (!items || items.length === 0) return `<span class="empty">—</span>`;
-const lis = items.map(x => `<li>${linkNoTrophies(escapeHtml(x))}</li>`).join("");
-return `<ul class="stack">${lis}</ul>`;
+    if (!items || items.length === 0) return `<span class="empty">—</span>`;
+    const lis = items.map(x => `<li>${linkNoTrophies(escapeHtml(x))}</li>`).join("");
+    return `<ul class="stack">${lis}</ul>`;
+}
+
+function includedGamesCell(items) {
+    if (!items || items.length === 0) return `<span class="empty">—</span>`;
+
+    const lis = items.map(x => {
+        const text = String(x ?? "");
+        const marked = text.match(/^\*\s*([^()]+?)(\s*(?:\(.*)?)$/);
+
+        if (!marked) return `<li>${linkNoTrophies(escapeHtml(text))}</li>`;
+
+        return `<li><span class="included-digital">${escapeHtml(marked[1])}</span>${linkNoTrophies(escapeHtml(marked[2]))}</li>`;
+    }).join("");
+
+    return `<ul class="stack">${lis}</ul>`;
 }
 
 const HARDWARE_CATEGORY_NOTE_MAP = {
@@ -447,7 +468,7 @@ return text.replace(
 );
 }
 
-const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Arcade Stick", "Controller Adapter", "Cooler", "Digital", "Disc Drive", "Driving Wheel", "Flight Stick", "Game Tablet", "Gamepad", "Gamepad & Mouse Combo", "Gaming Chair", "Gear Shifter", "Gun Accessory", "Horizontal Stand", "Keypad", "Keypad & Mouse Combo", "Modular", "Pack of 2", "Remote Control", "RGB", "USB Adapter", "Vertical Stand", "Webcam", "Wired", "Wireless", "x"]);
+const NOTE_NO_LINK = new Set(["64GB Memory Card", "320GB HDD", "1TB HDD", "1TB SSD", "8TB SSD", "Arcade Stick", "Back-Button Attachment", "Controller Adapter", "Cooler", "Digital", "Disc Drive", "Driving Wheel", "Flight Stick", "Game Tablet", "Gamepad", "Gamepad & Mouse Combo", "Gaming Chair", "Gear Shifter", "Gun Accessory", "Horizontal Stand", "Keypad", "Keypad & Mouse Combo", "Modular", "Pack of 2", "Remote Controller", "RGB", "USB Adapter", "Vertical Stand", "Webcam", "Wired", "Wireless", "x"]);
 
 const MORE_INFO_SKY_TITLES = new Set([
 "Skylanders: Giants",
@@ -525,7 +546,7 @@ tbody.innerHTML = rows.map(r => `
     <td class="col-genre" data-label="Genre">${genreCell(r.genre)}</td>
     <td class="col-format" data-label="Format">${escapeHtml(r.format)}</td>
     <td class="col-version" data-label="Version">${listCell(asArray(r.version))}</td>
-    <td class="col-included" data-label="Included">${listCell(r.included)}</td>
+    <td class="col-included" data-label="Included">${includedGamesCell(r.included)}</td>
     <td class="col-notes" data-label="Notes">${notesCell(r.notes, r)}</td>
     </tr>
 `).join("");
@@ -537,38 +558,57 @@ else { statsEl.textContent = ""; }
 }
 
 function platformMatchesHardware(row) {
-const plats = asArray(row.platform);
-return plats.some(p =>
-    [...state.platforms].some(sel => platformKey(sel) === platformKey(p))
-);
+    const selected = state.hardwarePlatforms;
+
+    const device = String(row.device || "").trim().toLowerCase();
+
+    if (/^pstv(?:\s|$)/i.test(device)) {
+        return selected.has("PSTV");
+    }
+
+    const platforms = asArray(row.platform);
+
+    return platforms.some(p => {
+        const value = String(p).trim().toLowerCase();
+
+        if (value === "portal" || value === "ps portal") {
+            return selected.has("Portal");
+        }
+
+        return [...selected].some(
+            s => s.toLowerCase() === value
+        );
+    });
 }
 
 function categoryMatchesHardware(row) {
-if (state.hardwareCats.size === 0) return false;
-const cats = asArray(row.category).map(x => String(x));
-const joined = cats.join(" ");
-for (const c of state.hardwareCats) {
-    if (joined.includes(c)) return true;
-}
-return false;
+    if (state.hardwareCats.size === 0) return false;
+
+    const cats = asArray(row.category).map(x => String(x));
+
+    const joined = cats.join(" ");
+        for (const c of state.hardwareCats) {
+            if (joined.includes(c)) return true;
+        }
+        return false;
 }
 
 function renderHardware() {
-const q = norm(state.q);
-let rows = DATA_HARDWARE
-    .filter(r =>
-    platformMatchesHardware(r) &&
-    categoryMatchesHardware(r) &&
-    (state.brand === "All" ? true : norm(r.brand) === norm(state.brand)) &&
-    includesAnyHardware(r, q)
-    );
+    const q = norm(state.q);
+    let rows = DATA_HARDWARE
+        .filter(r =>
+        platformMatchesHardware(r) &&
+        categoryMatchesHardware(r) &&
+        (state.brand === "All" ? true : norm(r.brand) === norm(state.brand)) &&
+        includesAnyHardware(r, q)
+        );
 
 rows.sort((a,b) => cmp(a,b,"device"));
 
 const tbody = document.getElementById("tbodyHardware");
 tbody.innerHTML = rows.map(r => `
     <tr>
-    <td class="col-device" data-label="Device"><a class="hard-link" href="ps_game/ps_hard.html#${encodeURIComponent([r.device, (r.platform||""), r.brand, (r.category||"")].join("||"))}">${escapeHtml(r.device)}</a></td>
+    <td class="col-device" data-label="Device"><a class="hard-link" href="ps_game/ps_hard.html#${encodeURIComponent(r.id ? "hardware:" + String(r.id).trim() : [r.device, (r.platform || ""), r.brand, (r.category || "")].join("||"))}">${escapeHtml(r.device)}</a></td>
     <td class="col-platform" data-label="Platform">${listCell(asArray(r.platform))}</td>
     <td class="col-brand" data-label="Brand">${manufacturerLinkHtml(r.brand)}</td>
     <td class="col-colour" data-label="Colour">${escapeHtml(r.colour || "—")}</td>
@@ -601,8 +641,10 @@ const isHardware = document.getElementById("modeSwitch").checked;
 state.q = "";
 document.getElementById("q").value = "";
 
-state.platforms.clear();
-["PS3","PS4","PS5","Vita"].forEach(p => state.platforms.add(p));
+state.hardwarePlatforms.clear();
+["PS3","PS4","PS5","Vita","PSTV","Portal"].forEach(
+    p => state.hardwarePlatforms.add(p)
+);
 
 state.formats.clear();
 ["Physical","Digital"].forEach(f => state.formats.add(f));
